@@ -1,0 +1,68 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Promotion &amp; Engagement</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active=1 %]
+            <span>Promotion &amp; Engagement</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+                <div id="toolbar" class="btn-toolbar">
+                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
+                        <i class="fa fa-plus"></i> New promotion
+                    </a>
+                </div>
+
+                <h1>Promotion &amp; Engagement</h1>
+                <p class="lead">Koha-native promotion tracking and circulation-impact analytics.</p>
+
+                <div class="row">
+                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Promotions</strong><br><span style="font-size:2rem">[% campaign_count %]</span></div></div></div>
+                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Books linked</strong><br><span style="font-size:2rem">[% item_count %]</span></div></div></div>
+                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Conversion rate</strong><br><span class="text-muted">Analytics engine: Phase 3</span></div></div></div>
+                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Plugin version</strong><br>[% plugin_version %]</div></div></div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Foundation status</strong></div>
+                    <div class="panel-body">
+                        <ul>
+                            <li>Plugin-owned campaign, item, audit and settings tables</li>
+                            <li>Non-destructive uninstall policy</li>
+                            <li>Reserved REST API namespace: <code>/api/v1/contrib/ajsn_promotion</code></li>
+                            <li>Koha core remains the source of truth for catalogue, items, patrons and circulation</li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                <div class="sidebar_menu">
+                    <ul>
+                        <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                        <li><span class="text-muted">Promotions</span></li>
+                        <li><span class="text-muted">Analytics</span></li>
+                        <li><span class="text-muted">Reports</span></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]

@@ -1,0 +1,14 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Configure Promotion &amp; Engagement</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+<div class="container-fluid">
+    <h1>Promotion &amp; Engagement configuration</h1>
+    <p><strong>Version:</strong> [% plugin_version %]</p>
+    <p><strong>REST namespace:</strong> <code>/api/v1/contrib/[% api_namespace %]</code></p>
+    <div class="alert alert-warning">No writable settings are exposed in v0.1.0. This is intentional for the foundation release.</div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]

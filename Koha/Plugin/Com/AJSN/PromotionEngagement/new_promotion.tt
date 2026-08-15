@@ -1,0 +1,44 @@
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: New promotion</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active=1 %]
+            <span>New promotion</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h1>New promotion</h1>
+            <div class="alert alert-info">
+                Foundation build only. This screen is intentionally read-only until barcode validation, permissions, CSRF protection and audit logging are completed and tested.
+            </div>
+            <fieldset class="rows">
+                <ol>
+                    <li><label>Promotion type</label><select disabled><option>Subject display</option><option>Recommended books</option><option>New arrivals</option><option>Book talk</option><option>Email campaign</option><option>Digital display</option></select></li>
+                    <li><label>Campaign name</label><input type="text" disabled placeholder="e.g. Islamic History Display – Aug 2026"></li>
+                    <li><label>Start date</label><input type="date" disabled></li>
+                    <li><label>End date</label><input type="date" disabled></li>
+                    <li><label>Target audience</label><input type="text" disabled placeholder="e.g. Darajah 5–7"></li>
+                    <li><label>Barcodes</label><textarea rows="8" disabled placeholder="One barcode per line"></textarea></li>
+                </ol>
+            </fieldset>
+            <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]">Back to dashboard</a>
+        </div>
+    </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]

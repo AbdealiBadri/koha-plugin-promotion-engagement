@@ -1,0 +1,31 @@
+{
+  "/health": {
+    "get": {
+      "x-mojo-to": "Com::AJSN::PromotionEngagement::API::Health#get",
+      "operationId": "getAjsnPromotionHealth",
+      "tags": ["ajsn_promotion"],
+      "summary": "Promotion & Engagement plugin health check",
+      "produces": ["application/json"],
+      "responses": {
+        "200": {
+          "description": "Plugin health information",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "status": {"type": "string"},
+              "plugin": {"type": "string"},
+              "version": {"type": "string"}
+            }
+          }
+        },
+        "401": {"description": "Authentication required"},
+        "403": {"description": "Access forbidden"}
+      },
+      "x-koha-authorization": {
+        "permissions": {
+          "catalogue": "1"
+        }
+      }
+    }
+  }
+}

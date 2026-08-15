@@ -1,0 +1,7 @@
+*.kpz
+*.zip
+.DS_Store
+.vscode/
+.idea/
+.env
+*.log
