@@ -41,4 +41,4 @@ Planned capabilities include:
 
 `source -> static checks -> KTD 25.11 -> KTD 26.05 -> AJSN staging -> versioned KPZ -> production`
 
-See `docs/ARCHITECTURE.md`, `docs/SAFETY.md`, and `docs/ROADMAP.md`.
+See `docs/ARCHITECTURE.md`, `docs/SAFETY.md`, `docs/ROADMAP.md`, and `docs/REAL_WORLD_USE_CASES.md`.
