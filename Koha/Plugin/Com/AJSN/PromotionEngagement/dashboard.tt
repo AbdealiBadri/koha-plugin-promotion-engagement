@@ -37,20 +37,95 @@
                 <h1>Promotion &amp; Engagement</h1>
                 <p class="lead">Koha-native promotion tracking and circulation-impact analytics.</p>
 
+                [% IF success_message %]
+                    <div class="alert alert-success">[% success_message | html %]</div>
+                [% END %]
+                [% IF warning_message %]
+                    <div class="alert alert-warning">[% warning_message | html %]</div>
+                [% END %]
+
                 <div class="row">
-                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Promotions</strong><br><span style="font-size:2rem">[% campaign_count %]</span></div></div></div>
-                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Books linked</strong><br><span style="font-size:2rem">[% item_count %]</span></div></div></div>
-                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Conversion rate</strong><br><span class="text-muted">Analytics engine: Phase 3</span></div></div></div>
-                    <div class="col-md-3"><div class="panel panel-default"><div class="panel-body"><strong>Plugin version</strong><br>[% plugin_version %]</div></div></div>
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <strong>Promotions</strong><br>
+                                <span style="font-size:2rem">[% campaign_count %]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <strong>Books linked</strong><br>
+                                <span style="font-size:2rem">[% item_count %]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <strong>Conversion rate</strong><br>
+                                <span class="text-muted">Analytics engine: Phase 3</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <strong>Plugin version</strong><br>
+                                [% plugin_version %]
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="panel panel-default">
-                    <div class="panel-heading"><strong>Foundation status</strong></div>
+                    <div class="panel-heading"><strong>Recent promotions</strong></div>
+                    <div class="panel-body">
+                        [% IF recent_campaigns && recent_campaigns.size %]
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Campaign</th>
+                                            <th>Type</th>
+                                            <th>Channel</th>
+                                            <th>Start</th>
+                                            <th>End</th>
+                                            <th>Audience</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH campaign IN recent_campaigns %]
+                                            <tr>
+                                                <td>[% campaign.name | html %]</td>
+                                                <td>[% campaign.campaign_type | html %]</td>
+                                                <td>[% campaign.channel | html %]</td>
+                                                <td>[% campaign.start_date | html %]</td>
+                                                <td>[% campaign.end_date | html %]</td>
+                                                <td>[% campaign.target_audience | html %]</td>
+                                                <td><span class="label label-default">[% campaign.status | html %]</span></td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                        [% ELSE %]
+                            <p class="text-muted">No promotions have been created yet.</p>
+                        [% END %]
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>v0.2 checkpoint status</strong></div>
                     <div class="panel-body">
                         <ul>
-                            <li>Plugin-owned campaign, item, audit and settings tables</li>
-                            <li>Non-destructive uninstall policy</li>
-                            <li>Reserved REST API namespace: <code>/api/v1/contrib/ajsn_promotion</code></li>
+                            <li>Campaign creation with Koha-native CSRF protection</li>
+                            <li>Koha plugin <code>tool</code> permission enforced by the core plugin runner</li>
+                            <li>Barcode validation against live Koha items before save</li>
+                            <li>Duplicate barcode prevention within a campaign</li>
+                            <li>Transactional campaign, linked-item and audit-log writes</li>
                             <li>Koha core remains the source of truth for catalogue, items, patrons and circulation</li>
                         </ul>
                     </div>
