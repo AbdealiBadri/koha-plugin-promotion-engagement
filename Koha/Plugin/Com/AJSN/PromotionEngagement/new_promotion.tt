@@ -29,22 +29,185 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <h1>New promotion</h1>
-            <div class="alert alert-info">
-                Foundation build only. This screen is intentionally read-only until barcode validation, permissions, CSRF protection and audit logging are completed and tested.
-            </div>
-            <fieldset class="rows">
-                <ol>
-                    <li><label>Promotion type</label><select disabled><option>Subject display</option><option>Recommended books</option><option>New arrivals</option><option>Book talk</option><option>Email campaign</option><option>Digital display</option></select></li>
-                    <li><label>Campaign name</label><input type="text" disabled placeholder="e.g. Islamic History Display – Aug 2026"></li>
-                    <li><label>Start date</label><input type="date" disabled></li>
-                    <li><label>End date</label><input type="date" disabled></li>
-                    <li><label>Target audience</label><input type="text" disabled placeholder="e.g. Darajah 5–7"></li>
-                    <li><label>Barcodes</label><textarea rows="8" disabled placeholder="One barcode per line"></textarea></li>
-                </ol>
-            </fieldset>
-            <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]">Back to dashboard</a>
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+                <h1>New promotion</h1>
+                <p class="lead">Create a campaign and link it to Koha items without duplicating catalogue data.</p>
+
+                [% IF errors && errors.size %]
+                    <div class="alert alert-danger">
+                        <h2>Campaign not saved</h2>
+                        <ul>
+                            [% FOREACH error IN errors %]
+                                <li>[% error | html %]</li>
+                            [% END %]
+                        </ul>
+                    </div>
+                [% END %]
+
+                [% IF warnings && warnings.size %]
+                    <div class="alert alert-warning">
+                        <ul>
+                            [% FOREACH warning IN warnings %]
+                                <li>[% warning | html %]</li>
+                            [% END %]
+                        </ul>
+                    </div>
+                [% END %]
+
+                [% IF invalid_barcodes && invalid_barcodes.size %]
+                    <div class="alert alert-danger">
+                        <strong>Invalid Koha barcodes:</strong>
+                        <ul>
+                            [% FOREACH barcode IN invalid_barcodes %]
+                                <li><code>[% barcode | html %]</code></li>
+                            [% END %]
+                        </ul>
+                    </div>
+                [% END %]
+
+                [% IF duplicate_barcodes && duplicate_barcodes.size %]
+                    <div class="alert alert-warning">
+                        <strong>Duplicate entries ignored:</strong>
+                        <ul>
+                            [% FOREACH barcode IN duplicate_barcodes %]
+                                <li><code>[% barcode | html %]</code></li>
+                            [% END %]
+                        </ul>
+                    </div>
+                [% END %]
+
+                [% IF valid_item_count %]
+                    <div class="alert alert-info">
+                        [% valid_item_count %] valid Koha item[% IF valid_item_count != 1 %]s[% END %] found in the submitted barcode list.
+                    </div>
+                [% END %]
+
+                <form method="post" action="/cgi-bin/koha/plugins/run.pl">
+                    <input type="hidden" name="class" value="[% CLASS | html %]">
+                    <input type="hidden" name="method" value="[% METHOD | html %]">
+                    <input type="hidden" name="action" value="new_promotion">
+                    <input type="hidden" name="op" value="cud-create_promotion">
+                    <input type="hidden" name="csrf_token" value="[% Koha.GenerateCSRF | html %]">
+
+                    <fieldset class="rows">
+                        <legend>Campaign details</legend>
+                        <ol>
+                            <li>
+                                <label for="campaign_type" class="required">Promotion type:</label>
+                                <select id="campaign_type" name="campaign_type" required>
+                                    <option value="">Select a type</option>
+                                    <option value="subject_display" [% IF form.campaign_type == 'subject_display' %]selected[% END %]>Subject / thematic display</option>
+                                    <option value="new_arrivals" [% IF form.campaign_type == 'new_arrivals' %]selected[% END %]>New arrivals</option>
+                                    <option value="recommendation" [% IF form.campaign_type == 'recommendation' %]selected[% END %]>Recommendation campaign</option>
+                                    <option value="email_campaign" [% IF form.campaign_type == 'email_campaign' %]selected[% END %]>Email campaign</option>
+                                    <option value="digital_signage" [% IF form.campaign_type == 'digital_signage' %]selected[% END %]>Digital signage</option>
+                                    <option value="physical_signage" [% IF form.campaign_type == 'physical_signage' %]selected[% END %]>Physical signage</option>
+                                    <option value="resource_feature" [% IF form.campaign_type == 'resource_feature' %]selected[% END %]>Resource feature</option>
+                                    <option value="author_feature" [% IF form.campaign_type == 'author_feature' %]selected[% END %]>Author feature</option>
+                                    <option value="publication_feature" [% IF form.campaign_type == 'publication_feature' %]selected[% END %]>Newspaper / magazine feature</option>
+                                    <option value="event" [% IF form.campaign_type == 'event' %]selected[% END %]>Event / activity</option>
+                                    <option value="outreach" [% IF form.campaign_type == 'outreach' %]selected[% END %]>Outreach campaign</option>
+                                    <option value="other" [% IF form.campaign_type == 'other' %]selected[% END %]>Other</option>
+                                </select>
+                                <span class="required">Required</span>
+                            </li>
+                            <li>
+                                <label for="channel" class="required">Channel:</label>
+                                <select id="channel" name="channel" required>
+                                    <option value="">Select a channel</option>
+                                    <option value="physical_display" [% IF form.channel == 'physical_display' %]selected[% END %]>Physical display</option>
+                                    <option value="email" [% IF form.channel == 'email' %]selected[% END %]>Email</option>
+                                    <option value="digital_signage" [% IF form.channel == 'digital_signage' %]selected[% END %]>Digital signage</option>
+                                    <option value="print_signage" [% IF form.channel == 'print_signage' %]selected[% END %]>Printed signage</option>
+                                    <option value="web" [% IF form.channel == 'web' %]selected[% END %]>Website / discovery layer</option>
+                                    <option value="social" [% IF form.channel == 'social' %]selected[% END %]>Social / messaging</option>
+                                    <option value="event" [% IF form.channel == 'event' %]selected[% END %]>Event / in-person</option>
+                                    <option value="other" [% IF form.channel == 'other' %]selected[% END %]>Other</option>
+                                </select>
+                                <span class="required">Required</span>
+                            </li>
+                            <li>
+                                <label for="name" class="required">Campaign name:</label>
+                                <input id="name" name="name" type="text" size="60" maxlength="255" required value="[% form.name | html %]" placeholder="e.g. Islamic History Display – August 2026">
+                                <span class="required">Required</span>
+                            </li>
+                            <li>
+                                <label for="start_date" class="required">Start date:</label>
+                                <input id="start_date" name="start_date" type="date" required value="[% form.start_date | html %]">
+                                <span class="required">Required</span>
+                            </li>
+                            <li>
+                                <label for="end_date">End date:</label>
+                                <input id="end_date" name="end_date" type="date" value="[% form.end_date | html %]">
+                            </li>
+                            <li>
+                                <label for="status">Status:</label>
+                                <select id="status" name="status">
+                                    <option value="draft" [% IF !form.status || form.status == 'draft' %]selected[% END %]>Draft</option>
+                                    <option value="active" [% IF form.status == 'active' %]selected[% END %]>Active</option>
+                                    <option value="completed" [% IF form.status == 'completed' %]selected[% END %]>Completed</option>
+                                </select>
+                            </li>
+                            <li>
+                                <label for="branchcode">Koha library:</label>
+                                <select id="branchcode" name="branchcode">
+                                    <option value="">All / institution-wide</option>
+                                    [% FOREACH library IN libraries %]
+                                        <option value="[% library.branchcode | html %]" [% IF form.branchcode == library.branchcode %]selected[% END %]>[% library.branchname | html %] ([% library.branchcode | html %])</option>
+                                    [% END %]
+                                </select>
+                            </li>
+                            <li>
+                                <label for="target_audience">Target audience:</label>
+                                <input id="target_audience" name="target_audience" type="text" size="60" maxlength="255" value="[% form.target_audience | html %]" placeholder="e.g. Darajah 5–7, faculty, all users">
+                            </li>
+                            <li>
+                                <label for="language_code">Language(s):</label>
+                                <input id="language_code" name="language_code" type="text" size="40" maxlength="30" value="[% form.language_code | html %]" placeholder="e.g. English, Arabic">
+                            </li>
+                            <li>
+                                <label for="display_location">Location(s):</label>
+                                <input id="display_location" name="display_location" type="text" size="60" maxlength="255" value="[% form.display_location | html %]" placeholder="e.g. Reception ground floor; First floor">
+                                <div class="hint">Use this for a physical location, signage point, virtual location, or other campaign placement.</div>
+                            </li>
+                            <li>
+                                <label for="notes">Notes:</label>
+                                <textarea id="notes" name="notes" rows="4" cols="70">[% form.notes | html %]</textarea>
+                            </li>
+                        </ol>
+                    </fieldset>
+
+                    <fieldset class="rows">
+                        <legend>Linked Koha items</legend>
+                        <ol>
+                            <li>
+                                <label for="barcodes">Barcodes:</label>
+                                <textarea id="barcodes" name="barcodes" rows="10" cols="45" placeholder="One barcode per line; comma and semicolon separated values are also accepted">[% form.barcodes_text | html %]</textarea>
+                                <div class="hint">Optional. Every supplied barcode is validated against Koha before anything is saved. Invalid barcodes block the save; duplicate entries are ignored and reported.</div>
+                            </li>
+                        </ol>
+                    </fieldset>
+
+                    <fieldset class="action">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i> Validate and save campaign
+                        </button>
+                        <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]">Cancel</a>
+                    </fieldset>
+                </form>
+            </main>
+        </div>
+
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                <div class="sidebar_menu">
+                    <ul>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+                        <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                    </ul>
+                </div>
+            </aside>
         </div>
     </div>
 </div>
