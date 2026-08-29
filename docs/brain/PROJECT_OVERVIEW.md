@@ -117,7 +117,7 @@ The plugin must be generic enough to represent Nairobi workflows without source-
 
 Repository default branch: `main`.  
 Active v0.2 implementation branch as last verified: `feature/v0.2-campaign-crud`.  
-Project Brain construction branch: `docs/project-brain`, based directly on the active v0.2 branch and intended to be fast-forwarded/merged back after validation.
+The Project Brain is published on the default `main` branch for discoverability and is also present on the active v0.2 implementation branch. `docs/project-brain` is retained as the documentation construction/mirror branch.
 
 ## Project status
 
