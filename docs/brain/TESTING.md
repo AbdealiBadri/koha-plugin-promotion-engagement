@@ -51,9 +51,9 @@ A temporary apparent failure using `3999900002034` was **not a plugin bug**. DB 
 
 | ID | Test | Status | Notes |
 |---|---|---|---|
-| T-120 | v0.2 health returns status ok | NEEDS MANUAL VERIFICATION | Foundation endpoint worked, but current runtime is blocked. |
-| T-121 | v0.2 health returns version `0.2.0` | BLOCKED | Code fix at `3537b8e`; KTD app container currently cannot reach ready state. |
-| T-122 | v0.2 unauthenticated health denied | BLOCKED | Repeat after KTD recovery. |
+| T-120 | v0.2 health returns status ok | PASS | Authenticated browser returned `status: ok`. |
+| T-121 | v0.2 health returns version `0.2.0` | PASS | Runtime response returned `version: 0.2.0`; stale-version bug is closed. |
+| T-122 | v0.2 unauthenticated health denied | PASS | InPrivate/incognito returned `{"error":"Authentication failure."}`. |
 
 ## Security
 
@@ -69,9 +69,10 @@ A temporary apparent failure using `3999900002034` was **not a plugin bug**. DB 
 | ID | Test | Status | Result |
 |---|---|---|---|
 | T-140 | WSL GitHub HTTPS connectivity after restart | PASS | Debian `curl -I https://github.com` returned HTTP 200 and feature-branch pull succeeded. |
-| T-141 | `kohadev` restart after app-container-only recreation | FAIL | `kohadev-koha-1` exits 11. |
-| T-142 | Diagnose app container exit | PASS diagnostic | Docker: OOM false; log ends `Database is not empty! ... do_all_you_can_do.pl line 89`. |
-| T-143 | Clean consistent KTD teardown/recreate | NOT RUN | Current exact next environment action after backup. |
+| T-141 | `kohadev` restart after app-container-only recreation | FAIL | Historical failed attempt; `kohadev-koha-1` exited because retained DB was non-empty. |
+| T-142 | Diagnose app container exit | PASS diagnostic | Docker: OOM false; log ended `Database is not empty! ... do_all_you_can_do.pl line 89`. |
+| T-143 | Clean consistent KTD teardown/recreate | PASS | Plugin tables were backed up; full KTD down/up completed; all three containers stayed Up and `--wait-ready 180` returned `KTD READY`. |
+| T-144 | Plugin reload after clean KTD recovery | PASS | Koha Administration > Plugins showed Promotion & Engagement `0.2.0` Enabled. |
 
 ## Release/compatibility tests
 
@@ -81,7 +82,7 @@ A temporary apparent failure using `3999900002034` was **not a plugin bug**. DB 
 | T-201 | Koha 26.05 compatibility | NOT RUN |
 | T-202 | v0.2+ clean KPZ install exact artifact | NOT RUN |
 | T-203 | Upgrade from prior KPZ preserving data | NOT RUN |
-| T-204 | Backup/restore/rollback rehearsal | NOT RUN |
+| T-204 | Backup/restore/rollback rehearsal | PARTIAL | Local plugin-table backup completed before KTD reset; full release rollback rehearsal remains. |
 | T-205 | AJSN staging acceptance | NOT RUN |
 | T-206 | Production verification | NOT RUN |
 
