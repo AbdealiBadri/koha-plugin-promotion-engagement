@@ -2,38 +2,25 @@
 
 **Last updated:** 2026-08-29  
 **Current implementation branch:** `feature/v0.2-campaign-crud`  
-**Last verified implementation commit:** `3537b8e`  
+**Implementation commit under test:** `3537b8e`  
 **Current milestone:** v0.2 Checkpoint 1 — campaign creation integrity/security
 
 ## Current objective
 
-Restore the `kohadev` KTD environment, verify the health endpoint now reports plugin version 0.2.0, then finish the remaining security/permission checks and close checkpoint 1.
+Finish the three remaining security/permission tests, then close v0.2 Checkpoint 1 and move to campaign management/configuration/multi-location work.
 
 ## Work completed most recently
 
-- v0.2 campaign creation workflow manually tested successfully.
-- Valid barcode linking, invalid-barcode blocking, duplicate de-duplication, audit write and mixed valid/invalid rollback all passed.
-- Dashboard remained 3 promotions / 2 linked items after rollback test.
-- API stale-version cause identified and fixed in GitHub commit `3537b8e`.
-- WSL GitHub connectivity recovered and commit `3537b8e` successfully pulled locally.
-- KTD app-container failure diagnosed from full logs.
-- Project Brain created from repository evidence and project history.
+- Backed up all four plugin-owned checkpoint tables before resetting KTD.
+- Performed a full consistent `kohadev` KTD teardown/recreate.
+- Confirmed `kohadev-koha-1`, `kohadev-db-1`, and `kohadev-memcached-1` are Up.
+- KTD `--wait-ready 180` returned `KTD READY`.
+- Koha Administration > Plugins shows Promotion & Engagement version **0.2.0 Enabled**.
+- Authenticated `/api/v1/contrib/ajsn_promotion/health` returned `status: ok` and `version: 0.2.0`.
+- InPrivate/unauthenticated health request returned `{"error":"Authentication failure."}`.
+- BUG-003 stale API version and ISSUE-004 KTD non-empty-DB blocker are now resolved.
 
-## Files/components changed most recently
-
-Implementation:
-
-- `Koha/Plugin/Com/AJSN/PromotionEngagement/API/Health.pm` — now reads plugin `$VERSION`.
-
-Project memory:
-
-- root `AGENTS.md`
-- `docs/brain/*`
-- `.project-memory/*`
-
-## Tests actually performed
-
-Passed:
+## Previously passed v0.2 campaign tests
 
 - campaign with no barcode;
 - one valid barcode;
@@ -41,92 +28,47 @@ Passed:
 - duplicate correct barcode linked once + warning;
 - DB campaign/item/audit verification;
 - mixed valid + invalid submission rolled back completely;
-- WSL GitHub HTTPS recovered after network restart.
+- dashboard remained unchanged after rollback.
 
-Diagnostic:
+These results are preserved in `TESTING.md`. Old local test rows were backed up before the clean KTD reset and do not need to be restored simply to preserve test evidence.
 
-- `docker inspect kohadev-koha-1` -> ExitCode 11, OOMKilled false.
-- `docker logs --tail 250 kohadev-koha-1` -> final fatal condition `Database is not empty! ... do_all_you_can_do.pl line 89`.
+## Current open checkpoint issue
 
-## What passed
+ISSUE-012 — security matrix is not yet complete.
 
-The v0.2 campaign write/integrity behaviour tested so far is sound. The barcode issue encountered during duplicate testing was a manual typo (`3999900002034` vs live `39999000002034`), not plugin validation failure.
+Still required:
 
-## What failed
-
-`kohadev-koha-1` cannot currently reach ready state after it was recreated while the existing populated DB container remained.
-
-## Known issues
-
-- ISSUE-004: KTD non-empty DB initialization blocker — current blocker.
-- BUG-003: health version code fixed but runtime 0.2.0 response not yet re-verified.
-- ISSUE-012: dedicated CSRF and lower-permission tests still pending.
-- Configuration/multi-location/analytics are intentionally not complete.
-
-## Important decisions that must not be reversed
-
-- Koha remains source of truth.
-- No Koha core patch/schema extension for plugin features.
-- Invalid barcode means whole campaign submission is rejected.
-- Duplicate campaign-item links are prohibited.
-- Uninstall is non-destructive by default.
-- Nairobi workflows are acceptance examples, not hard-coded defaults.
-- UI modernization waits until core workflows/analytics stabilize.
-- Patron-identifiable analytics require restricted access/privacy design.
-
-## Current blocker
-
-Fresh/recreated KTD app container is attempting first-time setup against retained initialized `kohadev-db-1`; initialization aborts because the DB is not empty.
+1. T-131 — missing/invalid CSRF token is rejected.
+2. T-132 — logged-in user without plugin tool permission cannot use plugin write workflow.
+3. T-133 — logged-in API user without `catalogue` permission cannot call `/health`.
 
 ## Exact next action
 
-1. Decide whether the existing local checkpoint DB rows need to be retained. The important test evidence is already recorded in `TESTING.md` and `CURRENT_STATE.md`.
-2. If retaining them, dump the four `plugin_ajsn_promo_*` tables using the local KTD DB credential **without committing the credential**.
-3. Perform a consistent full `kohadev` KTD teardown/recreate rather than deleting only the app container.
-4. Start with the v0.2 single-plugin mount and wait for readiness.
+Run **T-131 first** using the current healthy `kohadev` environment.
 
-Commands after any desired backup:
+Goal: attempt the campaign write endpoint without a valid Koha CSRF token and prove that Koha rejects the request and no campaign row is created.
 
-```bash
-cd ~/git/koha-testing-docker
-KOHA_IMAGE=25.11 ktd --proxy --single-plugin "$PLUGINS_DIR/koha-plugin-promotion-engagement" down
-KOHA_IMAGE=25.11 ktd --proxy --single-plugin "$PLUGINS_DIR/koha-plugin-promotion-engagement" up -d
-KOHA_IMAGE=25.11 ktd --proxy --single-plugin "$PLUGINS_DIR/koha-plugin-promotion-engagement" --wait-ready 180
-```
+Do not weaken/disable CSRF middleware to perform the test. The test must exercise Koha's normal protection.
 
-Do not proceed to plugin tests until the last command reports readiness.
+After T-131, proceed to lower-permission user tests T-132/T-133. If temporary test users/permissions are created or modified, restore/verify the normal authorized admin workflow afterward.
 
-Once ready:
+## What success should look like at checkpoint closure
 
-```bash
-KOHA_IMAGE=25.11 ktd --proxy --single-plugin "$PLUGINS_DIR/koha-plugin-promotion-engagement" --shell
-```
+- normal authorized campaign creation works;
+- invalid/missing CSRF is rejected with no DB write;
+- user without plugin tool permission is denied;
+- health API works for an appropriately authorized user;
+- health API is denied to unauthenticated users;
+- health API is denied to authenticated users lacking required `catalogue` permission;
+- source/UI/API version remains 0.2.0;
+- KTD remains healthy.
 
-Inside:
+## Next milestone after checkpoint closure
 
-```bash
-cd /kohadevbox/koha
-./misc/devel/install_plugins.pl
-sudo koha-plack --restart kohadev
-exit
-```
+Campaign management and universal configuration:
 
-Then verify source/UI/API versions agree.
-
-## What success should look like
-
-- `kohadev` remains up and KTD reports ready.
-- Koha Administration > Plugins shows Promotion & Engagement v0.2.0 enabled.
-- authenticated `/api/v1/contrib/ajsn_promotion/health` returns status `ok`, plugin name and version `0.2.0`.
-- unauthenticated request returns authentication/authorization failure.
-- campaign checkpoint smoke tests still pass after clean environment recovery.
-
-## If it fails, investigate
-
-1. `docker ps -a --filter name=kohadev`
-2. `docker inspect kohadev-koha-1 --format 'ExitCode={{.State.ExitCode}} OOMKilled={{.State.OOMKilled}} Error={{.State.Error}}'`
-3. `docker logs --tail 250 kohadev-koha-1`
-4. If plugin loader error: inspect `enable_plugins`, `pluginsdir`, plugin mount and Koha plugin logs.
-5. If template error: inspect the named `.tt` file/filter before touching DB.
-6. If Git/network error: compare Windows vs WSL HTTPS connectivity.
-7. Do not repeat app-container-only recreation over a retained populated KTD DB as a generic fix.
+- campaign detail/edit/archive/list/filter;
+- configurable type/channel/language/audience/cadence;
+- reusable multi-location support;
+- related audit logging;
+- then analytics engine before final UI modernization.
