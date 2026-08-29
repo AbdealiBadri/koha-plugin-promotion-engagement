@@ -1,0 +1,63 @@
+project:
+  name: "Koha Promotion & Engagement"
+  repository: "AbdealiBadri/koha-plugin-promotion-engagement"
+  default_branch: "main"
+  status: "pre-alpha-development"
+
+current:
+  milestone: "v0.2 Checkpoint 1 - campaign creation integrity/security"
+  implementation_branch: "feature/v0.2-campaign-crud"
+  implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
+  project_brain_branch: "docs/project-brain"
+  objective: "Recover kohadev KTD, runtime-verify health version 0.2.0, finish security checks, close checkpoint 1"
+  last_verified: "2026-08-29"
+  next_action: "Back up plugin test tables if needed, then perform a consistent full kohadev KTD teardown/recreate and wait for KTD READY"
+
+environment:
+  local:
+    platform: "Windows + WSL Debian + Docker/KTD"
+    ktd_instance: "kohadev"
+    koha_target: "25.11.x"
+    state: "blocked-app-container-exited"
+  clean_kpz_test:
+    historical_instance: "kpztest"
+    state: "removed-after-v0.1-test"
+  staging:
+    status: "not-run"
+  production:
+    status: "not-deployed"
+    target: "Aljamea-tus-Saifiyah Nairobi"
+
+blockers:
+  - id: "ISSUE-004"
+    summary: "kohadev-koha-1 exits because fresh app initialization sees retained non-empty DB"
+  - id: "BUG-003"
+    summary: "health version fix is in code but runtime 0.2.0 response awaits KTD recovery"
+  - id: "ISSUE-012"
+    summary: "dedicated CSRF and lower-permission security tests remain"
+
+critical_decisions:
+  - "DEC-001"
+  - "DEC-002"
+  - "DEC-003"
+  - "DEC-004"
+  - "DEC-005"
+  - "DEC-010"
+  - "DEC-011"
+  - "DEC-013"
+  - "DEC-017"
+
+last_test:
+  id: "T-142"
+  date: "2026-08-29"
+  command: "docker inspect/logs for kohadev-koha-1"
+  status: "PASS-diagnostic"
+  result: "ExitCode=11, OOMKilled=false; initialization aborts with Database is not empty"
+
+checkpoint_counts_before_environment_blocker:
+  promotions: 3
+  linked_items: 2
+  note: "local test data only, not production"
+
+secrets:
+  stored_in_project_memory: false
