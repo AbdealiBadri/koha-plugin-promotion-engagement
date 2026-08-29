@@ -9,16 +9,17 @@ current:
   implementation_branch: "feature/v0.2-campaign-crud"
   implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
   project_brain_branch: "docs/project-brain"
-  objective: "Recover kohadev KTD, runtime-verify health version 0.2.0, finish security checks, close checkpoint 1"
+  objective: "Finish dedicated CSRF and lower-permission security tests, then close checkpoint 1"
   last_verified: "2026-08-29"
-  next_action: "Back up plugin test tables if needed, then perform a consistent full kohadev KTD teardown/recreate and wait for KTD READY"
+  next_action: "Run T-131 missing/invalid CSRF rejection test in healthy kohadev"
 
 environment:
   local:
     platform: "Windows + WSL Debian + Docker/KTD"
     ktd_instance: "kohadev"
     koha_target: "25.11.x"
-    state: "blocked-app-container-exited"
+    state: "healthy-ready"
+    containers: "koha/db/memcached up"
   clean_kpz_test:
     historical_instance: "kpztest"
     state: "removed-after-v0.1-test"
@@ -29,12 +30,14 @@ environment:
     target: "Aljamea-tus-Saifiyah Nairobi"
 
 blockers:
-  - id: "ISSUE-004"
-    summary: "kohadev-koha-1 exits because fresh app initialization sees retained non-empty DB"
-  - id: "BUG-003"
-    summary: "health version fix is in code but runtime 0.2.0 response awaits KTD recovery"
   - id: "ISSUE-012"
     summary: "dedicated CSRF and lower-permission security tests remain"
+
+resolved_recently:
+  - id: "ISSUE-004"
+    summary: "full consistent KTD rebuild restored KTD READY"
+  - id: "BUG-003"
+    summary: "runtime health now returns plugin version 0.2.0; unauthenticated request denied"
 
 critical_decisions:
   - "DEC-001"
@@ -48,16 +51,21 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "T-142"
+  id: "T-122"
   date: "2026-08-29"
-  command: "docker inspect/logs for kohadev-koha-1"
-  status: "PASS-diagnostic"
-  result: "ExitCode=11, OOMKilled=false; initialization aborts with Database is not empty"
+  command: "InPrivate GET /api/v1/contrib/ajsn_promotion/health"
+  status: "PASS"
+  result: "Authentication failure returned; unauthenticated API access denied"
 
-checkpoint_counts_before_environment_blocker:
+runtime:
+  plugin_ui_version: "0.2.0"
+  health_api_version: "0.2.0"
+  ktd_ready: true
+
+checkpoint_counts_before_environment_reset:
   promotions: 3
   linked_items: 2
-  note: "local test data only, not production"
+  note: "historical local test data; plugin tables backed up before clean reset"
 
 secrets:
   stored_in_project_memory: false
