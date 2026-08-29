@@ -1,0 +1,105 @@
+modules:
+  plugin_foundation:
+    status: "implemented"
+    owner_system: "Koha Plugins framework"
+    dependencies: ["Koha 25.11.x"]
+    open_issues: ["ISSUE-004"]
+    next_action: "Restore KTD readiness and re-verify plugin v0.2.0 load"
+
+  campaign_creation:
+    status: "implemented-manually-verified"
+    owner_system: "plugin"
+    dependencies: ["Koha::Items", "Koha::Libraries", "plugin schema"]
+    open_issues: []
+    next_action: "Run post-recovery regression smoke"
+
+  barcode_linking:
+    status: "implemented-manually-verified"
+    owner_system: "Koha items are authoritative; plugin owns links"
+    dependencies: ["Koha items/barcodes"]
+    open_issues: []
+    next_action: "Preserve validation/de-duplication behaviour"
+
+  audit:
+    status: "partial"
+    owner_system: "plugin"
+    dependencies: ["campaign operations"]
+    open_issues: ["ISSUE-009"]
+    next_action: "Extend audit to edit/archive/status operations when those are built"
+
+  campaign_management:
+    status: "planned"
+    owner_system: "plugin"
+    dependencies: ["campaign_creation"]
+    open_issues: ["ISSUE-009"]
+    next_action: "Design detail/edit/archive/list after checkpoint 1"
+
+  configuration:
+    status: "partial"
+    owner_system: "plugin/Koha - source design pending"
+    dependencies: []
+    open_issues: ["TECHDEBT-007", "TECHDEBT-008"]
+    next_action: "Decide reusable vocabularies and multi-location source/model"
+
+  multi_location:
+    status: "planned-approved"
+    owner_system: "plugin"
+    dependencies: ["configuration"]
+    open_issues: ["TECHDEBT-008"]
+    next_action: "Design one-campaign-to-many-locations model"
+
+  non_barcode_resources:
+    status: "planned-approved"
+    owner_system: "plugin with Koha links where applicable"
+    dependencies: []
+    open_issues: ["ISSUE-011"]
+    next_action: "Design resource abstraction for e-resources/authors/themes"
+
+  dashboard:
+    status: "partial"
+    owner_system: "plugin"
+    dependencies: ["campaign_creation"]
+    open_issues: ["ISSUE-010"]
+    next_action: "Keep counts/recent list stable; modernize after analytics rules"
+
+  analytics:
+    status: "planned"
+    owner_system: "shared plugin analytics layer; Koha circulation source of truth"
+    dependencies: ["stable campaign model", "Koha circulation/statistics", "configuration"]
+    open_issues: ["ISSUE-010"]
+    next_action: "Define KPI formulas/baseline after v0.2 management/configuration"
+
+  rest_api:
+    status: "partial"
+    owner_system: "Koha REST + plugin"
+    dependencies: ["Koha authentication/authorization"]
+    open_issues: ["BUG-003", "ISSUE-012"]
+    next_action: "Runtime verify v0.2 health and security matrix after KTD recovery"
+
+  reporting_exports:
+    status: "planned"
+    owner_system: "plugin"
+    dependencies: ["analytics"]
+    open_issues: []
+    next_action: "Implement after stable analytics service"
+
+  historical_import:
+    status: "planned"
+    owner_system: "plugin"
+    dependencies: ["stable v1 data model"]
+    open_issues: []
+    next_action: "Design controlled importer with validation/audit/rollback later"
+
+  kpz_packaging:
+    status: "implemented-v0.1-verified-v0.2-needs-release-test"
+    owner_system: "repository/Koha plugin installer"
+    dependencies: ["Python 3", "Koha Plugins framework"]
+    open_issues: ["ISSUE-006", "ISSUE-013"]
+    next_action: "Run version-aware clean KPZ acceptance for release candidate"
+
+  deployment:
+    status: "development-only"
+    owner_system: "KTD now; AJSN staging/production later"
+    dependencies: ["security", "compatibility", "KPZ", "backup/rollback"]
+    open_issues: ["ISSUE-013"]
+    next_action: "Do not deploy until release gates pass"

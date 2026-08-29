@@ -1,0 +1,74 @@
+decisions:
+  DEC-001:
+    status: "accepted"
+    summary: "Koha remains source of truth for catalogue/items/patrons/branches/circulation"
+
+  DEC-002:
+    status: "accepted"
+    summary: "No Koha core patches or plugin columns in core tables"
+
+  DEC-003:
+    status: "accepted"
+    summary: "Uninstall is non-destructive; purge requires separate explicit action"
+
+  DEC-004:
+    status: "accepted"
+    summary: "Nairobi workflows are acceptance examples, not hard-coded defaults"
+
+  DEC-005:
+    status: "accepted"
+    summary: "Campaign save is all-or-nothing; invalid barcode blocks whole save"
+
+  DEC-006:
+    status: "accepted"
+    summary: "Duplicate item links prohibited within campaign"
+
+  DEC-007:
+    status: "accepted"
+    summary: "Use Koha-native CSRF and permission mechanisms"
+
+  DEC-008:
+    status: "accepted"
+    summary: "Staging/production distribution uses exact versioned KPZ + checksum"
+
+  DEC-009:
+    status: "accepted"
+    summary: "Use kohadev for feature checkpoint; disposable clean instance for KPZ acceptance"
+
+  DEC-010:
+    status: "accepted"
+    summary: "Defer modern UI redesign until core workflows and analytics stabilize"
+
+  DEC-011:
+    status: "accepted-requirement-pending-implementation"
+    summary: "One campaign must support multiple reusable locations"
+
+  DEC-012:
+    status: "accepted-direction"
+    summary: "Analytics compare campaign periods with Koha circulation baselines and configurable windows"
+
+  DEC-013:
+    status: "accepted-with-privacy-constraint"
+    summary: "Patron/class benefit analytics are restricted staff analytics"
+
+  DEC-014:
+    status: "accepted"
+    summary: "External API and staff UI must reuse shared analytics business rules"
+
+  DEC-015:
+    status: "accepted-requirement-pending-implementation"
+    summary: "Resource model must grow beyond physical barcodes"
+
+  DEC-016:
+    status: "accepted-code-implemented"
+    summary: "Health endpoint version comes from authoritative plugin VERSION"
+    supersedes: "hard-coded API version 0.1.0"
+    commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
+
+  DEC-017:
+    status: "accepted"
+    summary: "Production requires Koha compatibility, staging, backup/rollback and exact KPZ gates"
+
+  DEC-018:
+    status: "accepted-reconciliation"
+    summary: "Current four source-defined tables override old planned events-table assumption"

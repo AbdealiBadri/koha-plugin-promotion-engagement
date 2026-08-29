@@ -1,0 +1,83 @@
+issues:
+  BUG-001:
+    status: "resolved"
+    severity: "high-historical"
+    module: "plugin-loader"
+    summary: "KTD plugin discovery/load errors during foundation"
+
+  BUG-002:
+    status: "resolved"
+    severity: "high-historical"
+    module: "templates"
+    summary: "Template Toolkit filter/render failure on dashboard"
+
+  BUG-003:
+    status: "fixed-code-needs-runtime-verification"
+    severity: "medium"
+    module: "rest-api"
+    summary: "Health endpoint returned hard-coded 0.1.0 instead of plugin 0.2.0"
+    fix_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
+    next_action: "Verify authenticated response version 0.2.0 after KTD recovery"
+
+  ISSUE-004:
+    status: "open-blocker"
+    severity: "high-local-development"
+    module: "ktd"
+    summary: "kohadev app container exits because fresh initialization sees retained non-empty DB"
+    evidence: "ExitCode=11; OOMKilled=false; Database is not empty at do_all_you_can_do.pl line 89"
+    do_not_repeat: "Do not recreate only kohadev-koha-1 over retained initialized DB as generic recovery"
+    next_action: "Backup plugin tables if needed, full consistent KTD teardown/recreate"
+
+  ISSUE-005:
+    status: "resolved"
+    severity: "medium"
+    module: "wsl-network"
+    summary: "WSL GitHub port 443 route failure while Windows connectivity worked"
+
+  ISSUE-006:
+    status: "open-documentation-debt"
+    severity: "low"
+    module: "kpz"
+    summary: "Existing KPZ test plan examples remain v0.1-specific"
+
+  TECHDEBT-007:
+    status: "open"
+    severity: "medium"
+    module: "configuration"
+    summary: "Campaign type/channel hard-coded; audience/language/location free text"
+
+  TECHDEBT-008:
+    status: "open"
+    severity: "medium"
+    module: "locations"
+    summary: "Single free-text location cannot model one campaign across multiple locations"
+
+  ISSUE-009:
+    status: "planned"
+    severity: "medium"
+    module: "campaign-management"
+    summary: "No campaign detail/edit/archive/filter lifecycle"
+
+  ISSUE-010:
+    status: "planned"
+    severity: "product-critical"
+    module: "analytics"
+    summary: "Analytics engine and professional KPI dashboard not implemented"
+
+  ISSUE-011:
+    status: "planned"
+    severity: "medium"
+    module: "resources"
+    summary: "No dedicated e-resource/non-barcode promoted-resource model"
+
+  ISSUE-012:
+    status: "open"
+    severity: "high-before-release"
+    module: "security"
+    summary: "Dedicated CSRF and lower-permission matrix tests not yet run"
+
+  ISSUE-013:
+    status: "open-release-blocker"
+    severity: "high-release"
+    module: "compatibility-deployment"
+    summary: "Koha 26.05, staging, v0.2 exact KPZ and rollback gates outstanding"
