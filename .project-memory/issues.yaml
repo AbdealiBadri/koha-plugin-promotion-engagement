@@ -12,21 +12,20 @@ issues:
     summary: "Template Toolkit filter/render failure on dashboard"
 
   BUG-003:
-    status: "fixed-code-needs-runtime-verification"
+    status: "resolved"
     severity: "medium"
     module: "rest-api"
     summary: "Health endpoint returned hard-coded 0.1.0 instead of plugin 0.2.0"
     fix_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
-    next_action: "Verify authenticated response version 0.2.0 after KTD recovery"
+    evidence: "Authenticated runtime health returns 0.2.0; unauthenticated request returns Authentication failure"
 
   ISSUE-004:
-    status: "open-blocker"
+    status: "resolved"
     severity: "high-local-development"
     module: "ktd"
-    summary: "kohadev app container exits because fresh initialization sees retained non-empty DB"
-    evidence: "ExitCode=11; OOMKilled=false; Database is not empty at do_all_you_can_do.pl line 89"
+    summary: "kohadev app container exited because fresh initialization saw retained non-empty DB"
+    resolution: "Backed up four plugin tables, full KTD down/up, all containers Up, KTD READY"
     do_not_repeat: "Do not recreate only kohadev-koha-1 over retained initialized DB as generic recovery"
-    next_action: "Backup plugin tables if needed, full consistent KTD teardown/recreate"
 
   ISSUE-005:
     status: "resolved"
@@ -71,10 +70,12 @@ issues:
     summary: "No dedicated e-resource/non-barcode promoted-resource model"
 
   ISSUE-012:
-    status: "open"
+    status: "open-current-checkpoint"
     severity: "high-before-release"
     module: "security"
-    summary: "Dedicated CSRF and lower-permission matrix tests not yet run"
+    summary: "Dedicated CSRF and lower-permission matrix tests remain"
+    completed: "Authenticated health allowed; unauthenticated health denied"
+    next_action: "Run T-131 missing/invalid CSRF, T-132 no plugin tool permission, T-133 authenticated no catalogue permission"
 
   ISSUE-013:
     status: "open-release-blocker"
