@@ -22,29 +22,24 @@
 
 ## BUG-003 — Health endpoint reported stale `0.1.0`
 
-- **Status:** FIXED IN CODE / NEEDS RUNTIME VERIFICATION
+- **Status:** RESOLVED
 - **Severity:** Medium
 - **Module:** REST API
 - **Expected:** health endpoint version equals plugin `$VERSION` (`0.2.0` on active branch).
 - **Actual before fix:** endpoint returned `0.1.0`.
 - **Cause:** version string duplicated/hard-coded in `API/Health.pm`.
 - **Fix:** commit `3537b8e` makes controller read authoritative plugin `$VERSION`.
-- **Blocker:** runtime verification interrupted by current KTD startup failure.
-- **Next test:** once `kohadev` is healthy, authenticated `/api/v1/contrib/ajsn_promotion/health` must return `0.2.0`; unauthenticated request must fail.
+- **Runtime verification:** after KTD recovery, authenticated health returned `status: ok`, plugin name and `version: 0.2.0`; InPrivate/unauthenticated request returned `Authentication failure.`
 
 ## ISSUE-004 — `kohadev-koha-1` exits with non-empty database
 
-- **Status:** OPEN / CURRENT BLOCKER
+- **Status:** RESOLVED
 - **Severity:** High for local development; no production impact
 - **Module:** KTD environment lifecycle
-- **Expected:** `KOHA_IMAGE=25.11 ktd ... up -d` followed by `--wait-ready 180` reaches `KTD READY`.
-- **Actual:** app container exits; DB and memcached remain running.
-- **Evidence:** Docker inspect: `ExitCode=11`, `OOMKilled=false`; logs end with `Database is not empty! at /kohadevbox/misc4dev/do_all_you_can_do.pl line 89.`
+- **Historical symptom:** app container exited while DB/memcached remained; Docker inspect showed ExitCode 11 and logs ended `Database is not empty! at /kohadevbox/misc4dev/do_all_you_can_do.pl line 89.`
 - **Cause:** only `kohadev-koha-1` was removed/recreated while populated `kohadev-db-1` was retained; replacement app container followed first-time initialization logic.
-- **Attempts:** restarting container and re-running `up -d` did not solve it; recreating only app container reproduced the condition.
-- **Workaround/next action:** back up plugin test tables if needed, then use a consistent full KTD teardown/recreate rather than mixing a fresh app container with retained initialized DB.
+- **Resolution:** backed up all four plugin tables, performed full consistent KTD `down`, recreated the full environment, then `--wait-ready 180` returned `KTD READY`. All three containers remained Up.
 - **Do not repeat:** do not `docker rm -f kohadev-koha-1` as a generic fix while retaining a populated KTD DB unless the KTD lifecycle explicitly supports that state.
-- **Test required:** `KTD READY`, plugin 0.2.0 load, schema check, health endpoint regression.
 
 ## ISSUE-005 — WSL could not reach GitHub TCP/443
 
@@ -109,12 +104,13 @@
 
 ## ISSUE-012 — Security matrix not fully manually tested
 
-- **Status:** OPEN
+- **Status:** OPEN / CURRENT CHECKPOINT WORK
 - **Severity:** High before release
 - **Module:** authorization/CSRF
 - **Code evidence:** Koha-native CSRF convention and tool permission integration are present; health OpenAPI requires `catalogue`.
-- **Missing evidence:** dedicated forged/missing-CSRF POST test and lower-privilege staff/API matrix.
-- **Next action:** complete after KTD recovery.
+- **Completed evidence:** authenticated health succeeds; unauthenticated health is denied.
+- **Missing evidence:** dedicated forged/missing-CSRF POST test, user without plugin tool permission, and authenticated API user without `catalogue` permission.
+- **Next action:** run T-131, T-132 and T-133.
 
 ## ISSUE-013 — Compatibility/staging gates outstanding
 
