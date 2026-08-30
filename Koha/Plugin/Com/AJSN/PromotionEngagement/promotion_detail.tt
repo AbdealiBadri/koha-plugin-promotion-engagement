@@ -1,0 +1,188 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Promotion details</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active=1 %]
+            <span>[% campaign.name | html %]</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+                <div id="toolbar" class="btn-toolbar">
+                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">
+                        <i class="fa fa-arrow-left"></i> Back to promotions
+                    </a>
+                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
+                        <i class="fa fa-plus"></i> New promotion
+                    </a>
+                </div>
+
+                <h1>[% campaign.name | html %]</h1>
+                <p class="lead">Read-only campaign record. Editing and archiving are part of the next campaign-management checkpoint.</p>
+
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong>Campaign details</strong></div>
+                            <div class="panel-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr><th>Campaign ID</th><td>[% campaign.campaign_id %]</td></tr>
+                                        <tr><th>UUID</th><td><code>[% campaign.campaign_uuid | html %]</code></td></tr>
+                                        <tr><th>Type</th><td>[% campaign.campaign_type | html %]</td></tr>
+                                        <tr><th>Channel</th><td>[% campaign.channel | html %]</td></tr>
+                                        <tr><th>Status</th><td><span class="label label-default">[% campaign.status | html %]</span></td></tr>
+                                        <tr><th>Start</th><td>[% campaign.start_date | html %]</td></tr>
+                                        <tr><th>End</th><td>[% campaign.end_date | html %]</td></tr>
+                                        <tr>
+                                            <th>Koha library</th>
+                                            <td>
+                                                [% IF campaign.branchcode %]
+                                                    [% campaign.branchname | html %] ([% campaign.branchcode | html %])
+                                                [% ELSE %]
+                                                    All / institution-wide
+                                                [% END %]
+                                            </td>
+                                        </tr>
+                                        <tr><th>Target audience</th><td>[% campaign.target_audience | html %]</td></tr>
+                                        <tr><th>Language(s)</th><td>[% campaign.language_code | html %]</td></tr>
+                                        <tr><th>Location(s)</th><td>[% campaign.display_location | html %]</td></tr>
+                                        <tr><th>Created by</th><td>[% campaign.created_by | html %]</td></tr>
+                                        <tr><th>Created</th><td>[% campaign.created_at | html %]</td></tr>
+                                        <tr><th>Updated</th><td>[% campaign.updated_at | html %]</td></tr>
+                                    </tbody>
+                                </table>
+                                [% IF campaign.notes %]
+                                    <h3>Notes</h3>
+                                    <p>[% campaign.notes | html %]</p>
+                                [% END %]
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong>Current scope</strong></div>
+                            <div class="panel-body">
+                                <p>This screen intentionally reads existing plugin and Koha data only.</p>
+                                <ul>
+                                    <li>No campaign data can be edited here yet.</li>
+                                    <li>No Koha catalogue/item data is copied or modified.</li>
+                                    <li>Linked title/author data below is read live from Koha.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Linked Koha items</strong> ([% linked_items.size %])</div>
+                    <div class="panel-body">
+                        [% IF linked_items && linked_items.size %]
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Barcode</th>
+                                            <th>Title</th>
+                                            <th>Author</th>
+                                            <th>Itemnumber</th>
+                                            <th>Biblionumber</th>
+                                            <th>Linked</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH item IN linked_items %]
+                                            <tr>
+                                                <td><code>[% item.barcode | html %]</code></td>
+                                                <td>[% item.title | html %]</td>
+                                                <td>[% item.author | html %]</td>
+                                                <td>[% item.itemnumber %]</td>
+                                                <td>[% item.biblionumber %]</td>
+                                                <td>[% item.added_at | html %]</td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                        [% ELSE %]
+                            <p class="text-muted">No Koha items are linked to this campaign.</p>
+                        [% END %]
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Audit history</strong></div>
+                    <div class="panel-body">
+                        [% IF audit_rows && audit_rows.size %]
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>When</th>
+                                            <th>Action</th>
+                                            <th>Actor</th>
+                                            <th>Entity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH audit IN audit_rows %]
+                                            <tr>
+                                                <td>[% audit.created_at | html %]</td>
+                                                <td>[% audit.action_type | html %]</td>
+                                                <td>[% audit.actor_borrowernumber | html %]</td>
+                                                <td>[% audit.entity_type | html %] [% audit.entity_id | html %]</td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                        [% ELSE %]
+                            <p class="text-muted">No audit entries are recorded for this campaign.</p>
+                        [% END %]
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                <div class="sidebar_menu">
+                    <ul>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                        <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
+                        <li><span class="text-muted">Analytics</span></li>
+                        <li><span class="text-muted">Reports</span></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]
