@@ -32,6 +32,9 @@
                     <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
                         <i class="fa fa-plus"></i> New promotion
                     </a>
+                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">
+                        <i class="fa fa-list"></i> View promotions
+                    </a>
                 </div>
 
                 <h1>Promotion &amp; Engagement</h1>
@@ -99,7 +102,11 @@
                                     <tbody>
                                         [% FOREACH campaign IN recent_campaigns %]
                                             <tr>
-                                                <td>[% campaign.name | html %]</td>
+                                                <td>
+                                                    <a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotion_detail&campaign_id=[% campaign.campaign_id %]">
+                                                        [% campaign.name | html %]
+                                                    </a>
+                                                </td>
                                                 <td>[% campaign.campaign_type | html %]</td>
                                                 <td>[% campaign.channel | html %]</td>
                                                 <td>[% campaign.start_date | html %]</td>
@@ -138,7 +145,7 @@
                     <ul>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
-                        <li><span class="text-muted">Promotions</span></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><span class="text-muted">Analytics</span></li>
                         <li><span class="text-muted">Reports</span></li>
                     </ul>
