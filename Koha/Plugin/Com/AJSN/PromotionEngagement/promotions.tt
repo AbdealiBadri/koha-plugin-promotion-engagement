@@ -1,0 +1,113 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% USE KohaDates %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Promotions</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active=1 %]
+            <span>Promotions</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+                <div id="toolbar" class="btn-toolbar">
+                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
+                        <i class="fa fa-plus"></i> New promotion
+                    </a>
+                </div>
+
+                <h1>Promotions</h1>
+                <p class="lead">Browse saved promotion campaigns and open a campaign to review its linked Koha items and audit history.</p>
+
+                [% IF error_message %]
+                    <div class="alert alert-danger">[% error_message | html %]</div>
+                [% END %]
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Saved campaigns</strong></div>
+                    <div class="panel-body">
+                        [% IF campaigns && campaigns.size %]
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Campaign</th>
+                                            <th>Type</th>
+                                            <th>Channel</th>
+                                            <th>Start</th>
+                                            <th>End</th>
+                                            <th>Audience</th>
+                                            <th>Location</th>
+                                            <th>Items</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH campaign IN campaigns %]
+                                            <tr>
+                                                <td>
+                                                    <a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotion_detail&campaign_id=[% campaign.campaign_id %]">
+                                                        [% campaign.name | html %]
+                                                    </a>
+                                                </td>
+                                                <td>[% campaign.campaign_type | html %]</td>
+                                                <td>[% campaign.channel | html %]</td>
+                                                <td>[% campaign.start_date | html %]</td>
+                                                <td>[% campaign.end_date | html %]</td>
+                                                <td>[% campaign.target_audience | html %]</td>
+                                                <td>[% campaign.display_location | html %]</td>
+                                                <td>[% campaign.linked_item_count || 0 %]</td>
+                                                <td><span class="label label-default">[% campaign.status | html %]</span></td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                            [% IF campaigns.size == 200 %]
+                                <p class="text-muted">Showing the 200 most recent campaigns. Search/filter/pagination will be added in the campaign-management milestone.</p>
+                            [% END %]
+                        [% ELSE %]
+                            <p class="text-muted">No promotions have been created yet.</p>
+                        [% END %]
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                <div class="sidebar_menu">
+                    <ul>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                        <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
+                        <li><span class="text-muted">Analytics</span></li>
+                        <li><span class="text-muted">Reports</span></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]
