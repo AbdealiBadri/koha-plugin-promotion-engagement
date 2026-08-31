@@ -1,74 +1,79 @@
 # Session Handoff
 
-**Last updated:** 2026-08-29  
-**Current implementation branch:** `feature/v0.2-campaign-crud`  
-**Implementation commit under test:** `3537b8e`  
-**Current milestone:** v0.2 Checkpoint 1 — campaign creation integrity/security
+**Last updated:** 2026-08-31  
+**Base implementation branch:** `feature/v0.2-campaign-crud`  
+**Remote follow-on branch:** `feature/v0.2-campaign-read`  
+**Draft PR:** #1 — read-only promotions list and campaign detail views  
+**Current milestone:** finish v0.2 Checkpoint 1 security tests, then verify the read-only campaign-management slice.
 
 ## Current objective
 
-Finish the three remaining security/permission tests, then close v0.2 Checkpoint 1 and move to campaign management/configuration/multi-location work.
+1. Complete the three remaining security/permission tests on `feature/v0.2-campaign-crud`.
+2. Re-run one authorized smoke test.
+3. Switch to `feature/v0.2-campaign-read` and execute CR-01 through CR-07.
+4. Merge Draft PR #1 only after all runtime tests pass.
 
-## Work completed most recently
+## Verified runtime state before remote follow-on work
 
-- Backed up all four plugin-owned checkpoint tables before resetting KTD.
-- Performed a full consistent `kohadev` KTD teardown/recreate.
-- Confirmed `kohadev-koha-1`, `kohadev-db-1`, and `kohadev-memcached-1` are Up.
-- KTD `--wait-ready 180` returned `KTD READY`.
-- Koha Administration > Plugins shows Promotion & Engagement version **0.2.0 Enabled**.
+- `kohadev` KTD was rebuilt cleanly and returned `KTD READY`.
+- Koha Administration > Plugins showed Promotion & Engagement **0.2.0 Enabled**.
 - Authenticated `/api/v1/contrib/ajsn_promotion/health` returned `status: ok` and `version: 0.2.0`.
 - InPrivate/unauthenticated health request returned `{"error":"Authentication failure."}`.
-- BUG-003 stale API version and ISSUE-004 KTD non-empty-DB blocker are now resolved.
+- Campaign integrity tests previously passed: zero item, valid barcode, invalid barcode rejection, duplicate de-duplication, transactional DB/audit writes and mixed valid+invalid rollback.
 
-## Previously passed v0.2 campaign tests
+## Security checkpoint still open
 
-- campaign with no barcode;
-- one valid barcode;
-- fake invalid barcode blocked;
-- duplicate correct barcode linked once + warning;
-- DB campaign/item/audit verification;
-- mixed valid + invalid submission rolled back completely;
-- dashboard remained unchanged after rollback.
+ISSUE-012 remains open until these are actually executed:
 
-These results are preserved in `TESTING.md`. Old local test rows were backed up before the clean KTD reset and do not need to be restored simply to preserve test evidence.
+1. **T-131** — invalid/missing CSRF is rejected with no campaign write.
+2. **T-132** — logged-in user without plugin `tool` permission cannot use the write workflow.
+3. **T-133** — authenticated API user without `catalogue` permission cannot call `/health`.
 
-## Current open checkpoint issue
+Important T-131 note: a prior manual attempt changed the wrong `csrf_token` belonging to a Koha header/search form. That attempt is invalid evidence, not a failed security control. The correct token is inside the plugin form posting to `/cgi-bin/koha/plugins/run.pl`, beside `action=new_promotion` and `op=cud-create_promotion`.
 
-ISSUE-012 — security matrix is not yet complete.
+## Remote work prepared on `feature/v0.2-campaign-read`
 
-Still required:
+**CODE-PREPARED / NOT RUNTIME-VERIFIED**
 
-1. T-131 — missing/invalid CSRF token is rejected.
-2. T-132 — logged-in user without plugin tool permission cannot use plugin write workflow.
-3. T-133 — logged-in API user without `catalogue` permission cannot call `/health`.
+Draft PR #1 adds a deliberately low-risk read-only campaign-management slice:
 
-## Exact next action
+- Promotions list page using existing plugin tables.
+- Dashboard campaign names link to details.
+- Campaign detail page.
+- Linked-item barcode/itemnumber from plugin data.
+- Live Koha title/author/biblionumber read-through.
+- Campaign audit-history display.
+- Defensive invalid/nonexistent campaign-ID handling.
+- No schema change.
+- No edit/archive/delete write actions.
+- No Koha core changes.
 
-Run **T-131 first** using the current healthy `kohadev` environment.
+The branch is mergeable into `feature/v0.2-campaign-crud`, but must remain a Draft PR until KTD testing is complete.
 
-Goal: attempt the campaign write endpoint without a valid Koha CSRF token and prove that Koha rejects the request and no campaign row is created.
+## Exact test runbook
 
-Do not weaken/disable CSRF middleware to perform the test. The test must exercise Koha's normal protection.
+Use `docs/V0_2_TOMORROW_TEST_RUNBOOK.md` for the complete branch-switch, KTD re-initialisation and manual test sequence.
 
-After T-131, proceed to lower-permission user tests T-132/T-133. If temporary test users/permissions are created or modified, restore/verify the normal authorized admin workflow afterward.
+Read-view acceptance tests are in `docs/V0_2_CAMPAIGN_READ_TEST.md`:
 
-## What success should look like at checkpoint closure
+- CR-01 Promotions list.
+- CR-02 Campaign detail.
+- CR-03 Live Koha item read-through.
+- CR-04 Zero-linked-item campaign.
+- CR-05 Audit history.
+- CR-06 Invalid campaign ID.
+- CR-07 Existing create-workflow regression.
 
-- normal authorized campaign creation works;
-- invalid/missing CSRF is rejected with no DB write;
-- user without plugin tool permission is denied;
-- health API works for an appropriately authorized user;
-- health API is denied to unauthenticated users;
-- health API is denied to authenticated users lacking required `catalogue` permission;
-- source/UI/API version remains 0.2.0;
-- KTD remains healthy.
+## Merge gate
 
-## Next milestone after checkpoint closure
+Do not merge PR #1 until:
 
-Campaign management and universal configuration:
+- T-131/T-132/T-133 pass;
+- CR-01..CR-07 pass;
+- no Plack/template/database errors appear;
+- normal authorized campaign creation still works;
+- Project Brain and testing records are updated with observed results.
 
-- campaign detail/edit/archive/list/filter;
-- configurable type/channel/language/audience/cadence;
-- reusable multi-location support;
-- related audit logging;
-- then analytics engine before final UI modernization.
+## After PR #1
+
+Next implementation slice should be campaign edit/update + archive/status transitions with audit logging, followed by universal configuration and multi-location modelling. Analytics comes after the campaign data model and management workflow stabilise.
