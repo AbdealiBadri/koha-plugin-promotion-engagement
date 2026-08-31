@@ -48,6 +48,7 @@ Branch `feature/v0.2-campaign-read`, Draft PR #1:
 - [x] CODE: campaign audit-history view.
 - [x] CODE: invalid/nonexistent campaign-ID handling.
 - [x] CODE: manual KTD test plan/runbook.
+- [x] REMOTE PREPARATION: Project Brain/roadmap/handoff updated for the exact test sequence.
 - [ ] RUNTIME: CR-01..CR-07 verification.
 - [ ] MERGE: only after T-131/T-132/T-133 and CR-01..CR-07 pass.
 
