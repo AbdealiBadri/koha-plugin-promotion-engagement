@@ -3,13 +3,15 @@
 **Branch:** `feature/v0.2-campaign-read`  
 **Status:** NOT RUN — code prepared remotely; requires KTD verification before merge.
 
+For the exact branch-switch and KTD commands, use `docs/V0_2_TOMORROW_TEST_RUNBOOK.md`.
+
 ## Purpose
 
 Verify the new read-only Promotions list and Promotion detail screens without changing the existing campaign schema or write workflow.
 
 ## Preconditions
 
-- `feature/v0.2-campaign-crud` security checkpoint is either closed or its tests are preserved before switching branches.
+- `feature/v0.2-campaign-crud` security tests T-131/T-132/T-133 are complete or their state is explicitly preserved before switching branches.
 - `kohadev` reports `KTD READY`.
 - Promotion & Engagement plugin is enabled.
 - At least one campaign exists; ideally one campaign has a linked Koha item.
@@ -35,7 +37,7 @@ Verify the new read-only Promotions list and Promotion detail screens without ch
 - Campaign detail page renders.
 - Campaign metadata matches the saved record.
 - Institution-wide campaign shows `All / institution-wide`.
-- Branch-specific campaign resolves live Koha library name when available.
+- Branch-specific campaign resolves the live Koha library name when available.
 
 ## Test CR-03 — Linked Koha item read-through
 
@@ -56,7 +58,7 @@ Open a campaign with no linked barcodes.
 
 ## Test CR-05 — Audit history
 
-Open a campaign created through v0.2 workflow.
+Open a campaign created through the v0.2 workflow.
 
 **Expected:**
 - Existing `campaign_created` audit row is displayed.
@@ -80,9 +82,9 @@ After read-view testing, create one normal campaign using the existing New promo
 
 ## Merge gate
 
-Do not merge this branch into `feature/v0.2-campaign-crud` until:
+Do not merge Draft PR #1 into `feature/v0.2-campaign-crud` until:
 
-- current security checkpoint tests T-131/T-132/T-133 are complete or intentionally sequenced;
+- T-131/T-132/T-133 pass;
 - CR-01 through CR-07 pass;
 - no Plack/template/database errors appear;
 - Project Brain is updated with actual runtime evidence.
