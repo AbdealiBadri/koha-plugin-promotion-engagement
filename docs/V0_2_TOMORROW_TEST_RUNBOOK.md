@@ -118,6 +118,12 @@ Run the read-view tests from `docs/V0_2_CAMPAIGN_READ_TEST.md`:
 6. **CR-06** Invalid/nonexistent campaign ID is handled without server/SQL error.
 7. **CR-07** Existing New promotion write workflow still works after the read-view changes.
 
+## D. Decision after tests
+
+- If all T-131/T-132/T-133 and CR-01..CR-07 pass, record the evidence and merge Draft PR #1 into `feature/v0.2-campaign-crud`.
+- If any test fails, leave PR #1 draft/unmerged, capture the screen/logs, fix the defect on the appropriate feature branch, and re-run the failed test plus the authorized smoke test.
+- Do not merge directly to `main` from this test sequence.
+
 ## Merge gate
 
 Draft PR #1 must remain unmerged until:
@@ -126,5 +132,3 @@ Draft PR #1 must remain unmerged until:
 - CR-01 through CR-07 pass;
 - no new Plack/template/database errors appear;
 - actual runtime results are written back to Project Brain/testing records.
-
-If any test fails, stop at that test, capture the screen/logs, and fix the defect on the feature branch before continuing.
