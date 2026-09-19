@@ -1,104 +1,108 @@
 # Current State
 
-**Last verified runtime:** 2026-08-29  
+**Last verified:** 2026-09-19  
 **Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`  
 **Repository default branch:** `main`  
-**Base implementation branch:** `feature/v0.2-campaign-crud`  
-**Remote follow-on branch:** `feature/v0.2-campaign-read`  
-**Draft PR:** #1
+**Active implementation branch:** `feature/v0.2-campaign-read`  
+**Base branch:** `feature/v0.2-campaign-crud`
 
 ## Current milestone
 
-**v0.2.x — close campaign-creation security checkpoint, then verify the first read-only campaign-management slice.**
+**v0.2 campaign management — Campaign List + Campaign Detail acceptance/merge.**
 
-The KTD/API blockers are resolved. The immediate runtime objective remains the dedicated security/permission matrix. In parallel, a separate read-only feature branch has been prepared so development can advance without modifying the unclosed write/security checkpoint.
+**v0.2 Checkpoint 1 is CLOSED.** T-131, T-132, T-133 and the post-security authorized smoke test passed in isolated `promoeng`. CR-01 through CR-07 also passed. Human visual review of Promotions, linked-item detail and zero-item detail passed. The repeated logout was isolated to entering through a stale/deep plugin login path; the user confirmed normal staff-homepage login preserves navigation, so this is not treated as a plugin CSRF defect.
 
 ## Overall status
 
 **Pre-alpha / development only. Not approved for production.**
 
-## Working functionality — VERIFIED-RUNTIME
+Core campaign creation is materially working and has passed the manual integrity tests performed so far. The `kohadev` KTD environment is healthy again.
+
+## Working functionality — verified
 
 ### Plugin foundation
 
-- `kohadev` rebuilt cleanly and KTD reported `KTD READY`.
-- Koha Administration > Plugins showed Promotion & Engagement **0.2.0 Enabled**.
+- Dedicated `promoeng` KTD runtime is Up and isolated from unrelated projects; intranet returns HTTP 200.
+- Koha Administration > Plugins shows Promotion & Engagement **0.2.0 Enabled**.
 - Four plugin-owned tables are created/maintained by `_ensure_schema`.
 - Uninstall remains intentionally non-destructive.
 
 ### REST health endpoint
 
-- Authenticated request returns `status: ok`.
-- Plugin name is `Promotion & Engagement`.
-- Version is `0.2.0`.
-- InPrivate/unauthenticated request returns `Authentication failure.`
+Runtime verification now passes:
+
+- plugin route is registered in `promoeng` after Plack restart;
+- authenticated authorized requests previously returned `status: ok`, plugin name and version `0.2.0`;
+- unauthenticated request returns `Authentication failure.`;
+- authenticated user without `catalogue` permission now returns HTTP 403 with the required-permission detail.
+
+Therefore the stale `0.1.0` health-version defect is closed.
 
 ### Campaign creation
 
-Previously verified in `kohadev`:
+Previously verified in `kohadev` before the clean KTD reset:
 
 - campaign can save with zero linked items;
-- valid Koha barcode can be linked;
+- valid Koha barcode can be linked to a campaign;
 - invalid barcode blocks save;
-- duplicate barcode input stores one link and reports the duplicate;
+- duplicate barcode input is detected and one link is stored;
 - mixed valid + invalid input saves nothing;
 - dashboard counters update after successful writes;
 - successful campaign creation creates an audit row;
 - campaign/item/audit writes are transactional.
 
-The old checkpoint DB rows were backed up before the clean KTD reset. Their evidence is preserved and does not need to be restored merely to prove prior tests.
+The old checkpoint DB test rows were backed up before reset. Their evidence is preserved in the Project Brain; they do not need to be restored merely to prove the already-recorded tests.
 
-## Security checkpoint — NEEDS-VERIFICATION
+### Database evidence from prior checkpoint run
 
-Still required on `feature/v0.2-campaign-crud`:
+For `Duplicate Barcode Test`, runtime SQL verified:
 
-1. T-131 — invalid/missing CSRF token is rejected with no campaign write.
-2. T-132 — logged-in user without plugin `tool` permission cannot use the write workflow.
-3. T-133 — authenticated API user without `catalogue` permission cannot call `/health`.
+- `campaign_id = 3`;
+- status `draft`;
+- actor/creator borrower number recorded;
+- one campaign-item row despite duplicate input;
+- linked Koha item `itemnumber = 109`;
+- real barcode `39999000002034`;
+- a `campaign_created` audit row exists.
 
-A prior T-131 attempt altered the wrong Koha page token and is not valid evidence either way.
+A prior apparent barcode-validation inconsistency was traced to a manually mistyped barcode with one zero missing; it was not a plugin defect.
 
-## Remote follow-on development — VERIFIED-CODE / NOT RUNTIME-VERIFIED
+## Resolved environment incident
 
-Branch `feature/v0.2-campaign-read` and Draft PR #1 add:
+`kohadev-koha-1` had previously exited because only the app container was recreated while a populated `kohadev-db-1` remained. KTD first-time initialization then refused the non-empty database.
 
-- read-only Promotions list;
-- dashboard links to campaign detail;
-- read-only campaign detail view;
-- live Koha library-name resolution;
-- linked Koha item title/author/biblionumber read-through;
-- audit-history display;
-- defensive invalid/nonexistent campaign-ID handling;
-- dedicated KTD manual test plan and combined test runbook.
+Resolution completed:
 
-Safety properties of this slice:
+1. backed up all four `plugin_ajsn_promo_*` tables;
+2. performed full KTD `down`;
+3. recreated the full `kohadev` environment;
+4. confirmed all three containers stay Up;
+5. `--wait-ready 180` returned `KTD READY`;
+6. plugin loaded as 0.2.0 Enabled;
+7. authenticated and unauthenticated health tests passed.
 
-- no schema change;
-- no Koha core modification;
-- no edit/archive/delete write path;
-- current campaign creation code is retained;
-- PR remains draft until runtime testing passes.
+## Partially working / incomplete
 
-## Campaign model — incomplete
+### Campaign model
 
 - type/channel are generic but still hard-coded allowed values;
 - audience/language/location are simple fields;
 - only one free-text display location is currently stored;
-- edit/update/archive workflows are not built;
-- soft-delete columns exist but no UI/workflow uses them;
-- multi-location model is not built.
+- campaign list and read-only campaign detail are built and runtime/visually verified on the read branch;
+- edit/update/archive are not yet built;
+- soft-delete columns exist but no UI/workflow uses them.
 
-## Dashboard
+### Dashboard
 
-Current verified dashboard provides counts and recent campaigns. Conversion rate remains a placeholder (`Analytics engine: Phase 3`). Professional analytics and visual design are deliberately deferred until data model/workflows/formulas stabilise.
+Current dashboard provides counts and recent campaigns. Conversion rate is a placeholder (`Analytics engine: Phase 3`). Professional analytics and visual design are not yet built.
 
-## Major approved functionality still unimplemented
+## Unimplemented approved functionality
 
-- campaign edit/update/archive/status-transition workflow;
 - multi-location campaign model;
 - configurable universal vocabularies;
 - recurring/cadence support;
 - e-resource/non-barcode resource model;
+- edit/update/archive and list filtering/search workflows;
 - analytics engine;
 - before/during/after and 7/14/30/60-day KPIs;
 - conversion and days-to-first-checkout;
@@ -109,13 +113,14 @@ Current verified dashboard provides counts and recent campaigns. Conversion rate
 - external campaign/analytics APIs;
 - OAuth2 integration guide;
 - historical spreadsheet importer;
-- automated release-gate test suite;
+- automated test suite for release gate;
 - Koha 26.05 validation;
-- AJSN staging and production deployment.
+- AJSN staging deployment;
+- production deployment.
 
 ## Test state
 
-### PASS — VERIFIED-RUNTIME
+### PASS
 
 - v0.1 KPZ build/structure/checksum and historical clean install.
 - plugin disable/re-enable data persistence.
@@ -123,42 +128,63 @@ Current verified dashboard provides counts and recent campaigns. Conversion rate
 - v0.2 valid barcode linkage.
 - v0.2 invalid barcode blocking.
 - v0.2 duplicate barcode de-duplication.
-- v0.2 campaign/item/audit DB verification.
+- v0.2 campaign/item/audit database write verification.
 - v0.2 mixed valid+invalid rollback.
-- clean KTD rebuild/readiness.
+- clean consistent KTD rebuild and readiness.
 - plugin v0.2.0 runtime load.
 - authenticated v0.2 health returns `0.2.0`.
 - unauthenticated v0.2 health is denied.
 
-### NEXT RUNTIME TESTS
+### SECURITY CHECKPOINT
 
-- T-131, T-132, T-133 on `feature/v0.2-campaign-crud`.
-- Authorized smoke test.
-- CR-01..CR-07 on `feature/v0.2-campaign-read`.
+- T-131 invalid/missing CSRF rejection: PASS.
+- T-132 user without plugin tool permission: PASS.
+- T-133 authenticated API user without `catalogue`: PASS.
+- T-134 authorized campaign-create smoke after security tests: PASS.
+
+Checkpoint 1 is closed.
+
+### CAMPAIGN READ MODULE
+
+- CR-01 Promotions list: PASS.
+- CR-02 Campaign detail: PASS.
+- CR-03 Linked Koha item read-through: PASS.
+- CR-04 Zero-item campaign: PASS.
+- CR-05 Audit history: PASS.
+- CR-06 Invalid/nonexistent campaign ID handling: PASS.
+- CR-07 create-workflow regression: PASS.
+- Human visual review: PASS using normal Koha staff login path.
 
 ### NOT RUN
 
-- read-only PR #1 runtime verification;
-- Koha 26.05 compatibility;
-- institutional staging;
-- production;
+- Koha 26.05 compatibility.
+- institutional staging.
+- production.
 - analytics correctness tests because analytics are not implemented.
 
 ## Local environment state
 
 - Development host: Windows with WSL Debian and Docker/KTD.
 - KTD repository: `~/git/koha-testing-docker`.
-- Plugin repository is mounted through `--single-plugin`.
-- Main dev instance: `kohadev`.
-- Last verified: Koha, DB and memcached containers Up; KTD readiness PASS.
+- Plugin repository is mounted through `--single-plugin` for feature development.
+- Main plugin KTD instance: `promoeng`.
+- `promoeng-koha-1`, `promoeng-db-1`, and `promoeng-memcached-1` are Up as last verified.
+- `kohadev` is retained only as a legacy/shared instance and is not used for new plugin verification.
+- KTD readiness: PASS.
+- Historical checkpoint plugin tables were backed up before clean reset.
+
+## Production/staging state
+
+- No production deployment verified.
+- No AJSN staging deployment verified.
+- Production remains explicitly gated behind KTD regression, Koha 26.05, staging, backup/rollback, exact KPZ and checksum validation.
 
 ## Immediate next task
 
-Follow `docs/V0_2_TOMORROW_TEST_RUNBOOK.md`:
+1. Finish synchronizing feature/v0.2-campaign-read with the advanced feature/v0.2-campaign-crud base.
+2. Re-run CR-01..CR-07 after sync.
+3. Merge Draft PR #1 if clean.
+4. Start the next module: **Edit / Update / Archive** with audit-preserving status transitions and soft-delete/archive behavior.
+5. After that, proceed to universal configuration and multi-location support.
 
-1. finish T-131/T-132/T-133;
-2. authorized smoke test;
-3. switch to `feature/v0.2-campaign-read`;
-4. run CR-01..CR-07;
-5. if all pass, update evidence and merge Draft PR #1;
-6. then begin edit/update/archive + universal configuration/multi-location work.
+See SESSION_HANDOFF.md and TESTING.md.

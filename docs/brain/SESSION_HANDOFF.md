@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-19
 **Active runtime branch:** `feature/v0.2-campaign-read`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Campaign List + Campaign Detail visual acceptance
+**Current milestone:** Campaign List + Campaign Detail merge gate
 
 ## Verified completed today
 
@@ -24,15 +24,20 @@
 - `READ-LINKED-20260919`
 - `READ-REGRESSION-20260919`
 
+## Human visual result
+
+- Promotions list: PASS.
+- Linked-item campaign detail: PASS.
+- Zero-item campaign detail: PASS.
+- Browser logout issue: isolated to a stale/deep plugin login path. User confirmed that logging in through the normal Koha staff homepage prevents logout during navigation. T-131 remains PASS and this is not treated as a CSRF regression.
+
 ## Exact next action
 
-User performs one visual check of the local Promotions list/detail screens. Do not merge Draft PR #1 before that check.
-
-After visual approval:
-1. Sync/rebase the read branch with the now-advanced `feature/v0.2-campaign-crud` base and resolve documentation-only divergence safely.
-2. Re-run CR-01..CR-07.
-3. Merge Draft PR #1.
-4. Move to Edit/Update/Archive, then universal configuration + multi-location support.
+1. Finish syncing feature/v0.2-campaign-read with feature/v0.2-campaign-crud.
+2. Re-run CR-01 through CR-07.
+3. Merge Draft PR #1 if clean.
+4. Start Edit / Update / Archive.
+5. Then universal configuration and multi-location support.
 
 ## Visual URL
 

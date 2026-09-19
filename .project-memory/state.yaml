@@ -5,21 +5,27 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 Checkpoint 1 - campaign creation integrity/security"
-  implementation_branch: "feature/v0.2-campaign-crud"
+  milestone: "v0.2 campaign list/detail merge gate"
+  implementation_branch: "feature/v0.2-campaign-read"
   implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
   project_brain_branch: "docs/project-brain"
-  objective: "Finish dedicated CSRF and lower-permission security tests, then close checkpoint 1"
-  last_verified: "2026-08-29"
-  next_action: "Run T-131 missing/invalid CSRF rejection test in healthy kohadev"
+  objective: "Merge verified campaign list/detail module, then begin Edit/Update/Archive"
+  last_verified: "2026-09-19"
+  next_action: "Finish branch sync, rerun CR-01..CR-07, merge PR #1, then start Edit/Update/Archive"
 
 environment:
   local:
     platform: "Windows + WSL Debian + Docker/KTD"
-    ktd_instance: "kohadev"
+    primary_ktd_instance: "promoeng"
+    legacy_ktd_instance: "kohadev"
     koha_target: "25.11.x"
-    state: "healthy-ready"
-    containers: "koha/db/memcached up"
+    state: "promoeng-healthy"
+    evidence:
+      - "promoeng-koha-1/db-1/memcached-1 up"
+      - "promoeng-intra.localhost HTTP 200"
+      - "KTD startup log says ready to be enjoyed"
+      - "Promotion & Engagement 0.2.0 installed during startup"
+    isolation_rule: "Do not touch unrelated repositories/containers; no global Docker cleanup"
   clean_kpz_test:
     historical_instance: "kpztest"
     state: "removed-after-v0.1-test"
@@ -31,13 +37,13 @@ environment:
 
 blockers:
   - id: "ISSUE-012"
-    summary: "dedicated CSRF and lower-permission security tests remain"
+    summary: "T-131 invalid-CSRF and T-132 plugin-tool denial remain; T-133 API catalogue denial passed"
 
 resolved_recently:
   - id: "ISSUE-004"
-    summary: "full consistent KTD rebuild restored KTD READY"
+    summary: "old KTD database lifecycle blocker resolved previously; new work isolated to promoeng"
   - id: "BUG-003"
-    summary: "runtime health now returns plugin version 0.2.0; unauthenticated request denied"
+    summary: "runtime health returns plugin version 0.2.0; unauthenticated request denied"
 
 critical_decisions:
   - "DEC-001"
@@ -51,16 +57,16 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "T-122"
-  date: "2026-08-29"
-  command: "InPrivate GET /api/v1/contrib/ajsn_promotion/health"
+  id: "T-133"
+  date: "2026-09-19"
+  command: "Authenticated GET /api/v1/contrib/ajsn_promotion/health using KTD identity without catalogue permission"
   status: "PASS"
-  result: "Authentication failure returned; unauthenticated API access denied"
+  result: "HTTP 403 Authorization failure with required permission catalogue=1"
 
 runtime:
-  plugin_ui_version: "0.2.0"
-  health_api_version: "0.2.0"
-  ktd_ready: true
+  plugin_version: "0.2.0"
+  primary_environment: "promoeng"
+  primary_environment_ready: true
 
 checkpoint_counts_before_environment_reset:
   promotions: 3

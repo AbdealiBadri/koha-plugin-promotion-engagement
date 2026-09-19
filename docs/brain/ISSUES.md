@@ -104,13 +104,14 @@
 
 ## ISSUE-012 — Security matrix not fully manually tested
 
-- **Status:** OPEN / CURRENT CHECKPOINT WORK
+- **Status:** RESOLVED
 - **Severity:** High before release
 - **Module:** authorization/CSRF
 - **Code evidence:** Koha-native CSRF convention and tool permission integration are present; health OpenAPI requires `catalogue`.
 - **Completed evidence:** authenticated health succeeds; unauthenticated health is denied.
-- **Missing evidence:** dedicated forged/missing-CSRF POST test, user without plugin tool permission, and authenticated API user without `catalogue` permission.
-- **Next action:** run T-131, T-132 and T-133.
+- **Completed evidence:** authenticated health succeeds; unauthenticated health is denied; T-131 forged CSRF POST returned HTTP 403 with no DB write; T-132 catalogue-only staff session was denied plugin write access with no DB write and original flags restored; T-133 authenticated API user without `catalogue` returned HTTP 403 with required-permission detail; T-134 authorized campaign-create smoke passed and test rows were cleaned up.
+- **Resolution date:** 2026-09-19.
+- **Next action:** move to runtime validation of Draft PR #1 (Campaign List + Campaign Detail).
 
 ## ISSUE-013 — Compatibility/staging gates outstanding
 
