@@ -9,9 +9,9 @@ current:
   implementation_branch: "feature/v0.2-campaign-crud"
   implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
   project_brain_branch: "docs/project-brain"
-  objective: "Finish T-131/T-132/T-133 in isolated promoeng KTD, then close checkpoint 1"
+  objective: "Finish T-131/T-132 in isolated promoeng KTD, then close checkpoint 1; T-133 is PASS"
   last_verified: "2026-09-19"
-  next_action: "Run remaining security matrix against promoeng, then proceed to campaign read/detail module"
+  next_action: "Complete T-131 and end-to-end T-132, then authorized smoke test and close checkpoint 1"
 
 environment:
   local:
@@ -37,7 +37,7 @@ environment:
 
 blockers:
   - id: "ISSUE-012"
-    summary: "dedicated CSRF and lower-permission security tests remain"
+    summary: "T-131 invalid-CSRF and T-132 plugin-tool denial remain; T-133 API catalogue denial passed"
 
 resolved_recently:
   - id: "ISSUE-004"
@@ -57,11 +57,11 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "ENV-2026-09-19"
+  id: "T-133"
   date: "2026-09-19"
-  command: "Dedicated promoeng KTD startup + HTTP/container/log verification"
+  command: "Authenticated GET /api/v1/contrib/ajsn_promotion/health using KTD identity without catalogue permission"
   status: "PASS"
-  result: "promoeng containers Up; intranet HTTP 200; KTD log ready; plugin 0.2.0 installed"
+  result: "HTTP 403 Authorization failure with required permission catalogue=1"
 
 runtime:
   plugin_version: "0.2.0"
