@@ -97,35 +97,23 @@
                                 <label for="campaign_type" class="required">Promotion type:</label>
                                 <select id="campaign_type" name="campaign_type" required>
                                     <option value="">Select a type</option>
-                                    <option value="subject_display" [% IF form.campaign_type == 'subject_display' %]selected[% END %]>Subject / thematic display</option>
-                                    <option value="new_arrivals" [% IF form.campaign_type == 'new_arrivals' %]selected[% END %]>New arrivals</option>
-                                    <option value="recommendation" [% IF form.campaign_type == 'recommendation' %]selected[% END %]>Recommendation campaign</option>
-                                    <option value="email_campaign" [% IF form.campaign_type == 'email_campaign' %]selected[% END %]>Email campaign</option>
-                                    <option value="digital_signage" [% IF form.campaign_type == 'digital_signage' %]selected[% END %]>Digital signage</option>
-                                    <option value="physical_signage" [% IF form.campaign_type == 'physical_signage' %]selected[% END %]>Physical signage</option>
-                                    <option value="resource_feature" [% IF form.campaign_type == 'resource_feature' %]selected[% END %]>Resource feature</option>
-                                    <option value="author_feature" [% IF form.campaign_type == 'author_feature' %]selected[% END %]>Author feature</option>
-                                    <option value="publication_feature" [% IF form.campaign_type == 'publication_feature' %]selected[% END %]>Newspaper / magazine feature</option>
-                                    <option value="event" [% IF form.campaign_type == 'event' %]selected[% END %]>Event / activity</option>
-                                    <option value="outreach" [% IF form.campaign_type == 'outreach' %]selected[% END %]>Outreach campaign</option>
-                                    <option value="other" [% IF form.campaign_type == 'other' %]selected[% END %]>Other</option>
+                                    [% FOREACH type IN campaign_types %]
+                                        <option value="[% type.value_code | html %]" [% IF form.campaign_type == type.value_code %]selected[% END %]>[% type.label | html %]</option>
+                                    [% END %]
                                 </select>
                                 <span class="required">Required</span>
+                                <div class="hint">Values come from Promotion &amp; Engagement configuration.</div>
                             </li>
                             <li>
                                 <label for="channel" class="required">Channel:</label>
                                 <select id="channel" name="channel" required>
                                     <option value="">Select a channel</option>
-                                    <option value="physical_display" [% IF form.channel == 'physical_display' %]selected[% END %]>Physical display</option>
-                                    <option value="email" [% IF form.channel == 'email' %]selected[% END %]>Email</option>
-                                    <option value="digital_signage" [% IF form.channel == 'digital_signage' %]selected[% END %]>Digital signage</option>
-                                    <option value="print_signage" [% IF form.channel == 'print_signage' %]selected[% END %]>Printed signage</option>
-                                    <option value="web" [% IF form.channel == 'web' %]selected[% END %]>Website / discovery layer</option>
-                                    <option value="social" [% IF form.channel == 'social' %]selected[% END %]>Social / messaging</option>
-                                    <option value="event" [% IF form.channel == 'event' %]selected[% END %]>Event / in-person</option>
-                                    <option value="other" [% IF form.channel == 'other' %]selected[% END %]>Other</option>
+                                    [% FOREACH channel_item IN channels %]
+                                        <option value="[% channel_item.value_code | html %]" [% IF form.channel == channel_item.value_code %]selected[% END %]>[% channel_item.label | html %]</option>
+                                    [% END %]
                                 </select>
                                 <span class="required">Required</span>
+                                <div class="hint">Values come from Promotion &amp; Engagement configuration.</div>
                             </li>
                             <li>
                                 <label for="name" class="required">Campaign name:</label>
@@ -167,9 +155,22 @@
                                 <input id="language_code" name="language_code" type="text" size="40" maxlength="30" value="[% form.language_code | html %]" placeholder="e.g. English, Arabic">
                             </li>
                             <li>
-                                <label for="display_location">Location(s):</label>
-                                <input id="display_location" name="display_location" type="text" size="60" maxlength="255" value="[% form.display_location | html %]" placeholder="e.g. Reception ground floor; First floor">
-                                <div class="hint">Use this for a physical location, signage point, virtual location, or other campaign placement.</div>
+                                <label for="location_value_id">Location(s):</label>
+                                [% IF locations.size %]
+                                    <select id="location_value_id" name="location_value_id" multiple size="6">
+                                        [% FOREACH location IN locations %]
+                                            <option value="[% location.vocab_value_id %]" [% IF location.selected %]selected[% END %]>[% location.label | html %][% IF !location.is_active %] (disabled)[% END %]</option>
+                                        [% END %]
+                                    </select>
+                                    <div class="hint">Choose one or more reusable promotion locations. Hold Ctrl/Command to select multiple values.</div>
+                                [% ELSE %]
+                                    <div class="alert alert-warning">
+                                        No reusable locations are configured yet. Add them from the plugin Configuration screen.
+                                    </div>
+                                [% END %]
+                                [% IF form.display_location && !locations.size %]
+                                    <div class="hint">Legacy location: [% form.display_location | html %]</div>
+                                [% END %]
                             </li>
                             <li>
                                 <label for="notes">Notes:</label>
@@ -205,6 +206,7 @@
                     <ul>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                                            <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>
                 </div>
             </aside>

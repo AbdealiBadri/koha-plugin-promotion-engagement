@@ -166,3 +166,17 @@ Never put DB passwords or other secrets in this file; use local environment/conf
 - Existing CR-01..CR-07 and EA lifecycle/security/archive-count regressions after the configuration change: PASS.
 
 Next test block: campaign form adoption and multi-location persistence/rendering.
+
+## v0.2 Multi-location campaign integration — 2026-09-19
+
+- ML-01 reusable configured locations created through plugin configuration: PASS.
+- ML-02 create campaign with two configured locations: PASS.
+- ML-03 Promotions list renders friendly configured type/channel labels and combined location labels: PASS.
+- ML-04 Campaign detail renders multiple configured location labels: PASS.
+- ML-05 Edit form pre-selects current campaign locations: PASS.
+- ML-06 Edit reconciles add/remove location links transactionally and records location audit arrays: PASS.
+- ML-07 disabled location already linked to a campaign remains visible/selected for safe editing: PASS.
+- ML-08 forged CSRF on multi-location update returns HTTP 403 with no state change: PASS.
+- Full CFG, CR and EA regression suites after integration: PASS.
+
+Human visual review is the remaining merge gate for this milestone.

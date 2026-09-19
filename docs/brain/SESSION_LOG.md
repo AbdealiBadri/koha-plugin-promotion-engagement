@@ -158,3 +158,17 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - CFG-01 through CFG-07 PASS, including forged-CSRF rejection and invalid-code validation.
 - Re-ran CR-01..CR-07, EA lifecycle/security and archive-count suites; all remain PASS.
 - Immediate next action: adopt configured type/channel values in campaign forms and implement multi-location Create/Edit persistence/rendering with legacy fallback.
+
+### Multi-location campaign integration runtime gate completed — 2026-09-19
+- New/Edit Campaign Type and Channel selectors now read plugin configuration instead of hard-coded option lists.
+- New/Edit Location now supports multiple reusable configured locations.
+- Campaign creation writes normalized campaign-location links transactionally.
+- Campaign update reconciles location additions, removals and reactivations transactionally and records added/removed location IDs in audit details.
+- Promotions list and Campaign Detail render friendly configured Type/Channel labels and multiple location labels.
+- Existing legacy display_location remains as a backward-compatible fallback.
+- Disabled locations already linked to an existing campaign remain visible during edit; normal create flow does not offer disabled locations.
+- Campaign archive also soft-deletes active campaign-location links.
+- ML-01 through ML-08 PASS.
+- CFG-01 through CFG-07, CR-01 through CR-07, and EA lifecycle/security/archive-count suites all PASS after final Plack reload.
+- Retained visual fixture MULTILOC-VISUAL-20260919, campaign_id 40, with Main Entrance, First Floor and Digital Screen.
+- Next action: human visual acceptance, then final regression and merge. Analytics Engine follows.
