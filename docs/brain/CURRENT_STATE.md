@@ -8,9 +8,9 @@
 
 ## Current milestone
 
-**v0.2 campaign management — Edit / Update / Archive visual acceptance.**
+**v0.2 campaign management — Edit / Update / Archive complete and ready to merge.**
 
-**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance of the new edit/archive UI is the remaining gate before merge.
+**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance of the edit/archive UI passed. Final EA/CR regression also passed; the module is ready to merge.
 
 ## Overall status
 
@@ -91,7 +91,7 @@ Resolution completed:
 - campaign list and read-only campaign detail are built, runtime-verified, visually accepted and merged;
 - edit/update/archive are implemented and runtime-tested on the active branch;
 - campaign and item-link archive uses deleted_at and preserves history;
-- human visual acceptance remains pending before merge.
+- human visual acceptance passed; only branch merge/transition remains.
 
 ### Dashboard
 
@@ -182,10 +182,10 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Human visual check of `EDIT-VISUAL-20260919` detail and Edit form.
-2. If visual review passes, rerun EA-01..EA-13 plus CR-01..CR-07.
-3. Merge `feature/v0.2-campaign-edit-archive`.
-4. Move to universal configuration + multi-location campaign design/implementation.
-5. Keep search/filter/pagination as remaining campaign-management polish.
+1. Merge `feature/v0.2-campaign-edit-archive` into `feature/v0.2-campaign-crud`.
+2. Create the next feature branch for **Universal Configuration + Multi-location**.
+3. Design/implement reusable campaign vocabularies and one-campaign-to-many-locations without hard-coding Nairobi values.
+4. Preserve all Create/List/Detail/Edit/Archive regressions.
+5. Keep friendly labels/status contrast as non-blocking UI polish.
 
 See `SESSION_HANDOFF.md`, `TESTING.md`, and `docs/V0_2_EDIT_ARCHIVE_TEST.md`.

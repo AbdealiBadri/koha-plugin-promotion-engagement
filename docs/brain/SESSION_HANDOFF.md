@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-19
 **Active runtime branch:** `feature/v0.2-campaign-edit-archive`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Edit / Update / Archive visual acceptance
+**Current milestone:** Edit / Update / Archive accepted; transition to Universal Configuration + Multi-location
 
 ## Verified completed today
 
@@ -43,9 +43,19 @@
 - CR-01 through CR-07 regression: PASS.
 - Perl syntax / diff check / runtime logs: PASS.
 
+## Human visual acceptance
+
+PASS. The supplied screenshots confirm:
+- Edit promotion and Archive actions render on detail.
+- linked item and audit history render.
+- Edit form is correctly pre-filled, including linked barcode.
+- normal staff login path keeps the session stable.
+
+Final post-visual EA/CR regression also passed.
+
 ## Exact next action
 
-User performs one visual check of retained EDIT-VISUAL-20260919. If accepted, rerun regression, merge this branch, and begin Universal Configuration + Multi-location.
+Merge Draft PR #2, switch the local base to the merged state, create the Universal Configuration + Multi-location feature branch, and begin that milestone.
 
 ## Visual URL
 

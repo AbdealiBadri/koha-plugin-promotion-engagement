@@ -4,7 +4,7 @@
 **Environment:** isolated KTD `promoeng`, Koha 25.11.x
 **Date:** 2026-09-19
 **Automated runtime status:** PASS
-**Human visual status:** PENDING
+**Human visual status:** PASS
 
 ## Implemented scope
 
@@ -58,6 +58,19 @@ Visual gate:
 3. Return without changing data if desired.
 4. Do not archive the fixture until visual review is complete.
 
-## Merge gate
+## Human visual acceptance — PASS
 
-Do not merge this branch until the human visual check passes. After acceptance, rerun EA/CR regression, update Project Brain, and merge into feature/v0.2-campaign-crud.
+The user supplied screenshots of campaign detail and Edit Promotion on 2026-09-19.
+
+Verified visually:
+- Edit promotion and Archive actions are visible on campaign detail.
+- linked Koha item data and audit history render.
+- Edit Promotion opens with campaign metadata, status, branch, audience, language, location, notes and barcode pre-filled.
+- Update/Cancel controls render correctly.
+- No session-loss issue occurred when entering through normal Koha staff login.
+
+Non-blocking UI polish remains: machine-value labels such as physical_display/recommendation can later be rendered as friendlier display labels, and the status badge contrast can be improved.
+
+## Final merge gate
+
+PASS. After visual acceptance, EA-01..EA-13, EA security tests, dashboard archive count, and CR-01..CR-07 were rerun and all passed. The branch is ready to merge into feature/v0.2-campaign-crud.

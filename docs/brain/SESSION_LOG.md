@@ -131,3 +131,11 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 ### Draft PR for Edit / Update / Archive
 - Draft PR #2 opened: v0.2 campaign edit/update/archive lifecycle.
 - Automated/runtime gate is green; only human visual acceptance of EDIT-VISUAL-20260919 remains before merge.
+
+### Edit / Update / Archive human acceptance — 2026-09-19
+- User supplied screenshots of campaign detail and Edit Promotion.
+- Visual acceptance PASS: Edit and Archive actions visible; live linked-item data and audit history render; edit form is fully pre-filled including barcode.
+- Normal Koha staff login kept navigation/session stable.
+- Non-blocking polish noted: friendly display labels for machine values and stronger status badge contrast can be addressed later.
+- Final post-visual regression rerun PASS: EA lifecycle suite, EA CSRF/security suite, dashboard archive-count test, and CR-01..CR-07.
+- Draft PR #2 is cleared for merge.

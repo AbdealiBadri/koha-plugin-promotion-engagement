@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 Edit / Update / Archive visual acceptance"
+  milestone: "v0.2 Edit / Update / Archive accepted - transition to configuration/multi-location"
   implementation_branch: "feature/v0.2-campaign-edit-archive"
   implementation_commit: "15da5c9"
   project_brain_branch: "docs/project-brain"
-  objective: "Complete human visual acceptance and merge tested Edit/Update/Archive module"
+  objective: "Merge accepted Edit/Update/Archive module and start Universal Configuration + Multi-location"
   last_verified: "2026-09-19"
-  next_action: "Visual check EDIT-VISUAL-20260919; rerun EA/CR regression; merge; start universal configuration + multi-location"
+  next_action: "Merge PR #2, create configuration/multi-location branch, implement reusable vocabularies and many-location campaign model"
 
 environment:
   local:
@@ -35,9 +35,7 @@ environment:
     status: "not-deployed"
     target: "Aljamea-tus-Saifiyah Nairobi"
 
-blockers:
-  - id: "VISUAL-EA"
-    summary: "Human visual acceptance pending for Edit / Update / Archive UI"
+blockers: []
 
 resolved_recently:
   - id: "ISSUE-004"
@@ -57,9 +55,9 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "EA-13+CR"
+  id: "EA-FINAL+CR"
   date: "2026-09-19"
-  command: "Edit/archive + security + dashboard archive count + CR-01..CR-07 regression"
+  command: "Post-visual Edit/archive lifecycle + security + dashboard archive count + CR-01..CR-07 regression"
   status: "PASS"
   result: "EA-01..EA-13 and CR-01..CR-07 pass; Perl syntax OK; no new runtime errors"
 
