@@ -44,3 +44,10 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - User asked to visually monitor ongoing work instead of following terminal commands.
 - Added a repository rule: every active module must report current status, exact local Koha review page/URL, relevant Docker/KTD names, and separate Built/Tested/Ready-for-visual-check states.
 - Current active work remains v0.2 security checkpoint (T-131/T-132/T-133) in the isolated `promoeng` runtime before feature expansion.
+
+### Live plugin status check
+- `promoeng` KTD instance remains Up; `promoeng-koha-1`, `promoeng-db-1`, and `promoeng-memcached-1` are running.
+- Live request to `http://promoeng-intra.localhost/api/v1/contrib/ajsn_promotion/health` returned Mojolicious `Page Not Found` rather than the plugin health JSON.
+- Source still contains `/health` in `openapi.json` and the `API/Health.pm` controller.
+- Therefore v0.2 Checkpoint 1 is **not yet closed**: API route registration/loading in the isolated `promoeng` runtime is the current blocker and must be fixed before T-131/T-132/T-133 can be completed reliably.
+- Next action: diagnose plugin API route registration in `promoeng`, restore the health endpoint, then execute the remaining security matrix.
