@@ -1,7 +1,7 @@
 # v0.2 Campaign Read Views — Manual Test Plan
 
 **Branch:** `feature/v0.2-campaign-read`  
-**Status:** NOT RUN — code prepared remotely; requires KTD verification before merge.
+**Status:** AUTOMATED RUNTIME PASS on `promoeng` (2026-09-19) — awaiting final human visual check before merge.
 
 For the exact branch-switch and KTD commands, use `docs/V0_2_TOMORROW_TEST_RUNBOOK.md`.
 
@@ -88,3 +88,24 @@ Do not merge Draft PR #1 into `feature/v0.2-campaign-crud` until:
 - CR-01 through CR-07 pass;
 - no Plack/template/database errors appear;
 - Project Brain is updated with actual runtime evidence.
+
+
+## Runtime results — 2026-09-19
+
+Environment: isolated KTD project `promoeng`, Koha 25.11.x, plugin v0.2.0.
+
+- CR-01 Promotions list: **PASS** — HTTP 200; zero-item and linked-item fixtures rendered and detail links were present.
+- CR-02 Campaign detail: **PASS** — HTTP 200; linked fixture rendered and branch `CPL` resolved to live Koha branch name `Centerville`.
+- CR-03 Linked Koha item read-through: **PASS** — itemnumber `109`, barcode `39999000002034`, biblionumber `52`, and live title/author data were present.
+- CR-04 Zero-linked-item campaign: **PASS** — detail page displayed `No Koha items are linked to this campaign.`.
+- CR-05 Audit history: **PASS** — `campaign_created` and actor borrower number were rendered.
+- CR-06 Invalid/nonexistent campaign ID: **PASS** — both cases returned HTTP 200 with the intended user-facing error messages and no SQL/server error.
+- CR-07 Existing write regression: **PASS** — a normal campaign was created after read-view testing and appeared in Promotions.
+- Plack/intranet error logs after the suite: **no new template/database errors observed**.
+
+Test fixtures intentionally remain in the isolated `promoeng` database for the user's visual review:
+- `READ-ZERO-20260919`
+- `READ-LINKED-20260919`
+- `READ-REGRESSION-20260919`
+
+Merge gate status: automated runtime gate is satisfied; final visual review is still pending before Draft PR #1 is merged.
