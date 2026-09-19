@@ -84,3 +84,7 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - User confirmed continuation.
 - Immediate active task: T-131, an end-to-end forged/missing CSRF submission against the campaign-create workflow in the isolated `promoeng` environment, with verification that no campaign row is written.
 - After T-131: run T-132 plugin-tool permission denial, then one authorized campaign-creation smoke test. If all three are clean, close v0.2 Checkpoint 1 and move to runtime-testing Draft PR #1 (Campaign List + Campaign Detail).
+
+### Local KTD login reminder
+- User requested the local `promoeng` Koha staff login reminder for visual testing.
+- Credentials are intentionally **not** written into Project Brain or source control. Use the local KTD environment values only.
