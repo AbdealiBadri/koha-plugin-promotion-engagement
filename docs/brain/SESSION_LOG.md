@@ -51,3 +51,10 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Source still contains `/health` in `openapi.json` and the `API/Health.pm` controller.
 - Therefore v0.2 Checkpoint 1 is **not yet closed**: API route registration/loading in the isolated `promoeng` runtime is the current blocker and must be fixed before T-131/T-132/T-133 can be completed reliably.
 - Next action: diagnose plugin API route registration in `promoeng`, restore the health endpoint, then execute the remaining security matrix.
+
+### API route blocker resolved
+- Diagnosed `promoeng` health-route 404 as stale Plack routing after plugin installation/startup; KTD log had shown `Plack already running for kohadev: failed!`.
+- Restarted Plack inside `promoeng-koha-1` using `sudo koha-plack --restart kohadev`.
+- Re-tested `GET http://promoeng-intra.localhost/api/v1/contrib/ajsn_promotion/health` without authentication.
+- Result: HTTP 401 with `{"error":"Authentication failure."}`. This proves the plugin route is now registered and Koha authorization is active.
+- Current next action: execute T-131/T-132/T-133 security matrix against the now-correct `promoeng` runtime.
