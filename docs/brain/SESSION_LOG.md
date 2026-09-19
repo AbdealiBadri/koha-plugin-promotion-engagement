@@ -107,3 +107,8 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Created new working branch: feature/v0.2-campaign-edit-archive.
 - Immediate implementation scope: Edit campaign, Update campaign, controlled status transitions, Archive/soft-delete, and audit rows for each write action.
 - Existing create/read behavior and Koha source-of-truth rules must remain unchanged.
+
+### Immediate hurdle clarified — 2026-09-19
+- Current milestone is Edit / Update / Archive.
+- Success gate: edit existing campaign data safely, enforce the same validation/integrity rules as create, record audit history for changes/status transitions, archive via soft-delete () rather than destructive deletion, and keep Create/List/Detail regressions green.
+- After this gate, the next hurdle is universal configuration plus multi-location campaigns.
