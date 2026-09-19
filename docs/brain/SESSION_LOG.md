@@ -215,3 +215,11 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Verified rollback left zero synthetic rows in `issues`, `old_issues` and plugin campaigns.
 - Main plugin and Analytics module Perl syntax: PASS; git diff check PASS; Plack restart PASS.
 - Exact next action: human visual confirmation of campaign 40 Analytics page, then implement AN-11..AN-15.
+
+### Analytics dashboard navigation correction — 2026-09-19
+- User visual evidence confirmed the direct campaign 40 Analytics layout and zero-circulation metrics render correctly.
+- Dashboard > Analytics opened without campaign_id, leaving the selector blank; Calculate with no selection appeared ineffective.
+- Analytics now defaults a missing campaign ID to the newest non-archived campaign while preserving explicit manual selection.
+- Added five navigation-selection assertions; combined Analytics result is 28 assertions PASS.
+- Main plugin syntax PASS; Plack restart/status PASS.
+- Exact next action: recheck Dashboard > Analytics auto-loads campaign 40, then continue AN-11..AN-15.

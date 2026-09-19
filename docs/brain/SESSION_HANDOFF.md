@@ -81,9 +81,17 @@ Final post-visual EA/CR regression also passed.
 - Main plugin and Analytics module syntax: PASS.
 - Plack restarted successfully.
 
+## Analytics navigation visual finding and fix
+
+- Direct campaign 40 Analytics page: visual layout and calculated zero-circulation state PASS.
+- Dashboard > Analytics initially opened a blank campaign state; Calculate appeared ineffective while no campaign was selected.
+- Fixed server-side default selection so a missing campaign ID automatically selects and calculates the newest active campaign.
+- Added `t/analytics_navigation.t`; five default/manual/empty-list assertions PASS.
+- Combined Analytics suite: 28 assertions PASS; plugin syntax and Plack restart PASS.
+
 ## Exact next action
 
-Human visual confirmation of the first Analytics page for campaign 40. After visual acceptance, continue AN-11..AN-15 (overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity).
+Recheck Dashboard > Analytics and confirm campaign 40 is automatically selected and calculated. After visual acceptance, continue AN-11..AN-15 (overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity).
 
 ## Visual URL
 

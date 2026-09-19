@@ -92,23 +92,21 @@ Resolution completed:
 - legacy `display_location` remains as a backward-compatible fallback;
 - list/detail/edit/update/archive are runtime-verified and visually accepted;
 - campaign, item-link and campaign-location archive uses `deleted_at` and preserves history;
-- only PR #3 merge/branch transition remains before Analytics Engine work.
+- PR #3 is merged; the active v0.3 branch contains the first shared Analytics Engine implementation.
 
 ### Dashboard
 
-Current dashboard provides counts and recent campaigns. Conversion rate is a placeholder (`Analytics engine: Phase 3`). Professional analytics and visual design are not yet built.
+Current dashboard provides counts, recent campaigns and an Analytics entry point. The first Analytics page calculates campaign-level before/during/after KPIs from the shared service. Dashboard-to-Analytics navigation now defaults to the newest campaign when no campaign ID is supplied.
 
 ## Unimplemented approved functionality
 
 - recurring/cadence behavior beyond configuration values;
 - e-resource/non-barcode resource model;
 - list filtering/search workflows;
-- analytics engine;
-- before/during/after and 7/14/30/60-day KPIs;
-- conversion and days-to-first-checkout;
-- channel/location/subject/language/audience comparisons;
+- Analytics AN-11..AN-15 overlap, portfolio, privacy, authorization and UI/API parity coverage;
+- channel/location/subject/language/audience comparison views;
+- chart-based professional management dashboard;
 - restricted top user/student and top Darajah/class/group/category analytics;
-- professional management dashboard;
 - reports and CSV/JSON exports;
 - external campaign/analytics APIs;
 - OAuth2 integration guide;
@@ -181,10 +179,9 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Implement the shared Analytics Engine service defined in `ANALYTICS_SPEC.md`.
-2. Add transaction-scoped synthetic fixtures because isolated `promoeng` has no circulation history.
-3. Execute AN-01..AN-15 before wiring dashboard charts.
-4. Preserve aggregate-only privacy behavior and a minimum cohort of five distinct borrowers.
-5. Keep staff UI, reports and future APIs on the same service methods.
+1. Recheck Dashboard > Analytics and confirm campaign 40 now loads automatically.
+2. Complete AN-11..AN-15 for overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity.
+3. Preserve aggregate-only privacy behavior and a minimum cohort of five distinct borrowers.
+4. Keep staff UI, reports and future APIs on the same service methods.
 
 Architecture decisions DEC-019 and DEC-020 govern the active work.

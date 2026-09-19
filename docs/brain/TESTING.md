@@ -207,3 +207,13 @@ Human visual review is complete; the milestone is cleared for merge.
 - Main plugin and Analytics module Perl syntax: PASS.
 - AN-11..AN-15: NOT RUN / next implementation checkpoint.
 - Analytics page human visual review: PENDING.
+
+### Analytics navigation regression — 2026-09-19
+- Direct campaign 40 Analytics rendering: visual PASS.
+- Blank requested campaign defaults to newest active campaign: PASS.
+- Explicit campaign selection remains unchanged: PASS.
+- Empty/missing campaign list remains safely blank: PASS.
+- t/analytics_navigation.t: 5 assertions PASS.
+- Combined t/analytics_engine.t + t/analytics_navigation.t: 28 assertions PASS.
+- Plugin syntax and Plack restart/status: PASS.
+- Dashboard > Analytics post-fix human visual recheck: PENDING.

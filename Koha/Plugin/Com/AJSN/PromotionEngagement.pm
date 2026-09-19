@@ -321,6 +321,16 @@ sub _dashboard {
     return $self->output_html( $template->output() );
 }
 
+sub _analytics_campaign_id {
+    my ( $requested_id, $campaigns ) = @_;
+
+    $requested_id = _trim($requested_id);
+    return $requested_id if length $requested_id;
+    return q{} unless $campaigns && @{$campaigns};
+
+    return $campaigns->[0]->{campaign_id} || q{};
+}
+
 sub _analytics_screen {
     my ($self) = @_;
     $self->_ensure_schema;
@@ -338,7 +348,11 @@ sub _analytics_screen {
         { Slice => {} },
     ) || [];
 
-    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my $campaign_id = _analytics_campaign_id(
+        scalar $cgi->param('campaign_id'),
+        $campaigns,
+    );
+
     my ( $analytics, $error_message, @window_rows );
     if ( length $campaign_id ) {
         if ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 ) {

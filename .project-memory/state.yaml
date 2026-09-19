@@ -11,7 +11,7 @@ current:
   project_brain_branch: "docs/project-brain"
   objective: "Implement one shared, privacy-aware Analytics Engine from Koha circulation history"
   last_verified: "2026-09-19"
-  next_action: "Human visual check of Analytics page for campaign 40, then implement and run AN-11..AN-15"
+  next_action: "Recheck Dashboard > Analytics auto-loads campaign 40, then implement and run AN-11..AN-15"
 
 environment:
   local:
