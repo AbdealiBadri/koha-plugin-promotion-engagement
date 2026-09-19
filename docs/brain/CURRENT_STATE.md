@@ -8,9 +8,9 @@
 
 ## Current milestone
 
-**v0.2.x — Campaign data entry, validation, integrity, audit and security checkpoint.**
+**v0.2 campaign management — Campaign List + Campaign Detail runtime validation.**
 
-The isolated `promoeng` environment and REST route are healthy. The immediate objective is to complete the two remaining security tests (T-131/T-132); T-133 has now passed. Then close **v0.2 Checkpoint 1**.
+**v0.2 Checkpoint 1 is CLOSED.** T-131, T-132, T-133 and the post-security authorized smoke test all passed in the isolated `promoeng` environment. The immediate objective is now to runtime-test Draft PR #1 (`feature/v0.2-campaign-read`) before merge.
 
 ## Overall status
 
@@ -134,12 +134,14 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 - authenticated v0.2 health returns `0.2.0`.
 - unauthenticated v0.2 health is denied.
 
-### CURRENT CHECKPOINT WORK
+### SECURITY CHECKPOINT
 
-- dedicated missing/invalid CSRF rejection test;
-- user without plugin tool permission test.
+- T-131 invalid/missing CSRF rejection: PASS.
+- T-132 user without plugin tool permission: PASS.
+- T-133 authenticated API user without `catalogue`: PASS.
+- T-134 authorized campaign-create smoke after security tests: PASS.
 
-T-133 (authenticated API user without `catalogue`) is now PASS.
+Checkpoint 1 is closed.
 
 ### NOT RUN
 
@@ -167,12 +169,16 @@ T-133 (authenticated API user without `catalogue`) is now PASS.
 
 ## Immediate next task
 
-Complete the security checkpoint in this order:
+Runtime-test Draft PR #1 / branch `feature/v0.2-campaign-read` in `promoeng`:
 
-1. T-131 — prove a missing/invalid CSRF token cannot create a campaign.
-2. T-132 — prove a logged-in user without plugin tool permission cannot use the plugin write workflow.
-3. Re-run a normal authorized campaign smoke test after security testing.
-4. If all pass, mark v0.2 Checkpoint 1 closed and runtime-test the prepared Campaign List + Campaign Detail branch/PR before merge.
-5. Then proceed to edit/archive, universal configuration and multi-location work.
+1. Promotions list renders from existing campaign schema.
+2. Dashboard campaign names link to detail pages.
+3. Campaign detail renders linked Koha title/author/barcode/biblionumber.
+4. Campaign audit history renders.
+5. Zero-book campaign and invalid/nonexistent campaign IDs are handled safely.
+6. Campaign-create regression remains clean.
+7. Merge only after all CR-01..CR-07 checks pass.
+
+After merge, proceed to edit/update/archive, universal configuration and multi-location support.
 
 See `SESSION_HANDOFF.md` and `TESTING.md`.
