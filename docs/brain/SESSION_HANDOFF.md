@@ -1,9 +1,9 @@
 # Session Handoff
 
 **Last updated:** 2026-09-19
-**Active runtime branch:** `feature/v0.2-config-multilocation`
+**Active runtime branch:** `feature/v0.3-analytics-engine`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Universal Configuration + Multi-location
+**Current milestone:** v0.3 Analytics Engine
 
 ## Verified completed today
 
@@ -69,12 +69,24 @@ Final post-visual EA/CR regression also passed.
 - Runtime DB evidence: campaign 40 active with exactly three active normalized location links.
 - Draft PR #3 is cleared for merge.
 
+## Analytics Engine checkpoint
+
+- PR #3 merged into `feature/v0.2-campaign-crud` as `17915cd`.
+- Active branch: `feature/v0.3-analytics-engine`.
+- DEC-020 and `ANALYTICS_SPEC.md` define the authoritative checkout source, formulas, windows, attribution and privacy rules.
+- Shared `Analytics.pm` service implemented.
+- Koha-native Analytics page and navigation implemented.
+- Campaign 40 no-circulation smoke: PASS.
+- Synthetic transaction suite: 23 assertions PASS for AN-01..AN-10 coverage; all fixtures rolled back and database cleanup verified.
+- Main plugin and Analytics module syntax: PASS.
+- Plack restarted successfully.
+
 ## Exact next action
 
-1. Commit and push this Project Brain closure.
-2. Merge Draft PR #3 into `feature/v0.2-campaign-crud`.
-3. Begin Analytics Engine planning: KPI formulas, time windows, attribution rules, privacy boundaries and acceptance tests before implementation.
+Human visual confirmation of the first Analytics page for campaign 40. After visual acceptance, continue AN-11..AN-15 (overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity).
 
-## Visual URL retained for evidence
+## Visual URL
 
-`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotion_detail&campaign_id=40`
+`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=analytics&campaign_id=40`
+
+Log in through the normal Koha staff homepage first if required.

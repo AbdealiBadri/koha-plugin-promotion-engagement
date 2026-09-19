@@ -3,14 +3,14 @@
 **Last verified:** 2026-09-19
 **Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`
 **Repository default branch:** `main`
-**Active implementation branch:** `feature/v0.2-config-multilocation`
+**Active implementation branch:** `feature/v0.3-analytics-engine`
 **Base branch:** `feature/v0.2-campaign-crud`
 
 ## Current milestone
 
-**v0.2 universal configuration + multi-location — VERIFIED, READY TO MERGE.**
+**v0.3 Analytics Engine — ACTIVE.**
 
-Checkpoint 1, Campaign List/Detail and Edit/Update/Archive are complete. Universal configuration and normalized campaign-to-many-location support are implemented on `feature/v0.2-config-multilocation`. CFG-01..CFG-07, ML-01..ML-08, CR-01..CR-07 and EA lifecycle/security/archive-count suites pass in isolated `promoeng`. Campaign 40 Detail and Edit visual acceptance both pass; the Edit form pre-selects Main Entrance, First Floor and Digital Screen. Draft PR #3 is cleared for merge.
+Checkpoint 1, Campaign List/Detail, Edit/Update/Archive, Universal Configuration and Multi-location are complete. PR #3 merged into `feature/v0.2-campaign-crud` as `17915cd`. The active v0.3 branch now defines and implements one shared Analytics Engine using Koha circulation history without duplicating Koha operational data.
 
 ## Overall status
 
@@ -181,9 +181,10 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Commit and push the visual-acceptance closure documentation.
-2. Merge Draft PR #3 into `feature/v0.2-campaign-crud`.
-3. Start Analytics Engine design with explicit KPI formulas, comparison windows, attribution rules, privacy boundaries and acceptance tests.
-4. Implement one shared analytics service before dashboard charts or external analytics endpoints.
+1. Implement the shared Analytics Engine service defined in `ANALYTICS_SPEC.md`.
+2. Add transaction-scoped synthetic fixtures because isolated `promoeng` has no circulation history.
+3. Execute AN-01..AN-15 before wiring dashboard charts.
+4. Preserve aggregate-only privacy behavior and a minimum cohort of five distinct borrowers.
+5. Keep staff UI, reports and future APIs on the same service methods.
 
-Architecture decision DEC-019 remains satisfied; no Nairobi-specific values are hard-coded.
+Architecture decisions DEC-019 and DEC-020 govern the active work.

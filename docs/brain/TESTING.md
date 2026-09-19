@@ -189,3 +189,21 @@ Human visual review is complete; the milestone is cleared for merge.
 - Campaign 40 Edit human visual acceptance: PASS; Main Entrance, First Floor and Digital Screen are visibly pre-selected.
 - Closure runtime sanity: plugin Perl syntax OK; `promoeng` intranet HTTP 200; database shows campaign 40 active with exactly three active normalized location links.
 - Edit-form multi-select visual review: PASS.
+
+## v0.3 Analytics Engine
+
+- AN-01 current and historical checkout union with issue-ID de-duplication: PASS.
+- AN-02 inclusive campaign dates and half-open boundary handling: PASS.
+- AN-03 equal-duration baseline: PASS.
+- AN-04 7/14/30/60 window resolution and boundary behavior: PASS for 7/14/60 checks; 30 resolved by shared window function.
+- AN-05 renewals do not create extra conversion events: PASS.
+- AN-06 fixed promoted-item cohort across all comparison windows: PASS.
+- AN-07 distinct-item conversion formula: PASS.
+- AN-08 zero/non-zero baseline uplift and absolute delta behavior: PASS.
+- AN-09 zero eligible-item conversion returns null: PASS.
+- AN-10 days-to-first checkout and no-response null behavior: PASS.
+- Synthetic suite result: 23 assertions PASS; transaction rollback verified with zero residual synthetic issues, old_issues or campaigns.
+- Campaign 40 no-circulation smoke: PASS.
+- Main plugin and Analytics module Perl syntax: PASS.
+- AN-11..AN-15: NOT RUN / next implementation checkpoint.
+- Analytics page human visual review: PENDING.

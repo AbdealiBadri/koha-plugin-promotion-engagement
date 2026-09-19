@@ -153,3 +153,15 @@ This log preserves both current decisions and important superseded/rejected appr
 - **Backward compatibility:** existing campaign fields remain during migration so existing v0.2 records continue to render. New configuration-backed workflows must not destructively rewrite historical rows.
 - **Rejected alternative:** free text as the long-term source of truth for analytics dimensions.
 - **Rejected alternative:** institution-specific locations or values hard-coded in source.
+
+## DEC-020 — Analytics uses Koha issue history through one shared service
+
+- **Date:** 2026-09-19
+- **Status:** Accepted for v0.3 implementation
+- **Context:** Campaign impact must remain reproducible across staff UI, reports and future APIs even when Koha `statistics` retention differs by installation.
+- **Decision:** Use the union of Koha `issues` and `old_issues`, keyed by `issue_id` and dated by `issuedate`, as the canonical checkout-event source for v0.3. Renewals do not create additional conversion events.
+- **Windows:** During uses inclusive campaign dates implemented as half-open datetimes; baseline is the immediately preceding equal-duration period; After windows are 7/14/30/60 calendar days.
+- **Attribution:** per-campaign results may multi-attribute overlapping campaigns, while portfolio totals de-duplicate by `issue_id`.
+- **Privacy:** core analytics are aggregate-only; cohorts below five distinct borrowers are suppressed; identifiable patron analytics require a later restricted design.
+- **Consistency:** staff UI, reports and future APIs must call one shared analytics service.
+- **Specification:** `docs/brain/ANALYTICS_SPEC.md`.

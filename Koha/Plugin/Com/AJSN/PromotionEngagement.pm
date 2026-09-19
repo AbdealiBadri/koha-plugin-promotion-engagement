@@ -7,6 +7,7 @@ use C4::Context;
 use Koha::Items;
 use Koha::Libraries;
 use Mojo::JSON qw(decode_json encode_json);
+use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 
 our $VERSION = '0.2.0';
 
@@ -44,6 +45,10 @@ sub tool {
 
     if ( $action eq 'promotions' ) {
         return $self->_promotions_screen;
+    }
+
+    if ( $action eq 'analytics' ) {
+        return $self->_analytics_screen;
     }
 
     if ( $action eq 'promotion_detail' ) {
@@ -312,6 +317,80 @@ sub _dashboard {
         recent_campaigns => $recent_campaigns || [],
         success_message  => $args->{success_message},
         warning_message  => $args->{warning_message},
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _analytics_screen {
+    my ($self) = @_;
+    $self->_ensure_schema;
+
+    my $cgi = $self->{cgi};
+    my $dbh = C4::Context->dbh;
+    my $campaigns = $dbh->selectall_arrayref(
+        q{
+            SELECT campaign_id, name, start_date, end_date, status
+              FROM plugin_ajsn_promo_campaigns
+             WHERE deleted_at IS NULL
+             ORDER BY campaign_id DESC
+             LIMIT 200
+        },
+        { Slice => {} },
+    ) || [];
+
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my ( $analytics, $error_message, @window_rows );
+    if ( length $campaign_id ) {
+        if ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 ) {
+            my $ok = eval {
+                my $service =
+                  Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+                    { dbh => $dbh }
+                  );
+                $analytics = $service->campaign_metrics($campaign_id);
+                1;
+            };
+            unless ($ok) {
+                my $error = $@ || 'Unknown analytics error';
+                warn "Promotion & Engagement analytics failed: $error";
+                $error_message = 'Analytics could not be calculated for the selected campaign.';
+            }
+        } else {
+            $error_message = 'Select a valid campaign.';
+        }
+    }
+
+    if ($analytics) {
+        $analytics->{uplift_available} =
+          defined $analytics->{uplift_percent} ? 1 : 0;
+        $analytics->{days_to_first_available} =
+          defined $analytics->{days_to_first_checkout} ? 1 : 0;
+        my %labels = (
+            baseline => 'Baseline',
+            during   => 'During campaign',
+            after_7  => 'After 7 days',
+            after_14 => 'After 14 days',
+            after_30 => 'After 30 days',
+            after_60 => 'After 60 days',
+        );
+        @window_rows = map {
+            {
+                key     => $_,
+                label   => $labels{$_},
+                window  => $analytics->{windows}->{$_},
+                metrics => $analytics->{metrics}->{$_},
+            }
+        } qw(baseline during after_7 after_14 after_30 after_60);
+    }
+
+    my $template = $self->get_template( { file => 'analytics.tt' } );
+    $template->param(
+        plugin_version => $VERSION,
+        campaigns      => $campaigns,
+        selected_id    => $campaign_id,
+        analytics      => $analytics,
+        window_rows    => \@window_rows,
+        error_message  => $error_message,
     );
     return $self->output_html( $template->output() );
 }

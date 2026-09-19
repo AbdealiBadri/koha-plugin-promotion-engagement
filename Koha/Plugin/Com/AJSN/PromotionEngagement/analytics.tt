@@ -1,0 +1,181 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Promotion analytics</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+[% WRAPPER 'sub-header.inc' %]
+    [% WRAPPER breadcrumbs %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item %]
+            <a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>
+        [% END %]
+        [% WRAPPER breadcrumb_item bc_active=1 %]
+            <span>Analytics</span>
+        [% END %]
+    [% END %]
+[% END %]
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-10 col-sm-push-2">
+            <main>
+                <h1>Promotion analytics</h1>
+                <p class="lead">Before, during and after circulation impact calculated from Koha checkout history.</p>
+
+                [% IF error_message %]
+                    <div class="alert alert-danger">[% error_message | html %]</div>
+                [% END %]
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Select a campaign</strong></div>
+                    <div class="panel-body">
+                        <form method="get" action="/cgi-bin/koha/plugins/run.pl" class="form-inline">
+                            <input type="hidden" name="class" value="[% CLASS | html %]">
+                            <input type="hidden" name="method" value="[% METHOD | html %]">
+                            <input type="hidden" name="action" value="analytics">
+                            <label for="campaign_id">Campaign</label>
+                            <select id="campaign_id" name="campaign_id" class="form-control">
+                                <option value="">Choose a campaign</option>
+                                [% FOREACH option IN campaigns %]
+                                    <option value="[% option.campaign_id %]"[% IF selected_id == option.campaign_id %] selected="selected"[% END %]>
+                                        [% option.name | html %] ([% option.start_date | html %])
+                                    </option>
+                                [% END %]
+                            </select>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-bar-chart"></i> Calculate analytics
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                [% IF analytics %]
+                    <h2>[% analytics.campaign.name | html %]</h2>
+                    <p>
+                        Measurement specification [% analytics.spec_version | html %].
+                        Eligible promoted items: <strong>[% analytics.eligible_item_count %]</strong>.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <strong>During checkouts</strong><br>
+                                    <span style="font-size:2rem">[% analytics.metrics.during.checkout_count %]</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <strong>Conversion rate</strong><br>
+                                    [% IF analytics.eligible_item_count %]
+                                        <span style="font-size:2rem">[% analytics.metrics.during.conversion_rate %]%</span>
+                                    [% ELSE %]
+                                        <span class="text-muted">Not available</span>
+                                    [% END %]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <strong>Uplift vs baseline</strong><br>
+                                    [% IF analytics.uplift_available %]
+                                        <span style="font-size:2rem">[% analytics.uplift_percent %]%</span>
+                                    [% ELSE %]
+                                        <span class="text-muted">No baseline rate</span>
+                                    [% END %]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <strong>Days to first checkout</strong><br>
+                                    [% IF analytics.days_to_first_available %]
+                                        <span style="font-size:2rem">[% analytics.days_to_first_checkout %]</span>
+                                    [% ELSE %]
+                                        <span class="text-muted">No response yet</span>
+                                    [% END %]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Measurement windows</strong></div>
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Window</th>
+                                            <th>Dates</th>
+                                            <th>Days</th>
+                                            <th>Checkouts</th>
+                                            <th>Unique items</th>
+                                            <th>Conversion</th>
+                                            <th>Daily rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        [% FOREACH row IN window_rows %]
+                                            <tr>
+                                                <td><strong>[% row.label | html %]</strong></td>
+                                                <td>[% row.window.start | html %] to [% row.window.end | html %]</td>
+                                                <td>[% row.window.days %]</td>
+                                                <td>[% row.metrics.checkout_count %]</td>
+                                                <td>[% row.metrics.unique_items_checked_out %]</td>
+                                                <td>
+                                                    [% IF row.metrics.eligible_item_count %]
+                                                        [% row.metrics.conversion_rate %]%
+                                                    [% ELSE %]
+                                                        <span class="text-muted">—</span>
+                                                    [% END %]
+                                                </td>
+                                                <td>[% row.metrics.daily_checkout_rate %]</td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Privacy:</strong>
+                        This screen shows aggregate campaign results only. It does not expose patron names,
+                        card numbers or individual borrowing histories.
+                    </div>
+                [% ELSIF campaigns.size == 0 %]
+                    <div class="alert alert-info">Create a promotion before calculating analytics.</div>
+                [% END %]
+            </main>
+        </div>
+
+        <div class="col-sm-2 col-sm-pull-10">
+            <aside>
+                <div class="sidebar_menu">
+                    <ul>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
+                        <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
+                        <li><span class="text-muted">Reports</span></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+[% INCLUDE 'intranet-bottom.inc' %]
+

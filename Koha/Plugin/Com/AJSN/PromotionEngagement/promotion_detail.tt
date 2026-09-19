@@ -206,7 +206,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
-                        <li><span class="text-muted">Analytics</span></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
                         <li><span class="text-muted">Reports</span></li>
                     </ul>
                 </div>

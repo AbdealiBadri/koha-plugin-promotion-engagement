@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 Universal Configuration + Multi-location"
-  implementation_branch: "feature/v0.2-config-multilocation"
-  implementation_commit: "a3e2fe4"
+  milestone: "v0.3 Analytics Engine"
+  implementation_branch: "feature/v0.3-analytics-engine"
+  implementation_commit: "17915cd"
   project_brain_branch: "docs/project-brain"
-  objective: "Close and merge verified Universal Configuration + Multi-location milestone, then begin Analytics Engine"
+  objective: "Implement one shared, privacy-aware Analytics Engine from Koha circulation history"
   last_verified: "2026-09-19"
-  next_action: "Commit visual-acceptance closure, merge Draft PR #3, then define Analytics Engine KPI and attribution rules"
+  next_action: "Human visual check of Analytics page for campaign 40, then implement and run AN-11..AN-15"
 
 environment:
   local:
@@ -54,13 +54,14 @@ critical_decisions:
   - "DEC-013"
   - "DEC-017"
   - "DEC-019"
+  - "DEC-020"
 
 last_test:
-  id: "ML-01..08+CFG+CR+EA+VISUAL-ML"
+  id: "AN-01..AN-10-partial"
   date: "2026-09-19"
-  command: "Multi-location suite plus configuration/campaign regressions, syntax/runtime sanity and human visual acceptance"
+  command: "prove -v t/analytics_engine.t plus campaign 40 smoke and Perl syntax"
   status: "PASS"
-  result: "ML-01..ML-08, CFG-01..CFG-07, CR-01..CR-07 and EA lifecycle/security/archive-count pass; campaign 40 Detail and Edit show Main Entrance, First Floor and Digital Screen; syntax OK; intranet HTTP 200"
+  result: "23 assertions pass; fixtures rolled back with zero residue; campaign 40 smoke returns valid zero-event metrics; main plugin and Analytics module syntax OK"
 
 runtime:
   plugin_version: "0.2.0"

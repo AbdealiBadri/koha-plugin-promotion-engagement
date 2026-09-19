@@ -193,3 +193,25 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Existing post-readability-change ML-01..ML-08 and CR-01..CR-07 regression remains PASS; prior CFG and EA regression gates remain PASS.
 - Draft PR #3 is cleared for merge.
 - Exact next action: commit/push Project Brain closure, merge PR #3, then begin Analytics Engine KPI/attribution design.
+
+### PR #3 merge and Analytics Engine transition — 2026-09-19
+- Visual-acceptance closure committed and pushed as `08306c5`.
+- PR #3 body updated with complete automated, runtime and human evidence.
+- PR #3 marked ready and merged into `feature/v0.2-campaign-crud` as `17915cd`.
+- Local base fast-forwarded to the merged commit.
+- Created active branch `feature/v0.3-analytics-engine`.
+- Inspected live Koha schemas: `issues`, `old_issues`, `statistics` and plugin campaign-item links.
+- Isolated `promoeng` currently has zero circulation rows; v0.3 correctness will use transaction-scoped synthetic fixtures.
+- Accepted DEC-020 and created `ANALYTICS_SPEC.md`: issues/old_issues checkout source, equal-duration baseline, inclusive campaign period through half-open ranges, 7/14/30/60 After windows, distinct-item conversion, null uplift on zero baseline, transparent overlap attribution, portfolio de-duplication and privacy suppression below five borrowers.
+- Exact next action: implement the shared Analytics Engine service and execute AN-01..AN-15 before dashboard UI.
+
+### Analytics Engine first implementation checkpoint — 2026-09-19
+- Added shared `Analytics.pm` service using Koha `issues` + `old_issues` and fixed campaign item cohorts.
+- Added exact Baseline, During and After 7/14/30/60 windows, conversion, daily rate, absolute delta, uplift and days-to-first-checkout.
+- Added Koha-native Analytics page, campaign selector, KPI cards, measurement-window table and aggregate-only privacy notice.
+- Enabled Analytics navigation from Dashboard, Promotions and Campaign Detail.
+- Campaign 40 no-circulation smoke: PASS with one eligible item, valid 12-day Baseline/During windows, zero checkouts and null uplift.
+- Added rollback-safe `t/analytics_engine.t`; 23 assertions PASS covering AN-01..AN-10 behavior.
+- Verified rollback left zero synthetic rows in `issues`, `old_issues` and plugin campaigns.
+- Main plugin and Analytics module Perl syntax: PASS; git diff check PASS; Plack restart PASS.
+- Exact next action: human visual confirmation of campaign 40 Analytics page, then implement AN-11..AN-15.

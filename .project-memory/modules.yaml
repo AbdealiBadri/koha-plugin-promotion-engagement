@@ -63,11 +63,11 @@ modules:
     next_action: "Keep counts/recent list stable; modernize after analytics rules"
 
   analytics:
-    status: "planned"
+    status: "service-and-first-ui-implemented-runtime-tested-visual-pending"
     owner_system: "shared plugin analytics layer; Koha circulation source of truth"
-    dependencies: ["stable campaign model", "Koha circulation/statistics", "configuration"]
+    dependencies: ["stable campaign model", "Koha issues/old_issues", "configuration"]
     open_issues: ["ISSUE-010"]
-    next_action: "Define KPI formulas/baseline after v0.2 management/configuration"
+    next_action: "Visual-check campaign 40 Analytics page, then complete AN-11..AN-15"
 
   rest_api:
     status: "partial-health-verified"
