@@ -82,12 +82,23 @@ A feature is not complete merely because code was written. When relevant, update
 - `docs/brain/DECISIONS.md`
 - `docs/brain/ROADMAP.md`
 - `docs/brain/DATA_MODEL.md`
+- `docs/brain/SESSION_LOG.md`
 - `.project-memory/state.yaml`
 - `.project-memory/modules.yaml`
 - `.project-memory/issues.yaml`
 - `.project-memory/decisions.yaml`
 
 Do not mechanically rewrite every document after a trivial change; update only knowledge materially affected by the change.
+
+## Continuity and chat-limit protocol
+
+- The repository Project Brain is the continuity mechanism if a ChatGPT conversation ends or reaches its context limit.
+- Maintain `docs/brain/SESSION_LOG.md` as a chronological engineering log of material actions, commands/tests, observed results, decisions, blockers, and next actions.
+- Update `docs/brain/SESSION_HANDOFF.md` whenever the current blocker, active module, branch, environment, or next action changes.
+- In user-facing progress replies for this project, explicitly state: **"The document is updated."** only after the relevant Project Brain update has actually been committed or otherwise persisted.
+- Include the short continuation prompt from `docs/brain/NEW_SESSION_PROMPT.md` in progress/handoff replies so the user can recover immediately in a new chat.
+- Do not claim documentation is updated if the write/commit failed.
+- Prefer dedicated project-specific KTD/container names and never run global Docker cleanup commands when unrelated projects may share Docker/WSL.
 
 ## Before ending a development session
 
@@ -98,6 +109,7 @@ Do not mechanically rewrite every document after a trivial change; update only k
 5. Update the exact current blocker and next action.
 6. Update `SESSION_HANDOFF.md` so another agent can continue without the previous conversation.
 7. Ensure Markdown and YAML state agree.
+8. Append the session's material actions and results to `SESSION_LOG.md`.
 
 ## Current branch caution
 
