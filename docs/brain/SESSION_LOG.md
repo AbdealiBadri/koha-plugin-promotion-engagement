@@ -71,3 +71,11 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - No user action is required for creating these temporary test identities.
 - Test identities must remain confined to `promoeng`, use clearly recognizable test names, receive only the minimum permissions needed for T-132/T-133, and be removed or disabled after verification.
 - Manual user involvement is only needed if a visual browser confirmation is specifically required after the automated/runtime test passes.
+
+### Security checkpoint progress — 2026-09-19
+- T-133 is now PASS in the isolated `promoeng` runtime.
+- Used existing KTD test identity `term1` (original flags = 2, no `catalogue` permission) against `GET /api/v1/contrib/ajsn_promotion/health`.
+- HTTP Basic authentication succeeded and Koha returned HTTP 403 with `Authorization failure. Missing required permission(s).` and required permission `{"catalogue":"1"}`.
+- This distinguishes T-133 from the unauthenticated 401 test and proves the endpoint permission gate is active.
+- Temporarily changed `term1` flags from 2 to 6 only to prepare a lower-permission staff scenario for T-132, then restored flags back to the original value 2 after credentialed browser automation was blocked by the remote execution safety layer. No permanent account/permission change remains.
+- T-131 and the full end-to-end T-132 browser denial test remain open. Code inspection confirms plugin `run.pl` requires `plugins => tool`, and the campaign form uses Koha's `cud-` operation plus generated CSRF token, but these are not yet counted as PASS without end-to-end evidence.
