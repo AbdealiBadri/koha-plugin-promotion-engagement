@@ -75,10 +75,169 @@ sub tool {
 
 sub configure {
     my ( $self, $args ) = @_;
+    my $cgi = $self->{cgi};
+    $self->_ensure_schema;
+
+    my $success_message;
+    my @errors;
+
+    if ( ( $cgi->request_method || q{} ) eq 'POST' ) {
+        my $op = $cgi->param('op') || q{};
+
+        if ( $op eq 'cud-save_vocab_value' ) {
+            my $dimension  = _trim( scalar $cgi->param('dimension') );
+            my $value_code = lc _trim( scalar $cgi->param('value_code') );
+            my $label      = _trim( scalar $cgi->param('label') );
+            my $sort_order = _trim( scalar $cgi->param('sort_order') );
+            my $is_active  = $cgi->param('is_active') ? 1 : 0;
+
+            my %allowed_dimensions = map { $_ => 1 } qw(
+              campaign_type channel location language audience cadence
+            );
+
+            push @errors, 'Select a valid configuration dimension.'
+              unless $allowed_dimensions{$dimension};
+            push @errors, 'Code is required.'
+              unless length $value_code;
+            push @errors, 'Code may contain only lowercase letters, numbers, underscore and hyphen.'
+              if length($value_code)
+              && $value_code !~ /^[a-z0-9][a-z0-9_-]{0,79}$/;
+            push @errors, 'Label is required.'
+              unless length $label;
+            push @errors, 'Label must be 255 characters or fewer.'
+              if length($label) > 255;
+            push @errors, 'Sort order must be a whole number from 0 to 9999.'
+              unless $sort_order =~ /^\d{1,4}$/ && $sort_order <= 9999;
+
+            unless (@errors) {
+                my $dbh   = C4::Context->dbh;
+                my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+
+                my $ok = eval {
+                    local $dbh->{RaiseError} = 1;
+                    $dbh->begin_work;
+                    $dbh->do(
+                        q{
+                            INSERT INTO plugin_ajsn_promo_vocab_values
+                                (dimension, value_code, label, sort_order, is_active,
+                                 created_by, updated_by, deleted_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
+                            ON DUPLICATE KEY UPDATE
+                                label = VALUES(label),
+                                sort_order = VALUES(sort_order),
+                                is_active = VALUES(is_active),
+                                updated_by = VALUES(updated_by),
+                                deleted_at = NULL
+                        },
+                        undef,
+                        $dimension,
+                        $value_code,
+                        $label,
+                        $sort_order,
+                        $is_active,
+                        $actor,
+                        $actor,
+                    );
+                    $dbh->commit;
+                    1;
+                };
+
+                if ($ok) {
+                    $success_message = sprintf(
+                        'Saved %s value "%s".',
+                        $dimension,
+                        $label,
+                    );
+                } else {
+                    my $error = $@ || 'Unknown database error';
+                    eval { $dbh->rollback };
+                    warn "Promotion & Engagement vocabulary save failed: $error";
+                    push @errors, 'The configuration value could not be saved. No partial change was kept.';
+                }
+            }
+        }
+        elsif ( $op eq 'cud-toggle_vocab_value' ) {
+            my $vocab_value_id = _trim( scalar $cgi->param('vocab_value_id') );
+            my $set_active     = _trim( scalar $cgi->param('set_active') );
+
+            push @errors, 'Select a valid configuration value.'
+              unless $vocab_value_id =~ /^\d+$/ && $vocab_value_id > 0;
+            push @errors, 'Invalid active-state request.'
+              unless $set_active eq '0' || $set_active eq '1';
+
+            unless (@errors) {
+                my $dbh   = C4::Context->dbh;
+                my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+                my $rows  = $dbh->do(
+                    q{
+                        UPDATE plugin_ajsn_promo_vocab_values
+                           SET is_active = ?, updated_by = ?
+                         WHERE vocab_value_id = ?
+                           AND deleted_at IS NULL
+                    },
+                    undef,
+                    $set_active,
+                    $actor,
+                    $vocab_value_id,
+                );
+
+                if ( $rows && $rows > 0 ) {
+                    $success_message = $set_active
+                      ? 'Configuration value enabled.'
+                      : 'Configuration value disabled.';
+                } else {
+                    push @errors, 'The requested configuration value was not found.';
+                }
+            }
+        }
+        elsif ( length $op ) {
+            push @errors, 'Unsupported configuration action.';
+        }
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $rows = $dbh->selectall_arrayref(
+        q{
+            SELECT vocab_value_id, dimension, value_code, label,
+                   sort_order, is_active, created_at, updated_at
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE deleted_at IS NULL
+             ORDER BY dimension, sort_order, label, value_code
+        },
+        { Slice => {} },
+    );
+
+    my @dimension_order = qw(
+      campaign_type channel location language audience cadence
+    );
+    my %dimension_labels = (
+        campaign_type => 'Campaign types',
+        channel       => 'Channels',
+        location      => 'Locations',
+        language      => 'Languages',
+        audience      => 'Audiences',
+        cadence       => 'Cadence / frequency',
+    );
+    my %values_by_dimension;
+    for my $row ( @{ $rows || [] } ) {
+        push @{ $values_by_dimension{ $row->{dimension} } }, $row;
+    }
+
+    my @vocabulary_groups = map {
+        {
+            dimension => $_,
+            label     => $dimension_labels{$_},
+            values    => $values_by_dimension{$_} || [],
+        }
+    } @dimension_order;
+
     my $template = $self->get_template( { file => 'configure.tt' } );
     $template->param(
-        plugin_version => $VERSION,
-        api_namespace  => $self->api_namespace,
+        plugin_version    => $VERSION,
+        api_namespace     => $self->api_namespace,
+        vocabulary_groups => \@vocabulary_groups,
+        success_message   => $success_message,
+        errors            => \@errors,
     );
     return $self->output_html( $template->output() );
 }
@@ -169,16 +328,35 @@ sub _promotions_screen {
                    c.name, c.start_date, c.end_date, c.branchcode,
                    c.target_audience, c.language_code, c.display_location,
                    c.status, c.created_at, c.updated_at,
+                   COALESCE(vt.label, c.campaign_type) AS campaign_type_label,
+                   COALESCE(vc.label, c.channel) AS channel_label,
+                   (
+                       SELECT GROUP_CONCAT(vl.label ORDER BY vl.sort_order, vl.label SEPARATOR ' · ')
+                         FROM plugin_ajsn_promo_campaign_locations cl
+                         JOIN plugin_ajsn_promo_vocab_values vl
+                           ON vl.vocab_value_id = cl.location_value_id
+                        WHERE cl.campaign_id = c.campaign_id
+                          AND cl.deleted_at IS NULL
+                          AND vl.deleted_at IS NULL
+                   ) AS location_labels,
                    COUNT(pi.campaign_item_id) AS linked_item_count
               FROM plugin_ajsn_promo_campaigns c
               LEFT JOIN plugin_ajsn_promo_items pi
                 ON pi.campaign_id = c.campaign_id
                AND pi.deleted_at IS NULL
+              LEFT JOIN plugin_ajsn_promo_vocab_values vt
+                ON vt.dimension = 'campaign_type'
+               AND vt.value_code = c.campaign_type
+               AND vt.deleted_at IS NULL
+              LEFT JOIN plugin_ajsn_promo_vocab_values vc
+                ON vc.dimension = 'channel'
+               AND vc.value_code = c.channel
+               AND vc.deleted_at IS NULL
              WHERE c.deleted_at IS NULL
              GROUP BY c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
                       c.name, c.start_date, c.end_date, c.branchcode,
                       c.target_audience, c.language_code, c.display_location,
-                      c.status, c.created_at, c.updated_at
+                      c.status, c.created_at, c.updated_at, vt.label, vc.label
              ORDER BY c.campaign_id DESC
              LIMIT 200
         },
@@ -235,6 +413,34 @@ sub _promotion_detail_screen {
         $campaign->{branchname} = $library ? $library->branchname : undef;
     }
 
+    my ($type_label) = $dbh->selectrow_array(
+        q{SELECT label FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'campaign_type' AND value_code = ? AND deleted_at IS NULL},
+        undef, $campaign->{campaign_type},
+    );
+    my ($channel_label) = $dbh->selectrow_array(
+        q{SELECT label FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'channel' AND value_code = ? AND deleted_at IS NULL},
+        undef, $campaign->{channel},
+    );
+    $campaign->{campaign_type_label} = $type_label || $campaign->{campaign_type};
+    $campaign->{channel_label} = $channel_label || $campaign->{channel};
+
+    my $campaign_locations = $dbh->selectall_arrayref(
+        q{
+            SELECT vl.vocab_value_id, vl.value_code, vl.label
+              FROM plugin_ajsn_promo_campaign_locations cl
+              JOIN plugin_ajsn_promo_vocab_values vl
+                ON vl.vocab_value_id = cl.location_value_id
+             WHERE cl.campaign_id = ?
+               AND cl.deleted_at IS NULL
+               AND vl.deleted_at IS NULL
+             ORDER BY vl.sort_order, vl.label
+        },
+        { Slice => {} },
+        $campaign_id,
+    );
+
     my $linked_items = $dbh->selectall_arrayref(
         q{
             SELECT pi.campaign_item_id, pi.itemnumber, pi.barcode, pi.added_at,
@@ -269,8 +475,9 @@ sub _promotion_detail_screen {
     $template->param(
         plugin_version  => $VERSION,
         campaign        => $campaign,
-        linked_items    => $linked_items || [],
-        audit_rows      => $audit_rows || [],
+        linked_items       => $linked_items || [],
+        campaign_locations => $campaign_locations || [],
+        audit_rows         => $audit_rows || [],
         success_message => $args->{success_message},
     );
     return $self->output_html( $template->output() );
@@ -280,6 +487,9 @@ sub _new_promotion_screen {
     my ( $self, $args ) = @_;
     $args ||= {};
     $self->_ensure_schema;
+
+    my $dbh  = C4::Context->dbh;
+    my $form = $args->{form} || {};
 
     my @libraries;
     my $libraries_rs = Koha::Libraries->search( {}, { order_by => 'branchname' } );
@@ -291,11 +501,53 @@ sub _new_promotion_screen {
           };
     }
 
+    my $campaign_types = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'campaign_type'
+               AND is_active = 1
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
+    my $channels = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'channel'
+               AND is_active = 1
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
+    my $locations = $dbh->selectall_arrayref(
+        q{
+            SELECT vocab_value_id, value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'location'
+               AND is_active = 1
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
+    my %selected_location_ids =
+      map { $_ => 1 } @{ $form->{location_value_ids} || [] };
+    for my $location ( @{ $locations || [] } ) {
+        $location->{selected} = $selected_location_ids{ $location->{vocab_value_id} } ? 1 : 0;
+    }
+
     my $template = $self->get_template( { file => 'new_promotion.tt' } );
     $template->param(
         plugin_version     => $VERSION,
         libraries          => \@libraries,
-        form               => $args->{form} || {},
+        campaign_types     => $campaign_types || [],
+        channels           => $channels || [],
+        locations          => $locations || [],
+        form               => $form,
         errors             => $args->{errors} || [],
         warnings           => $args->{warnings} || [],
         invalid_barcodes   => $args->{invalid_barcodes} || [],
@@ -308,6 +560,14 @@ sub _new_promotion_screen {
 sub _create_promotion {
     my ($self) = @_;
     my $cgi = $self->{cgi};
+    $self->_ensure_schema;
+    my $dbh = C4::Context->dbh;
+
+    my %seen_location_ids;
+    my @location_value_ids =
+      grep { !$seen_location_ids{$_}++ }
+      grep { /^\d+$/ && $_ > 0 }
+      map { _trim($_) } $cgi->multi_param('location_value_id');
 
     my %form = (
         campaign_type    => _trim( scalar $cgi->param('campaign_type') ),
@@ -319,6 +579,7 @@ sub _create_promotion {
         target_audience  => _trim( scalar $cgi->param('target_audience') ),
         language_code    => _trim( scalar $cgi->param('language_code') ),
         display_location => _trim( scalar $cgi->param('display_location') ),
+        location_value_ids => \@location_value_ids,
         notes            => _trim( scalar $cgi->param('notes') ),
         status           => _trim( scalar $cgi->param('status') ) || 'draft',
         barcodes_text    => scalar( $cgi->param('barcodes') // q{} ),
@@ -327,20 +588,23 @@ sub _create_promotion {
     my @errors;
     my @warnings;
 
-    my %allowed_types = map { $_ => 1 } qw(
-      subject_display new_arrivals recommendation email_campaign digital_signage
-      physical_signage resource_feature author_feature publication_feature event
-      outreach other
-    );
-    my %allowed_channels = map { $_ => 1 } qw(
-      physical_display email digital_signage print_signage web social event other
-    );
     my %allowed_statuses = map { $_ => 1 } qw(draft active completed);
 
-    push @errors, 'Select a valid promotion type.'
-      unless $allowed_types{ $form{campaign_type} };
-    push @errors, 'Select a valid channel.'
-      unless $allowed_channels{ $form{channel} };
+    my ($valid_type) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'campaign_type' AND value_code = ?
+             AND is_active = 1 AND deleted_at IS NULL},
+        undef, $form{campaign_type},
+    );
+    my ($valid_channel) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'channel' AND value_code = ?
+             AND is_active = 1 AND deleted_at IS NULL},
+        undef, $form{channel},
+    );
+
+    push @errors, 'Select a valid promotion type.' unless $valid_type;
+    push @errors, 'Select a valid channel.' unless $valid_channel;
     push @errors, 'Campaign name is required.' unless length $form{name};
     push @errors, 'Campaign name must be 255 characters or fewer.'
       if length( $form{name} ) > 255;
@@ -357,9 +621,30 @@ sub _create_promotion {
       if length( $form{target_audience} ) > 255;
     push @errors, 'Language must be 30 characters or fewer.'
       if length( $form{language_code} ) > 30;
-    push @errors, 'Location must be 255 characters or fewer.'
-      if length( $form{display_location} ) > 255;
     push @errors, 'Select a valid status.' unless $allowed_statuses{ $form{status} };
+
+    my @locations;
+    for my $location_id (@location_value_ids) {
+        my $location = $dbh->selectrow_hashref(
+            q{
+                SELECT vocab_value_id, value_code, label
+                  FROM plugin_ajsn_promo_vocab_values
+                 WHERE vocab_value_id = ?
+                   AND dimension = 'location'
+                   AND is_active = 1
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $location_id,
+        );
+        if ($location) {
+            push @locations, $location;
+        } else {
+            push @errors, 'One or more selected campaign locations are invalid or disabled.';
+            last;
+        }
+    }
+    $form{display_location} = join '; ', map { $_->{label} } @locations;
 
     if ( length $form{branchcode} && !Koha::Libraries->find( $form{branchcode} ) ) {
         push @errors, 'The selected Koha library does not exist.';
@@ -415,7 +700,6 @@ sub _create_promotion {
         );
     }
 
-    my $dbh = C4::Context->dbh;
     my ($campaign_uuid) = $dbh->selectrow_array('SELECT UUID()');
     my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
     my $campaign_id;
@@ -452,6 +736,19 @@ sub _create_promotion {
             undef, undef, 'plugin_ajsn_promo_campaigns', 'campaign_id'
         );
 
+        my $location_sth = $dbh->prepare(q{
+            INSERT INTO plugin_ajsn_promo_campaign_locations
+                (campaign_id, location_value_id, added_by)
+            VALUES (?, ?, ?)
+        });
+        for my $location (@locations) {
+            $location_sth->execute(
+                $campaign_id,
+                $location->{vocab_value_id},
+                $actor,
+            );
+        }
+
         my $item_sth = $dbh->prepare(q{
             INSERT INTO plugin_ajsn_promo_items
                 (campaign_id, itemnumber, barcode, added_by)
@@ -473,6 +770,7 @@ sub _create_promotion {
                 channel       => $form{channel},
                 status        => $form{status},
                 item_count    => scalar @items,
+                location_value_ids => [ map { $_->{vocab_value_id} } @locations ],
             }
         );
 
@@ -584,6 +882,21 @@ sub _edit_promotion_screen {
     }
     $form->{campaign_id} = $campaign_id;
 
+    my $selected_location_ids = $form->{location_value_ids};
+    unless ($selected_location_ids) {
+        $selected_location_ids = $dbh->selectcol_arrayref(
+            q{
+                SELECT location_value_id
+                  FROM plugin_ajsn_promo_campaign_locations
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $campaign_id,
+        );
+        $form->{location_value_ids} = $selected_location_ids || [];
+    }
+
     my @libraries;
     my $libraries_rs = Koha::Libraries->search( {}, { order_by => 'branchname' } );
     while ( my $library = $libraries_rs->next ) {
@@ -594,11 +907,53 @@ sub _edit_promotion_screen {
           };
     }
 
+    my $campaign_types = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'campaign_type'
+               AND deleted_at IS NULL
+               AND (is_active = 1 OR value_code = ?)
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+        $campaign->{campaign_type},
+    );
+    my $channels = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'channel'
+               AND deleted_at IS NULL
+               AND (is_active = 1 OR value_code = ?)
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+        $campaign->{channel},
+    );
+    my $locations = $dbh->selectall_arrayref(
+        q{
+            SELECT vocab_value_id, value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'location'
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
+    my %selected_location_ids = map { $_ => 1 } @{ $form->{location_value_ids} || [] };
+    for my $location ( @{ $locations || [] } ) {
+        $location->{selected} = $selected_location_ids{ $location->{vocab_value_id} } ? 1 : 0;
+    }
+
     my $template = $self->get_template( { file => 'edit_promotion.tt' } );
     $template->param(
         plugin_version     => $VERSION,
         campaign           => $campaign,
         libraries          => \@libraries,
+        campaign_types     => $campaign_types || [],
+        channels           => $channels || [],
+        locations          => $locations || [],
         form               => $form,
         errors             => $args->{errors} || [],
         warnings           => $args->{warnings} || [],
@@ -642,6 +997,12 @@ sub _update_promotion {
         );
     }
 
+    my %seen_location_ids;
+    my @location_value_ids =
+      grep { !$seen_location_ids{$_}++ }
+      grep { /^\d+$/ && $_ > 0 }
+      map { _trim($_) } $cgi->multi_param('location_value_id');
+
     my %form = (
         campaign_id      => $campaign_id,
         campaign_type    => _trim( scalar $cgi->param('campaign_type') ),
@@ -653,28 +1014,34 @@ sub _update_promotion {
         target_audience  => _trim( scalar $cgi->param('target_audience') ),
         language_code    => _trim( scalar $cgi->param('language_code') ),
         display_location => _trim( scalar $cgi->param('display_location') ),
+        location_value_ids => \@location_value_ids,
         notes            => _trim( scalar $cgi->param('notes') ),
         status           => _trim( scalar $cgi->param('status') ) || 'draft',
         barcodes_text    => scalar( $cgi->param('barcodes') // q{} ),
     );
 
+    warn "PE_DEBUG display_location=[" . ($form{display_location} // q{undef}) . "]\n";
+
     my @errors;
     my @warnings;
 
-    my %allowed_types = map { $_ => 1 } qw(
-      subject_display new_arrivals recommendation email_campaign digital_signage
-      physical_signage resource_feature author_feature publication_feature event
-      outreach other
-    );
-    my %allowed_channels = map { $_ => 1 } qw(
-      physical_display email digital_signage print_signage web social event other
-    );
     my %allowed_statuses = map { $_ => 1 } qw(draft active completed);
 
-    push @errors, 'Select a valid promotion type.'
-      unless $allowed_types{ $form{campaign_type} };
-    push @errors, 'Select a valid channel.'
-      unless $allowed_channels{ $form{channel} };
+    my ($valid_type) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'campaign_type' AND value_code = ?
+             AND deleted_at IS NULL AND (is_active = 1 OR value_code = ?)},
+        undef, $form{campaign_type}, $existing->{campaign_type},
+    );
+    my ($valid_channel) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'channel' AND value_code = ?
+             AND deleted_at IS NULL AND (is_active = 1 OR value_code = ?)},
+        undef, $form{channel}, $existing->{channel},
+    );
+
+    push @errors, 'Select a valid promotion type.' unless $valid_type;
+    push @errors, 'Select a valid channel.' unless $valid_channel;
     push @errors, 'Campaign name is required.' unless length $form{name};
     push @errors, 'Campaign name must be 255 characters or fewer.'
       if length( $form{name} ) > 255;
@@ -691,9 +1058,51 @@ sub _update_promotion {
       if length( $form{target_audience} ) > 255;
     push @errors, 'Language must be 30 characters or fewer.'
       if length( $form{language_code} ) > 30;
-    push @errors, 'Location must be 255 characters or fewer.'
-      if length( $form{display_location} ) > 255;
     push @errors, 'Select a valid status.' unless $allowed_statuses{ $form{status} };
+
+    my $existing_location_rows = $dbh->selectall_arrayref(
+        q{
+            SELECT campaign_location_id, location_value_id, deleted_at
+              FROM plugin_ajsn_promo_campaign_locations
+             WHERE campaign_id = ?
+        },
+        { Slice => {} },
+        $campaign_id,
+    );
+    my %existing_active_location_ids =
+      map { $_->{location_value_id} => 1 }
+      grep { !defined $_->{deleted_at} } @{ $existing_location_rows || [] };
+
+    my @locations;
+    for my $location_id (@location_value_ids) {
+        my $location = $dbh->selectrow_hashref(
+            q{
+                SELECT vocab_value_id, value_code, label, is_active
+                  FROM plugin_ajsn_promo_vocab_values
+                 WHERE vocab_value_id = ?
+                   AND dimension = 'location'
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $location_id,
+        );
+        if ( $location && ( $location->{is_active} || $existing_active_location_ids{$location_id} ) ) {
+            push @locations, $location;
+        } else {
+            push @errors, 'One or more selected campaign locations are invalid or disabled.';
+            last;
+        }
+    }
+
+    if (@locations) {
+        $form{display_location} = join '; ', map { $_->{label} } @locations;
+    } elsif ( keys %existing_active_location_ids ) {
+        $form{display_location} = q{};
+    } else {
+        $form{display_location} = length( $form{display_location} )
+          ? $form{display_location}
+          : ( $existing->{display_location} // q{} );
+    }
 
     if ( length $form{branchcode} && !Koha::Libraries->find( $form{branchcode} ) ) {
         push @errors, 'The selected Koha library does not exist.';
@@ -778,6 +1187,13 @@ sub _update_promotion {
     my @added_itemnumbers;
     my @removed_itemnumbers;
 
+    my %existing_by_location =
+      map { $_->{location_value_id} => $_ } @{ $existing_location_rows || [] };
+    my %desired_by_location =
+      map { $_->{vocab_value_id} => $_ } @locations;
+    my @added_location_ids;
+    my @removed_location_ids;
+
     my $ok = eval {
         local $dbh->{RaiseError} = 1;
         $dbh->begin_work;
@@ -805,6 +1221,51 @@ sub _update_promotion {
             $form{status},
             $campaign_id,
         );
+
+        for my $row ( @{ $existing_location_rows || [] } ) {
+            my $location_id = $row->{location_value_id};
+            if ( $desired_by_location{$location_id} ) {
+                if ( defined $row->{deleted_at} ) {
+                    $dbh->do(
+                        q{
+                            UPDATE plugin_ajsn_promo_campaign_locations
+                               SET added_by = ?, added_at = NOW(), deleted_at = NULL
+                             WHERE campaign_location_id = ?
+                        },
+                        undef,
+                        $actor,
+                        $row->{campaign_location_id},
+                    );
+                    push @added_location_ids, $location_id;
+                }
+            } elsif ( !defined $row->{deleted_at} ) {
+                $dbh->do(
+                    q{
+                        UPDATE plugin_ajsn_promo_campaign_locations
+                           SET deleted_at = NOW()
+                         WHERE campaign_location_id = ?
+                    },
+                    undef,
+                    $row->{campaign_location_id},
+                );
+                push @removed_location_ids, $location_id;
+            }
+        }
+
+        my $location_sth = $dbh->prepare(q{
+            INSERT INTO plugin_ajsn_promo_campaign_locations
+                (campaign_id, location_value_id, added_by)
+            VALUES (?, ?, ?)
+        });
+        for my $location (@locations) {
+            next if $existing_by_location{ $location->{vocab_value_id} };
+            $location_sth->execute(
+                $campaign_id,
+                $location->{vocab_value_id},
+                $actor,
+            );
+            push @added_location_ids, $location->{vocab_value_id};
+        }
 
         for my $row ( @{ $existing_item_rows || [] } ) {
             my $itemnumber = $row->{itemnumber};
@@ -862,7 +1323,10 @@ sub _update_promotion {
                 status_after       => $form{status},
                 added_itemnumbers  => \@added_itemnumbers,
                 removed_itemnumbers => \@removed_itemnumbers,
+                added_location_ids => \@added_location_ids,
+                removed_location_ids => \@removed_location_ids,
                 item_count         => scalar @items,
+                location_count     => scalar @locations,
             }
         );
 
@@ -1001,6 +1465,17 @@ sub _archive_promotion {
             $campaign_id,
         );
 
+        $dbh->do(
+            q{
+                UPDATE plugin_ajsn_promo_campaign_locations
+                   SET deleted_at = NOW()
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $campaign_id,
+        );
+
         my $details = encode_json(
             {
                 campaign_uuid  => $campaign->{campaign_uuid},
@@ -1128,6 +1603,87 @@ sub _ensure_schema {
             PRIMARY KEY (setting_key)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS plugin_ajsn_promo_vocab_values (
+            vocab_value_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            dimension VARCHAR(40) NOT NULL,
+            value_code VARCHAR(80) NOT NULL,
+            label VARCHAR(255) NOT NULL,
+            sort_order INT NOT NULL DEFAULT 100,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_by INT NULL,
+            updated_by INT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            deleted_at DATETIME NULL,
+            PRIMARY KEY (vocab_value_id),
+            UNIQUE KEY uq_promo_vocab_dimension_code (dimension, value_code),
+            KEY idx_promo_vocab_dimension_active_sort (dimension, is_active, sort_order)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS plugin_ajsn_promo_campaign_locations (
+            campaign_location_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            campaign_id BIGINT UNSIGNED NOT NULL,
+            location_value_id BIGINT UNSIGNED NOT NULL,
+            added_by INT NULL,
+            added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at DATETIME NULL,
+            PRIMARY KEY (campaign_location_id),
+            UNIQUE KEY uq_promo_campaign_location (campaign_id, location_value_id),
+            KEY idx_promo_location_value (location_value_id),
+            CONSTRAINT fk_ajsn_promo_campaign_location_campaign
+                FOREIGN KEY (campaign_id)
+                REFERENCES plugin_ajsn_promo_campaigns (campaign_id)
+                ON DELETE CASCADE,
+            CONSTRAINT fk_ajsn_promo_campaign_location_value
+                FOREIGN KEY (location_value_id)
+                REFERENCES plugin_ajsn_promo_vocab_values (vocab_value_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    });
+
+    _seed_default_vocab_values($dbh);
+
+    return 1;
+}
+
+
+sub _seed_default_vocab_values {
+    my ($dbh) = @_;
+
+    my @defaults = (
+        [ campaign_type => subject_display     => 'Subject / thematic display', 10 ],
+        [ campaign_type => new_arrivals        => 'New arrivals',               20 ],
+        [ campaign_type => recommendation      => 'Recommendation campaign',    30 ],
+        [ campaign_type => email_campaign      => 'Email campaign',             40 ],
+        [ campaign_type => digital_signage     => 'Digital signage',            50 ],
+        [ campaign_type => physical_signage    => 'Physical signage',           60 ],
+        [ campaign_type => resource_feature    => 'Resource feature',           70 ],
+        [ campaign_type => author_feature      => 'Author feature',             80 ],
+        [ campaign_type => publication_feature => 'Publication feature',        90 ],
+        [ campaign_type => event               => 'Event',                     100 ],
+        [ campaign_type => outreach            => 'Outreach',                  110 ],
+        [ campaign_type => other               => 'Other',                     120 ],
+        [ channel       => physical_display    => 'Physical display',           10 ],
+        [ channel       => email               => 'Email',                      20 ],
+        [ channel       => digital_signage     => 'Digital signage',            30 ],
+        [ channel       => print_signage       => 'Print signage',              40 ],
+        [ channel       => web                 => 'Web',                        50 ],
+        [ channel       => social              => 'Social',                     60 ],
+        [ channel       => event               => 'Event',                      70 ],
+        [ channel       => other               => 'Other',                      80 ],
+    );
+
+    my $sth = $dbh->prepare(q{
+        INSERT IGNORE INTO plugin_ajsn_promo_vocab_values
+            (dimension, value_code, label, sort_order, is_active)
+        VALUES (?, ?, ?, ?, 1)
+    });
+    for my $row (@defaults) {
+        $sth->execute( @{$row} );
+    }
 
     return 1;
 }

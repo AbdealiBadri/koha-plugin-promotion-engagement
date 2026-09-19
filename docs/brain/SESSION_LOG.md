@@ -139,3 +139,57 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Non-blocking polish noted: friendly display labels for machine values and stronger status badge contrast can be addressed later.
 - Final post-visual regression rerun PASS: EA lifecycle suite, EA CSRF/security suite, dashboard archive-count test, and CR-01..CR-07.
 - Draft PR #2 is cleared for merge.
+
+### Transition to Universal Configuration + Multi-location — 2026-09-19
+- User screenshots confirmed Edit / Update / Archive visual acceptance.
+- Final EA lifecycle/security/dashboard-count and CR-01..CR-07 regression passed.
+- PR #2 merged successfully into feature/v0.2-campaign-crud as commit 82a69d4.
+- Created active branch feature/v0.2-config-multilocation.
+- Reviewed TECHDEBT-007/008, PRD, architecture and decisions before changing the configuration model.
+- Accepted DEC-019: plugin-managed universal vocabularies are canonical for promotion configuration; Koha Authorized Values may be an optional source later, but no Koha core changes are required.
+- Multi-location will use a normalized namespaced campaign-to-location relation with reusable configured locations and soft-remove semantics.
+- Existing legacy campaign fields remain during migration to preserve current records.
+
+### Universal configuration foundation implemented — 2026-09-19
+- Added plugin_ajsn_promo_vocab_values for reusable campaign type, channel, location, language, audience and cadence values.
+- Added plugin_ajsn_promo_campaign_locations as the normalized campaign-to-location relation table.
+- Seeded only the existing generic campaign type/channel values; no Nairobi-specific values were added.
+- Replaced the foundation-only Configure page with writable configuration management for stable code, label, sort order and active/disabled state.
+- CFG-01 through CFG-07 PASS, including forged-CSRF rejection and invalid-code validation.
+- Re-ran CR-01..CR-07, EA lifecycle/security and archive-count suites; all remain PASS.
+- Immediate next action: adopt configured type/channel values in campaign forms and implement multi-location Create/Edit persistence/rendering with legacy fallback.
+
+### Multi-location campaign integration runtime gate completed — 2026-09-19
+- New/Edit Campaign Type and Channel selectors now read plugin configuration instead of hard-coded option lists.
+- New/Edit Location now supports multiple reusable configured locations.
+- Campaign creation writes normalized campaign-location links transactionally.
+- Campaign update reconciles location additions, removals and reactivations transactionally and records added/removed location IDs in audit details.
+- Promotions list and Campaign Detail render friendly configured Type/Channel labels and multiple location labels.
+- Existing legacy display_location remains as a backward-compatible fallback.
+- Disabled locations already linked to an existing campaign remain visible during edit; normal create flow does not offer disabled locations.
+- Campaign archive also soft-deletes active campaign-location links.
+- ML-01 through ML-08 PASS.
+- CFG-01 through CFG-07, CR-01 through CR-07, and EA lifecycle/security/archive-count suites all PASS after final Plack reload.
+- Retained visual fixture MULTILOC-VISUAL-20260919, campaign_id 40, with Main Entrance, First Floor and Digital Screen.
+- Next action: human visual acceptance, then final regression and merge. Analytics Engine follows.
+- Draft PR #3 opened for Universal Configuration + Multi-location. Automated CFG/ML/CR/EA gates are green; human visual acceptance of campaign 40 is the remaining merge gate.
+
+### Multi-location visual review — detail screen PASS — 2026-09-19
+- User supplied screenshot of MULTILOC-VISUAL-20260919 campaign detail (campaign ID 40).
+- Visual PASS for configured friendly Type/Channel labels and all three locations: Main Entrance, First Floor, Digital Screen.
+- Screenshot exposed weak contrast for the status/location badge styling under this Koha theme.
+- Replaced faint badges on Campaign Detail with readable plain text/strong status presentation; no data-model change.
+- Re-ran ML-01..ML-08 and CR-01..CR-07 after the presentation change; all PASS.
+- Remaining human gate: open Edit Promotion for campaign 40 and confirm the three locations are pre-selected in the multi-select.
+
+### Multi-location visual acceptance and runtime closure — 2026-09-19
+- User supplied the Edit Promotion screenshot for MULTILOC-VISUAL-20260919, campaign ID 40.
+- Visual PASS: Main Entrance, First Floor and Digital Screen are all pre-selected.
+- Detail and Edit visual gates are therefore complete.
+- Branch `feature/v0.2-config-multilocation` is clean and synchronized at `a3e2fe4`.
+- Dedicated `promoeng-koha-1`, `promoeng-db-1` and `promoeng-memcached-1` are Up; intranet returns HTTP 200.
+- Plugin Perl syntax check: PASS.
+- Runtime SQL confirms campaign 40 is active and has exactly three active normalized location links matching the visual evidence.
+- Existing post-readability-change ML-01..ML-08 and CR-01..CR-07 regression remains PASS; prior CFG and EA regression gates remain PASS.
+- Draft PR #3 is cleared for merge.
+- Exact next action: commit/push Project Brain closure, merge PR #3, then begin Analytics Engine KPI/attribution design.

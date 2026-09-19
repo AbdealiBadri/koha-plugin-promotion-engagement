@@ -1,9 +1,9 @@
 # Session Handoff
 
 **Last updated:** 2026-09-19
-**Active runtime branch:** `feature/v0.2-campaign-edit-archive`
+**Active runtime branch:** `feature/v0.2-config-multilocation`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Edit / Update / Archive accepted; transition to Universal Configuration + Multi-location
+**Current milestone:** Universal Configuration + Multi-location
 
 ## Verified completed today
 
@@ -53,12 +53,28 @@ PASS. The supplied screenshots confirm:
 
 Final post-visual EA/CR regression also passed.
 
+## Edit / Update / Archive closure
+
+- Human visual acceptance: PASS.
+- Final EA/CR regression: PASS.
+- PR #2 merged into feature/v0.2-campaign-crud as commit 82a69d4.
+
+## Universal Configuration + Multi-location closure
+
+- CFG-01..CFG-07, ML-01..ML-08, CR-01..CR-07 and EA lifecycle/security/archive-count suites: PASS.
+- Campaign Detail visual acceptance for campaign 40: PASS.
+- Edit Promotion visual acceptance: PASS; Main Entrance, First Floor and Digital Screen are all pre-selected.
+- Post-readability-change ML/CR regression: PASS.
+- Current runtime sanity: plugin Perl syntax OK; isolated `promoeng` containers Up; intranet HTTP 200.
+- Runtime DB evidence: campaign 40 active with exactly three active normalized location links.
+- Draft PR #3 is cleared for merge.
+
 ## Exact next action
 
-Merge Draft PR #2, switch the local base to the merged state, create the Universal Configuration + Multi-location feature branch, and begin that milestone.
+1. Commit and push this Project Brain closure.
+2. Merge Draft PR #3 into `feature/v0.2-campaign-crud`.
+3. Begin Analytics Engine planning: KPI formulas, time windows, attribution rules, privacy boundaries and acceptance tests before implementation.
 
-## Visual URL
+## Visual URL retained for evidence
 
-`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotion_detail&campaign_id=13`
-
-If not already authenticated, log in to the local KTD Koha staff interface first and then open the URL above.
+`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotion_detail&campaign_id=40`

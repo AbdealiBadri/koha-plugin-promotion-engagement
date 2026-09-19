@@ -142,3 +142,14 @@ This log preserves both current decisions and important superseded/rejected appr
 - **Status:** Accepted reconciliation
 - **Context:** an early architecture artifact referenced an events table; current source creates campaigns/items/audit/settings.
 - **Decision:** Treat four current source-defined tables as the present schema. Any future event/occurrence table requires an explicit new decision and migration.
+## DEC-019 — Plugin-managed universal vocabularies with optional Koha sourcing
+
+- **Date:** 2026-09-19
+- **Status:** Accepted for v0.2 configuration/multi-location milestone
+- **Context:** Campaign types, channels, languages, audiences, cadence and display locations must be reusable and configurable without hard-coding Nairobi values. Koha Authorized Values are useful for some libraries, but campaign locations can also be signage points, virtual placements or other promotion-specific concepts that are not Koha item locations.
+- **Decision:** Use plugin-managed, namespaced vocabulary records as the canonical promotion-configuration layer. Values use dimension + stable code + human label, can be activated/deactivated and sorted, and remain independent of Koha core schema.
+- **Integration direction:** Koha Authorized Values may later be imported/synchronized or referenced as an optional source, but the plugin must not require Koha core configuration changes for every promotion dimension.
+- **Multi-location model:** one campaign links to many reusable configured location values through a namespaced junction table. Location links are soft-removable and auditable; the plugin validates that linked values belong to the location dimension.
+- **Backward compatibility:** existing campaign fields remain during migration so existing v0.2 records continue to render. New configuration-backed workflows must not destructively rewrite historical rows.
+- **Rejected alternative:** free text as the long-term source of truth for analytics dimensions.
+- **Rejected alternative:** institution-specific locations or values hard-coded in source.
