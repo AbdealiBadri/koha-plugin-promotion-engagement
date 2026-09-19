@@ -173,3 +173,11 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Retained visual fixture MULTILOC-VISUAL-20260919, campaign_id 40, with Main Entrance, First Floor and Digital Screen.
 - Next action: human visual acceptance, then final regression and merge. Analytics Engine follows.
 - Draft PR #3 opened for Universal Configuration + Multi-location. Automated CFG/ML/CR/EA gates are green; human visual acceptance of campaign 40 is the remaining merge gate.
+
+### Multi-location visual review — detail screen PASS — 2026-09-19
+- User supplied screenshot of MULTILOC-VISUAL-20260919 campaign detail (campaign ID 40).
+- Visual PASS for configured friendly Type/Channel labels and all three locations: Main Entrance, First Floor, Digital Screen.
+- Screenshot exposed weak contrast for the status/location badge styling under this Koha theme.
+- Replaced faint badges on Campaign Detail with readable plain text/strong status presentation; no data-model change.
+- Re-ran ML-01..ML-08 and CR-01..CR-07 after the presentation change; all PASS.
+- Remaining human gate: open Edit Promotion for campaign 40 and confirm the three locations are pre-selected in the multi-select.

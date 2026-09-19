@@ -180,3 +180,9 @@ Next test block: campaign form adoption and multi-location persistence/rendering
 - Full CFG, CR and EA regression suites after integration: PASS.
 
 Human visual review is the remaining merge gate for this milestone.
+
+### Multi-location visual acceptance progress
+- Campaign Detail visual review for campaign 40: PASS.
+- Friendly Type/Channel and three configured locations visible: PASS.
+- Low-contrast status/location badge presentation corrected; ML-01..ML-08 and CR-01..CR-07 rerun PASS.
+- Edit-form multi-select visual review: PENDING.

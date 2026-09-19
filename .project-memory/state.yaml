@@ -11,7 +11,7 @@ current:
   project_brain_branch: "docs/project-brain"
   objective: "Complete human visual acceptance and merge verified Universal Configuration + Multi-location milestone"
   last_verified: "2026-09-19"
-  next_action: "Visual check campaign 40; rerun ML/CFG/CR/EA; merge; begin Analytics Engine"
+  next_action: "Open Edit for campaign 40 and visually confirm three locations pre-selected; then final regression, merge, begin Analytics Engine"
 
 environment:
   local:
@@ -37,7 +37,7 @@ environment:
 
 blockers:
   - id: "VISUAL-ML"
-    summary: "Human visual acceptance pending for configured multi-location UI"
+    summary: "Detail visual PASS; Edit multi-location preselection visual check remains"
 
 resolved_recently:
   - id: "ISSUE-004"

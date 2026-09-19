@@ -76,7 +76,7 @@
                                         <tr><th>UUID</th><td><code>[% campaign.campaign_uuid | html %]</code></td></tr>
                                         <tr><th>Type</th><td>[% campaign.campaign_type_label | html %]</td></tr>
                                         <tr><th>Channel</th><td>[% campaign.channel_label | html %]</td></tr>
-                                        <tr><th>Status</th><td><span class="label label-default">[% campaign.status | html %]</span></td></tr>
+                                        <tr><th>Status</th><td><strong>[% campaign.status | html %]</strong></td></tr>
                                         <tr><th>Start</th><td>[% campaign.start_date | html %]</td></tr>
                                         <tr><th>End</th><td>[% campaign.end_date | html %]</td></tr>
                                         <tr>
@@ -95,9 +95,7 @@
                                             <th>Location(s)</th>
                                             <td>
                                                 [% IF campaign_locations.size %]
-                                                    [% FOREACH location IN campaign_locations %]
-                                                        <span class="label label-info">[% location.label | html %]</span>
-                                                    [% END %]
+                                                    [% FOREACH location IN campaign_locations %][% IF !loop.first %] · [% END %][% location.label | html %][% END %]
                                                 [% ELSE %]
                                                     [% campaign.display_location | html %]
                                                 [% END %]
