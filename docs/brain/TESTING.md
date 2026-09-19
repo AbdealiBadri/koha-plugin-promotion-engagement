@@ -61,9 +61,10 @@ A temporary apparent failure using `3999900002034` was **not a plugin bug**. DB 
 | ID | Test | Status | Notes |
 |---|---|---|---|
 | T-130 | Normal POST with generated CSRF token | PASS indirectly | Successful v0.2 campaign POSTs traversed normal Koha middleware. |
-| T-131 | Missing/invalid CSRF token rejected | NOT RUN | Dedicated adversarial test still required. |
-| T-132 | User without plugin tool permission denied | NOT RUN | Lower-privilege matrix required. |
+| T-131 | Missing/invalid CSRF token rejected | PASS | Authenticated staff session submitted exact campaign-create POST with `csrf_token=INVALID-CSRF-TEST`; Koha returned HTTP 403 `Wrong CSRF token`; DB count for unique test campaign stayed 0 before/after. |
+| T-132 | User without plugin tool permission denied | PASS | Existing KTD test patron `term1` was temporarily set to catalogue-only (`flags=4`), a valid staff session/CSRF token was created, main staff page access passed, plugin write POST was denied to login/authorization flow, and DB count stayed 0. Original flags restored by trap. |
 | T-133 | Health API without required `catalogue` permission denied | PASS | `term1` authenticated successfully via HTTP Basic but lacks `catalogue`; endpoint returned HTTP 403 with `Authorization failure. Missing required permission(s).` and required permission `{catalogue: 1}`. Test account state was left/restored at its original flags. |
+| T-134 | Authorized campaign-create smoke after security tests | PASS | Synthetic valid staff session for superlibrarian submitted normal campaign create; HTTP 200, one campaign row and one `campaign_created` audit row observed; test data cleaned up afterward. |
 
 ## KTD/runtime recovery
 
