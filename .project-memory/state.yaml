@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 campaign list/detail merge gate"
-  implementation_branch: "feature/v0.2-campaign-read"
+  milestone: "v0.2 Edit / Update / Archive"
+  implementation_branch: "feature/v0.2-campaign-edit-archive"
   implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
   project_brain_branch: "docs/project-brain"
-  objective: "Merge verified campaign list/detail module, then begin Edit/Update/Archive"
+  objective: "Implement auditable campaign edit/update/archive without Koha core changes"
   last_verified: "2026-09-19"
-  next_action: "Finish branch sync, rerun CR-01..CR-07, merge PR #1, then start Edit/Update/Archive"
+  next_action: "Build edit screen, transactional update, status transitions, archive soft-delete, and regression tests"
 
 environment:
   local:

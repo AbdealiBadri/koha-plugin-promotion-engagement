@@ -99,3 +99,11 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - feature/v0.2-campaign-read was synchronized with the advanced feature/v0.2-campaign-crud base; documentation conflicts were resolved in favor of the latest verified runtime state.
 - CR-01 through CR-07 were rerun after the sync and all passed again.
 - Immediate next action: merge Draft PR #1, then begin Edit / Update / Archive.
+
+### Campaign management transition — 2026-09-19
+- Draft PR #1 (Campaign List + Campaign Detail) was marked ready and merged successfully into feature/v0.2-campaign-crud.
+- Merge commit: 21a209fff1709743657393b6a849fd4cc89aa151.
+- Local base branch was fast-forwarded to the merged state.
+- Created new working branch: feature/v0.2-campaign-edit-archive.
+- Immediate implementation scope: Edit campaign, Update campaign, controlled status transitions, Archive/soft-delete, and audit rows for each write action.
+- Existing create/read behavior and Koha source-of-truth rules must remain unchanged.

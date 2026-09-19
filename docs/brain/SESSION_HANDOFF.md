@@ -1,9 +1,9 @@
 # Session Handoff
 
 **Last updated:** 2026-09-19
-**Active runtime branch:** `feature/v0.2-campaign-read`
+**Active runtime branch:** `feature/v0.2-campaign-edit-archive`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Campaign List + Campaign Detail merge gate
+**Current milestone:** Edit / Update / Archive implementation
 
 ## Verified completed today
 
@@ -33,11 +33,14 @@
 
 ## Exact next action
 
-1. Finish syncing feature/v0.2-campaign-read with feature/v0.2-campaign-crud.
-2. Re-run CR-01 through CR-07.
-3. Merge Draft PR #1 if clean.
-4. Start Edit / Update / Archive.
-5. Then universal configuration and multi-location support.
+Implement the next campaign-management slice in this order:
+1. read current architecture/decision/data-model rules for campaign updates and soft-delete;
+2. add Edit Campaign screen pre-filled from the existing campaign;
+3. add transactional update logic with validation and audit;
+4. add controlled status transitions;
+5. add Archive action using deleted_at rather than destructive delete;
+6. run create/read regression plus new edit/archive tests;
+7. present the local Koha page for one human visual check.
 
 ## Visual URL
 
