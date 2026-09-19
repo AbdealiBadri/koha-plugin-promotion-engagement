@@ -6,7 +6,7 @@
 
 ## Current objective
 
-Finish the remaining security/permission tests in the dedicated isolated KTD environment, then close v0.2 Checkpoint 1 and move module-by-module through campaign management, configuration/multi-location, analytics, reporting/API, compatibility, KPZ, and public release.
+Finish the two remaining security tests (T-131/T-132) in the dedicated isolated KTD environment; T-133 now passes. Then run an authorized smoke test, close v0.2 Checkpoint 1, and move module-by-module through campaign management, configuration/multi-location, analytics, reporting/API, compatibility, KPZ, and public release.
 
 ## Current environment
 
@@ -42,13 +42,13 @@ ISSUE-012 — complete the dedicated security matrix:
 
 1. T-131 — invalid/missing CSRF token is rejected and creates no campaign.
 2. T-132 — logged-in user without plugin tool permission cannot use plugin write workflow.
-3. T-133 — authenticated API user without `catalogue` permission cannot call `/health`.
+3. T-133 — PASS: authenticated API identity without `catalogue` returned HTTP 403 and explicit required-permission detail.
 
 ## Exact next action
 
-Run T-131, T-132, and T-133 against **`promoeng`**, recording actual runtime evidence. Do not use `kohadev` for new verification.
+Run T-131 and the full end-to-end T-132 against **`promoeng`**, recording actual runtime evidence. Then re-run one normal authorized campaign smoke test. Do not use `kohadev` for new verification.
 
-After these pass, close checkpoint 1 and move to the prepared campaign read/list/detail module, then edit/archive and multi-location/configuration.
+If clean, close checkpoint 1 and runtime-test the prepared draft PR #1 for campaign list/detail before merge; then proceed to edit/archive and multi-location/configuration.
 
 ## Release direction
 
