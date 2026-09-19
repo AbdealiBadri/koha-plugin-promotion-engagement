@@ -58,3 +58,10 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Re-tested `GET http://promoeng-intra.localhost/api/v1/contrib/ajsn_promotion/health` without authentication.
 - Result: HTTP 401 with `{"error":"Authentication failure."}`. This proves the plugin route is now registered and Koha authorization is active.
 - Current next action: execute T-131/T-132/T-133 security matrix against the now-correct `promoeng` runtime.
+
+### Security checkpoint continuation
+- Confirmed the plugin API route is registered after Plack restart.
+- Attempted an authenticated health check using the generic KTD `.env` `KOHA_USER/KOHA_PASS` pair via HTTP Basic auth.
+- Result: HTTP 403 with `Invalid password`; therefore the generic environment credentials are not a valid API test identity for this Koha runtime.
+- No plugin code change was made from this failed credential test.
+- Next action: use/create dedicated Koha test identities with explicit permission sets for T-132/T-133, and complete T-131 with the normal authenticated staff workflow. Do not weaken permissions or CSRF for testing.
