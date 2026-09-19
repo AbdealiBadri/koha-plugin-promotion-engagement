@@ -1,6 +1,6 @@
 # Current State
 
-**Last verified:** 2026-08-29  
+**Last verified:** 2026-09-19  
 **Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`  
 **Repository default branch:** `main`  
 **Active implementation branch:** `feature/v0.2-campaign-crud`  
@@ -10,7 +10,7 @@
 
 **v0.2.x — Campaign data entry, validation, integrity, audit and security checkpoint.**
 
-The environment/API blockers are resolved. The immediate objective is now to complete the remaining dedicated security/permission tests and close **v0.2 Checkpoint 1**.
+The isolated `promoeng` environment and REST route are healthy. The immediate objective is to complete the two remaining security tests (T-131/T-132); T-133 has now passed. Then close **v0.2 Checkpoint 1**.
 
 ## Overall status
 
@@ -22,7 +22,7 @@ Core campaign creation is materially working and has passed the manual integrity
 
 ### Plugin foundation
 
-- `kohadev` rebuilt cleanly and KTD reports `KTD READY`.
+- Dedicated `promoeng` KTD runtime is Up and isolated from unrelated projects; intranet returns HTTP 200.
 - Koha Administration > Plugins shows Promotion & Engagement **0.2.0 Enabled**.
 - Four plugin-owned tables are created/maintained by `_ensure_schema`.
 - Uninstall remains intentionally non-destructive.
@@ -31,10 +31,10 @@ Core campaign creation is materially working and has passed the manual integrity
 
 Runtime verification now passes:
 
-- authenticated request returns `status: ok`;
-- plugin name is `Promotion & Engagement`;
-- version is `0.2.0`;
-- InPrivate/unauthenticated request returns `Authentication failure.`
+- plugin route is registered in `promoeng` after Plack restart;
+- authenticated authorized requests previously returned `status: ok`, plugin name and version `0.2.0`;
+- unauthenticated request returns `Authentication failure.`;
+- authenticated user without `catalogue` permission now returns HTTP 403 with the required-permission detail.
 
 Therefore the stale `0.1.0` health-version defect is closed.
 
@@ -137,8 +137,9 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 ### CURRENT CHECKPOINT WORK
 
 - dedicated missing/invalid CSRF rejection test;
-- user without plugin tool permission test;
-- authenticated API user without `catalogue` permission test.
+- user without plugin tool permission test.
+
+T-133 (authenticated API user without `catalogue`) is now PASS.
 
 ### NOT RUN
 
@@ -152,8 +153,9 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 - Development host: Windows with WSL Debian and Docker/KTD.
 - KTD repository: `~/git/koha-testing-docker`.
 - Plugin repository is mounted through `--single-plugin` for feature development.
-- Main dev KTD instance: `kohadev`.
-- `kohadev-koha-1`, `kohadev-db-1`, and `kohadev-memcached-1` are Up as last verified.
+- Main plugin KTD instance: `promoeng`.
+- `promoeng-koha-1`, `promoeng-db-1`, and `promoeng-memcached-1` are Up as last verified.
+- `kohadev` is retained only as a legacy/shared instance and is not used for new plugin verification.
 - KTD readiness: PASS.
 - Historical checkpoint plugin tables were backed up before clean reset.
 
@@ -169,8 +171,8 @@ Complete the security checkpoint in this order:
 
 1. T-131 — prove a missing/invalid CSRF token cannot create a campaign.
 2. T-132 — prove a logged-in user without plugin tool permission cannot use the plugin write workflow.
-3. T-133 — prove a logged-in API user without `catalogue` permission cannot call the health endpoint.
-4. Re-run a normal authorized campaign smoke test if any security test requires account/configuration changes.
-5. If all pass, mark v0.2 Checkpoint 1 closed and move to campaign management/configuration/multi-location work.
+3. Re-run a normal authorized campaign smoke test after security testing.
+4. If all pass, mark v0.2 Checkpoint 1 closed and runtime-test the prepared Campaign List + Campaign Detail branch/PR before merge.
+5. Then proceed to edit/archive, universal configuration and multi-location work.
 
 See `SESSION_HANDOFF.md` and `TESTING.md`.
