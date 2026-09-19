@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 Edit / Update / Archive accepted - transition to configuration/multi-location"
-  implementation_branch: "feature/v0.2-campaign-edit-archive"
-  implementation_commit: "15da5c9"
+  milestone: "v0.2 Universal Configuration + Multi-location"
+  implementation_branch: "feature/v0.2-config-multilocation"
+  implementation_commit: "82a69d4"
   project_brain_branch: "docs/project-brain"
-  objective: "Merge accepted Edit/Update/Archive module and start Universal Configuration + Multi-location"
+  objective: "Implement universal plugin-managed vocabularies and normalized multi-location campaigns"
   last_verified: "2026-09-19"
-  next_action: "Merge PR #2, create configuration/multi-location branch, implement reusable vocabularies and many-location campaign model"
+  next_action: "Implement DEC-019 vocabulary schema/config UI and campaign-to-many-location relation with backward compatibility"
 
 environment:
   local:

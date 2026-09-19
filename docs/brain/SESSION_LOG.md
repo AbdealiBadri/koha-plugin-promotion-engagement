@@ -139,3 +139,13 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Non-blocking polish noted: friendly display labels for machine values and stronger status badge contrast can be addressed later.
 - Final post-visual regression rerun PASS: EA lifecycle suite, EA CSRF/security suite, dashboard archive-count test, and CR-01..CR-07.
 - Draft PR #2 is cleared for merge.
+
+### Transition to Universal Configuration + Multi-location — 2026-09-19
+- User screenshots confirmed Edit / Update / Archive visual acceptance.
+- Final EA lifecycle/security/dashboard-count and CR-01..CR-07 regression passed.
+- PR #2 merged successfully into feature/v0.2-campaign-crud as commit 82a69d4.
+- Created active branch feature/v0.2-config-multilocation.
+- Reviewed TECHDEBT-007/008, PRD, architecture and decisions before changing the configuration model.
+- Accepted DEC-019: plugin-managed universal vocabularies are canonical for promotion configuration; Koha Authorized Values may be an optional source later, but no Koha core changes are required.
+- Multi-location will use a normalized namespaced campaign-to-location relation with reusable configured locations and soft-remove semantics.
+- Existing legacy campaign fields remain during migration to preserve current records.

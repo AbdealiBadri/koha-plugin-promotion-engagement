@@ -1,9 +1,9 @@
 # Session Handoff
 
 **Last updated:** 2026-09-19
-**Active runtime branch:** `feature/v0.2-campaign-edit-archive`
+**Active runtime branch:** `feature/v0.2-config-multilocation`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Edit / Update / Archive accepted; transition to Universal Configuration + Multi-location
+**Current milestone:** Universal Configuration + Multi-location
 
 ## Verified completed today
 
@@ -53,9 +53,20 @@ PASS. The supplied screenshots confirm:
 
 Final post-visual EA/CR regression also passed.
 
+## Edit / Update / Archive closure
+
+- Human visual acceptance: PASS.
+- Final EA/CR regression: PASS.
+- PR #2 merged into feature/v0.2-campaign-crud as commit 82a69d4.
+
 ## Exact next action
 
-Merge Draft PR #2, switch the local base to the merged state, create the Universal Configuration + Multi-location feature branch, and begin that milestone.
+Implement DEC-019 on feature/v0.2-config-multilocation:
+1. universal vocabulary schema;
+2. configuration CRUD/activation/order;
+3. campaign-to-many-location relation;
+4. Create/Edit integration with backward compatibility;
+5. regression + one visual gate.
 
 ## Visual URL
 

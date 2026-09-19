@@ -3,14 +3,14 @@
 **Last verified:** 2026-09-19
 **Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`
 **Repository default branch:** `main`
-**Active implementation branch:** `feature/v0.2-campaign-edit-archive`
+**Active implementation branch:** `feature/v0.2-config-multilocation`
 **Base branch:** `feature/v0.2-campaign-crud`
 
 ## Current milestone
 
-**v0.2 campaign management — Edit / Update / Archive complete and ready to merge.**
+**v0.2 universal configuration + multi-location — ACTIVE.**
 
-**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance of the edit/archive UI passed. Final EA/CR regression also passed; the module is ready to merge.
+**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance passed and PR #2 merged as commit `82a69d4`. The active milestone now replaces hard-coded/free-text promotion dimensions with universal configuration and a normalized one-campaign-to-many-locations model.
 
 ## Overall status
 
@@ -182,10 +182,11 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Merge `feature/v0.2-campaign-edit-archive` into `feature/v0.2-campaign-crud`.
-2. Create the next feature branch for **Universal Configuration + Multi-location**.
-3. Design/implement reusable campaign vocabularies and one-campaign-to-many-locations without hard-coding Nairobi values.
-4. Preserve all Create/List/Detail/Edit/Archive regressions.
-5. Keep friendly labels/status contrast as non-blocking UI polish.
+1. Add namespaced universal vocabulary schema and idempotent migration.
+2. Build configuration management for campaign type, channel, location, language, audience and cadence.
+3. Add normalized campaign-to-location links with soft-remove/reactivation.
+4. Migrate Create/Edit forms to configured values while preserving legacy records.
+5. Add multi-location tests and rerun all CR/EA regressions.
+6. Present one local visual check before merge.
 
-See `SESSION_HANDOFF.md`, `TESTING.md`, and `docs/V0_2_EDIT_ARCHIVE_TEST.md`.
+Architecture decision: DEC-019. No Nairobi-specific values will be hard-coded.

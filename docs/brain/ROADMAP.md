@@ -33,7 +33,7 @@
 
 **Acceptance criteria:** all `docs/V0_2_CHECKPOINT_1_TEST.md` pass criteria plus the security regression checks above.
 
-## Next milestone — v0.2 campaign management and universal configuration
+## Current milestone — v0.2 universal configuration and multi-location
 
 **Priority:** P1  
 **Dependency:** checkpoint 1 closure
@@ -54,13 +54,13 @@ Branch `feature/v0.2-campaign-read`, Draft PR #1:
 
 ### Planned after read-only slice
 
-- campaign edit/update workflow with audit;
-- archive/soft-delete and status transitions;
+- [x] campaign edit/update workflow with audit;
+- [x] archive/soft-delete and status transitions;
 - campaign search/filter refinement;
-- reusable configurable campaign types/channels;
-- location vocabulary design;
-- one campaign to multiple locations;
-- configurable languages/audiences/cadence;
+- [ ] reusable configurable campaign types/channels;
+- [ ] plugin-managed location vocabulary;
+- [ ] one campaign to multiple locations;
+- [ ] configurable languages/audiences/cadence;
 - recurring campaign/template strategy decision.
 
 Acceptance highlights:
