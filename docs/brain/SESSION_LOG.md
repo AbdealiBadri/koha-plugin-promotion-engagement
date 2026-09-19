@@ -65,3 +65,9 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Result: HTTP 403 with `Invalid password`; therefore the generic environment credentials are not a valid API test identity for this Koha runtime.
 - No plugin code change was made from this failed credential test.
 - Next action: use/create dedicated Koha test identities with explicit permission sets for T-132/T-133, and complete T-131 with the normal authenticated staff workflow. Do not weaken permissions or CSRF for testing.
+
+### Test identity plan
+- Dedicated permission-test identities will be created directly inside the isolated `promoeng` Koha test environment using Koha-supported patron/permission mechanisms rather than manual UI entry where possible.
+- No user action is required for creating these temporary test identities.
+- Test identities must remain confined to `promoeng`, use clearly recognizable test names, receive only the minimum permissions needed for T-132/T-133, and be removed or disabled after verification.
+- Manual user involvement is only needed if a visual browser confirmation is specifically required after the automated/runtime test passes.
