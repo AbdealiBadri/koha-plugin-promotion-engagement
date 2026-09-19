@@ -34,3 +34,8 @@ Chronological engineering log for durable project continuity. Record only materi
 
 ### Current next action
 Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133 API catalogue-permission denial against `promoeng`. Record runtime evidence, close v0.2 Checkpoint 1 if all pass, then continue into campaign read/detail and subsequent modules.
+
+### Clarification on environment naming
+- `promoeng` is only the dedicated KTD/Docker project name/container namespace for this plugin; it is not a new source-code repository or duplicate project folder.
+- Existing source folders remain unchanged: `~/git/plugins/koha-plugin-promotion-engagement` for the plugin and `~/git/koha-testing-docker` for KTD.
+- The older `kohadev` KTD instance is separate from the source folders and is no longer the primary runtime for this plugin.
