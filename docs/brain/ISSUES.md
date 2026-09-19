@@ -104,13 +104,14 @@
 
 ## ISSUE-012 — Security matrix not fully manually tested
 
-- **Status:** OPEN / CURRENT CHECKPOINT WORK
+- **Status:** OPEN / CURRENT CHECKPOINT WORK (T-133 PASS; T-131/T-132 remain)
 - **Severity:** High before release
 - **Module:** authorization/CSRF
 - **Code evidence:** Koha-native CSRF convention and tool permission integration are present; health OpenAPI requires `catalogue`.
 - **Completed evidence:** authenticated health succeeds; unauthenticated health is denied.
-- **Missing evidence:** dedicated forged/missing-CSRF POST test, user without plugin tool permission, and authenticated API user without `catalogue` permission.
-- **Next action:** run T-131, T-132 and T-133.
+- **Completed evidence:** authenticated health succeeds; unauthenticated health is denied; T-133 authenticated API user without `catalogue` returned HTTP 403 with required-permission detail.
+- **Missing evidence:** dedicated forged/missing-CSRF POST test and user without plugin tool permission.
+- **Next action:** run T-131 and T-132, then authorized smoke test and close checkpoint if clean.
 
 ## ISSUE-013 — Compatibility/staging gates outstanding
 
