@@ -110,5 +110,5 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 
 ### Immediate hurdle clarified — 2026-09-19
 - Current milestone is Edit / Update / Archive.
-- Success gate: edit existing campaign data safely, enforce the same validation/integrity rules as create, record audit history for changes/status transitions, archive via soft-delete () rather than destructive deletion, and keep Create/List/Detail regressions green.
+- Success gate: edit existing campaign data safely, enforce the same validation/integrity rules as create, record audit history for changes/status transitions, archive via soft-delete using deleted_at rather than destructive deletion, and keep Create/List/Detail regressions green.
 - After this gate, the next hurdle is universal configuration plus multi-location campaigns.
