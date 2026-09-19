@@ -100,6 +100,16 @@ Do not mechanically rewrite every document after a trivial change; update only k
 - Do not claim documentation is updated if the write/commit failed.
 - Prefer dedicated project-specific KTD/container names and never run global Docker cleanup commands when unrelated projects may share Docker/WSL.
 
+## Visual monitoring protocol
+
+For each active module, give the user a simple visual checkpoint:
+- state the module currently being worked on;
+- state whether the work is code-only, runtime-tested, or ready for user review;
+- give the exact local Koha page/URL the user can open to verify the module;
+- if Docker/KTD state is relevant, identify the exact project/container names to watch;
+- after a module is complete, report `Built`, `Tested`, and `Ready for visual check` separately;
+- do not ask the user to inspect raw terminal output unless a human visual/functional confirmation is genuinely required.
+
 ## Before ending a development session
 
 1. Re-run the tests relevant to the code changed.
