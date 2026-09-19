@@ -130,3 +130,22 @@ Non-blocking polish observations:
 These are UI-polish items and do not block functional acceptance of the read-view module.
 
 **Remaining visual gate:** open `READ-LINKED-20260919` and visually confirm the Campaign Detail page before merge.
+
+
+## Human browser session issue — BLOCKER before merge
+
+**Observed:** 2026-09-19.
+
+During visual review, the user could render Campaign Detail pages correctly, including the linked-item and zero-item cases. However, navigating back to Promotions or clicking another campaign repeatedly caused Koha to show `Error: Session timed out. Please log in again`.
+
+Runtime evidence from `plack.log` shows the pattern clearly:
+- browser GET to Promotions/Detail returns the login page;
+- user POSTs the login form;
+- the same requested Promotions/Detail page then renders correctly;
+- the next GET navigation again falls back to login.
+
+This is **not currently classified as a CSRF failure** because the failing navigation requests are GET requests and Koha's CSRF middleware applies state-changing methods. The T-131 forged-CSRF POST test still passes (HTTP 403, no DB write).
+
+A separate automated cookie-jar login through the normal Koha staff login successfully navigated Promotions -> Detail -> Promotions without losing authentication. Therefore the immediate investigation is browser/session persistence for this KTD/plugin navigation path, not reopening T-131 without evidence.
+
+**Merge status:** BLOCKED until the browser session timeout is reproduced, root-caused, fixed or conclusively isolated to KTD/browser state, and the human navigation test passes without repeated login.
