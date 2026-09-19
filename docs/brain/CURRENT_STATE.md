@@ -8,9 +8,9 @@
 
 ## Current milestone
 
-**v0.2 universal configuration + multi-location — ACTIVE.**
+**v0.2 universal configuration + multi-location — VERIFIED, READY TO MERGE.**
 
-**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance passed and PR #2 merged as commit `82a69d4`. The active milestone now replaces hard-coded/free-text promotion dimensions with universal configuration and a normalized one-campaign-to-many-locations model.
+Checkpoint 1, Campaign List/Detail and Edit/Update/Archive are complete. Universal configuration and normalized campaign-to-many-location support are implemented on `feature/v0.2-config-multilocation`. CFG-01..CFG-07, ML-01..ML-08, CR-01..CR-07 and EA lifecycle/security/archive-count suites pass in isolated `promoeng`. Campaign 40 Detail and Edit visual acceptance both pass; the Edit form pre-selects Main Entrance, First Floor and Digital Screen. Draft PR #3 is cleared for merge.
 
 ## Overall status
 
@@ -24,7 +24,7 @@ Core campaign creation is materially working and has passed the manual integrity
 
 - Dedicated `promoeng` KTD runtime is Up and isolated from unrelated projects; intranet returns HTTP 200.
 - Koha Administration > Plugins shows Promotion & Engagement **0.2.0 Enabled**.
-- Four plugin-owned tables are created/maintained by `_ensure_schema`.
+- Six plugin-owned tables are created/maintained by `_ensure_schema`, including universal vocabulary and campaign-location relation tables.
 - Uninstall remains intentionally non-destructive.
 
 ### REST health endpoint
@@ -85,13 +85,14 @@ Resolution completed:
 
 ### Campaign model
 
-- type/channel are generic but still hard-coded allowed values;
-- audience/language/location are simple fields;
-- only one free-text display location is currently stored;
-- campaign list and read-only campaign detail are built, runtime-verified, visually accepted and merged;
-- edit/update/archive are implemented and runtime-tested on the active branch;
-- campaign and item-link archive uses deleted_at and preserves history;
-- human visual acceptance passed; only branch merge/transition remains.
+- campaign type and channel use plugin-managed universal configuration;
+- reusable location values support normalized one-campaign-to-many-location links;
+- Create and Edit persist/reconcile location links transactionally;
+- disabled linked locations remain visible during Edit;
+- legacy `display_location` remains as a backward-compatible fallback;
+- list/detail/edit/update/archive are runtime-verified and visually accepted;
+- campaign, item-link and campaign-location archive uses `deleted_at` and preserves history;
+- only PR #3 merge/branch transition remains before Analytics Engine work.
 
 ### Dashboard
 
@@ -99,9 +100,7 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 
 ## Unimplemented approved functionality
 
-- multi-location campaign model;
-- configurable universal vocabularies;
-- recurring/cadence support;
+- recurring/cadence behavior beyond configuration values;
 - e-resource/non-barcode resource model;
 - list filtering/search workflows;
 - analytics engine;
@@ -182,11 +181,9 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Add namespaced universal vocabulary schema and idempotent migration.
-2. Build configuration management for campaign type, channel, location, language, audience and cadence.
-3. Add normalized campaign-to-location links with soft-remove/reactivation.
-4. Migrate Create/Edit forms to configured values while preserving legacy records.
-5. Add multi-location tests and rerun all CR/EA regressions.
-6. Present one local visual check before merge.
+1. Commit and push the visual-acceptance closure documentation.
+2. Merge Draft PR #3 into `feature/v0.2-campaign-crud`.
+3. Start Analytics Engine design with explicit KPI formulas, comparison windows, attribution rules, privacy boundaries and acceptance tests.
+4. Implement one shared analytics service before dashboard charts or external analytics endpoints.
 
-Architecture decision: DEC-019. No Nairobi-specific values will be hard-coded.
+Architecture decision DEC-019 remains satisfied; no Nairobi-specific values are hard-coded.

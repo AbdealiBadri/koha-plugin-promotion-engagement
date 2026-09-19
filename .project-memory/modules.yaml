@@ -28,25 +28,25 @@ modules:
     next_action: "Preserve create/update/status/archive audit behavior during future modules"
 
   campaign_management:
-    status: "implemented-runtime-verified-visual-pending"
+    status: "implemented-runtime-and-visual-verified"
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-009"]
-    next_action: "Visual acceptance, merge, then add search/filter/pagination polish later"
+    next_action: "Merge PR #3; add search/filter/pagination polish later"
 
   configuration:
-    status: "partial"
-    owner_system: "plugin/Koha - source design pending"
+    status: "implemented-runtime-and-visual-verified"
+    owner_system: "plugin"
     dependencies: []
-    open_issues: ["TECHDEBT-007", "TECHDEBT-008"]
-    next_action: "Decide reusable vocabularies and multi-location source/model"
+    open_issues: []
+    next_action: "Preserve universal vocabulary behavior while Analytics Engine is added"
 
   multi_location:
-    status: "planned-approved"
+    status: "implemented-runtime-and-visual-verified"
     owner_system: "plugin"
     dependencies: ["configuration"]
-    open_issues: ["TECHDEBT-008"]
-    next_action: "Design one-campaign-to-many-locations model"
+    open_issues: []
+    next_action: "Preserve normalized links and legacy fallback while Analytics Engine is added"
 
   non_barcode_resources:
     status: "planned-approved"

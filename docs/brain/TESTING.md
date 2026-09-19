@@ -179,10 +179,13 @@ Next test block: campaign form adoption and multi-location persistence/rendering
 - ML-08 forged CSRF on multi-location update returns HTTP 403 with no state change: PASS.
 - Full CFG, CR and EA regression suites after integration: PASS.
 
-Human visual review is the remaining merge gate for this milestone.
+Human visual review is complete; the milestone is cleared for merge.
 
 ### Multi-location visual acceptance progress
 - Campaign Detail visual review for campaign 40: PASS.
 - Friendly Type/Channel and three configured locations visible: PASS.
 - Low-contrast status/location badge presentation corrected; ML-01..ML-08 and CR-01..CR-07 rerun PASS.
-- Edit-form multi-select visual review: PENDING.
+- Campaign 40 Detail human visual acceptance: PASS.
+- Campaign 40 Edit human visual acceptance: PASS; Main Entrance, First Floor and Digital Screen are visibly pre-selected.
+- Closure runtime sanity: plugin Perl syntax OK; `promoeng` intranet HTTP 200; database shows campaign 40 active with exactly three active normalized location links.
+- Edit-form multi-select visual review: PASS.

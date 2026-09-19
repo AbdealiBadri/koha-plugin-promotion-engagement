@@ -61,21 +61,19 @@
 
 ## TECHDEBT-007 — Generic vocabularies are still hard-coded
 
-- **Status:** OPEN
+- **Status:** RESOLVED
 - **Severity:** Medium
 - **Module:** campaign configuration
-- **Description:** allowed campaign types/channels are hard-coded in Perl; audience/language/location are free text.
-- **Requirement:** configurable universal vocabularies without Nairobi-specific code.
-- **Next action:** design configuration source and migrations after v0.2 checkpoint closure.
+- **Resolution:** plugin-managed universal vocabularies now provide configured campaign type, channel, location, language, audience and cadence values without Nairobi-specific source logic.
+- **Evidence:** CFG-01..CFG-07 PASS; Create/Edit render configured Type and Channel labels.
 
 ## TECHDEBT-008 — Single free-text location cannot model real campaigns
 
-- **Status:** OPEN
+- **Status:** RESOLVED
 - **Severity:** Medium
 - **Module:** campaign/location data model
-- **Actual:** one `display_location VARCHAR(255)`.
-- **Expected future:** one campaign can link multiple reusable locations; analytics can compare locations.
-- **Open design:** Koha authorized values vs plugin values vs hybrid.
+- **Resolution:** normalized `plugin_ajsn_promo_campaign_locations` links one campaign to multiple reusable configured locations with soft-remove/reactivation semantics and legacy fallback.
+- **Evidence:** ML-01..ML-08 PASS; campaign 40 Detail/Edit visual PASS with Main Entrance, First Floor and Digital Screen.
 
 ## ISSUE-009 — Campaign management lifecycle incomplete
 
@@ -84,7 +82,7 @@
 - **Module:** campaign management
 - **Completed:** list/detail, linked-resource read-through, edit/update, whitelisted statuses, campaign/item soft-delete archive, and audit of create/update/status/archive operations.
 - **Runtime evidence:** CR-01..CR-07 and EA-01..EA-13 pass in isolated promoeng.
-- **Remaining:** human visual acceptance for Edit/Archive, then search/filter/pagination polish.
+- **Remaining:** search/filter/pagination polish only; lifecycle and human visual acceptance are complete.
 
 ## ISSUE-010 — Analytics engine not implemented
 

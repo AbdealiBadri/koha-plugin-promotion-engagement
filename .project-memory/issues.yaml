@@ -40,22 +40,22 @@ issues:
     summary: "Existing KPZ test plan examples remain v0.1-specific"
 
   TECHDEBT-007:
-    status: "open"
+    status: "resolved"
     severity: "medium"
     module: "configuration"
-    summary: "Campaign type/channel hard-coded; audience/language/location free text"
+    summary: "Plugin-managed universal vocabularies implemented and verified"
 
   TECHDEBT-008:
-    status: "open"
+    status: "resolved"
     severity: "medium"
     module: "locations"
-    summary: "Single free-text location cannot model one campaign across multiple locations"
+    summary: "Normalized campaign-to-many-location model implemented and verified"
 
   ISSUE-009:
     status: "partially-resolved"
     severity: "medium"
     module: "campaign-management"
-    summary: "List/detail/edit/archive lifecycle implemented; search/filter/pagination and human visual acceptance remain"
+    summary: "List/detail/edit/archive lifecycle and human visual acceptance completed; search/filter/pagination remain later polish"
 
   ISSUE-010:
     status: "planned"

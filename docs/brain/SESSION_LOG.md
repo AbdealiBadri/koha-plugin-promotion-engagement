@@ -181,3 +181,15 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Replaced faint badges on Campaign Detail with readable plain text/strong status presentation; no data-model change.
 - Re-ran ML-01..ML-08 and CR-01..CR-07 after the presentation change; all PASS.
 - Remaining human gate: open Edit Promotion for campaign 40 and confirm the three locations are pre-selected in the multi-select.
+
+### Multi-location visual acceptance and runtime closure — 2026-09-19
+- User supplied the Edit Promotion screenshot for MULTILOC-VISUAL-20260919, campaign ID 40.
+- Visual PASS: Main Entrance, First Floor and Digital Screen are all pre-selected.
+- Detail and Edit visual gates are therefore complete.
+- Branch `feature/v0.2-config-multilocation` is clean and synchronized at `a3e2fe4`.
+- Dedicated `promoeng-koha-1`, `promoeng-db-1` and `promoeng-memcached-1` are Up; intranet returns HTTP 200.
+- Plugin Perl syntax check: PASS.
+- Runtime SQL confirms campaign 40 is active and has exactly three active normalized location links matching the visual evidence.
+- Existing post-readability-change ML-01..ML-08 and CR-01..CR-07 regression remains PASS; prior CFG and EA regression gates remain PASS.
+- Draft PR #3 is cleared for merge.
+- Exact next action: commit/push Project Brain closure, merge PR #3, then begin Analytics Engine KPI/attribution design.
