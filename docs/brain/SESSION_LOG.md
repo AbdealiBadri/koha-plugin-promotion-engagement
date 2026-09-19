@@ -79,3 +79,8 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - This distinguishes T-133 from the unauthenticated 401 test and proves the endpoint permission gate is active.
 - Temporarily changed `term1` flags from 2 to 6 only to prepare a lower-permission staff scenario for T-132, then restored flags back to the original value 2 after credentialed browser automation was blocked by the remote execution safety layer. No permanent account/permission change remains.
 - T-131 and the full end-to-end T-132 browser denial test remain open. Code inspection confirms plugin `run.pl` requires `plugins => tool`, and the campaign form uses Koha's `cud-` operation plus generated CSRF token, but these are not yet counted as PASS without end-to-end evidence.
+
+### Immediate next work
+- User confirmed continuation.
+- Immediate active task: T-131, an end-to-end forged/missing CSRF submission against the campaign-create workflow in the isolated `promoeng` environment, with verification that no campaign row is written.
+- After T-131: run T-132 plugin-tool permission denial, then one authorized campaign-creation smoke test. If all three are clean, close v0.2 Checkpoint 1 and move to runtime-testing Draft PR #1 (Campaign List + Campaign Detail).
