@@ -1,79 +1,41 @@
 # Session Handoff
 
-**Last updated:** 2026-08-31  
-**Base implementation branch:** `feature/v0.2-campaign-crud`  
-**Remote follow-on branch:** `feature/v0.2-campaign-read`  
-**Draft PR:** #1 — read-only promotions list and campaign detail views  
-**Current milestone:** finish v0.2 Checkpoint 1 security tests, then verify the read-only campaign-management slice.
+**Last updated:** 2026-09-19
+**Active runtime branch:** `feature/v0.2-campaign-read`
+**Runtime environment:** isolated KTD `promoeng`
+**Current milestone:** Campaign List + Campaign Detail visual acceptance
 
-## Current objective
+## Verified completed today
 
-1. Complete the three remaining security/permission tests on `feature/v0.2-campaign-crud`.
-2. Re-run one authorized smoke test.
-3. Switch to `feature/v0.2-campaign-read` and execute CR-01 through CR-07.
-4. Merge Draft PR #1 only after all runtime tests pass.
+- v0.2 Checkpoint 1 security gate is closed:
+  - T-131 invalid CSRF: PASS — HTTP 403, no campaign write.
+  - T-132 catalogue-only staff without plugin tool permission: PASS — normal staff session valid, plugin write denied, no campaign write, original flags restored.
+  - T-133 authenticated API identity without `catalogue`: PASS — HTTP 403 with required permission detail.
+  - T-134 authorized campaign-create smoke: PASS — campaign + audit created, then test data cleaned.
+- Switched local mounted plugin to `feature/v0.2-campaign-read`.
+- Restarted Plack.
+- Created read-view fixtures through the real plugin create workflow.
+- CR-01 through CR-07 all PASS in `promoeng`.
+- No new Plack/intranet template/database errors observed after the suite.
 
-## Verified runtime state before remote follow-on work
+## Test fixtures retained for visual review
 
-- `kohadev` KTD was rebuilt cleanly and returned `KTD READY`.
-- Koha Administration > Plugins showed Promotion & Engagement **0.2.0 Enabled**.
-- Authenticated `/api/v1/contrib/ajsn_promotion/health` returned `status: ok` and `version: 0.2.0`.
-- InPrivate/unauthenticated health request returned `{"error":"Authentication failure."}`.
-- Campaign integrity tests previously passed: zero item, valid barcode, invalid barcode rejection, duplicate de-duplication, transactional DB/audit writes and mixed valid+invalid rollback.
+- `READ-ZERO-20260919`
+- `READ-LINKED-20260919`
+- `READ-REGRESSION-20260919`
 
-## Security checkpoint still open
+## Exact next action
 
-ISSUE-012 remains open until these are actually executed:
+User performs one visual check of the local Promotions list/detail screens. Do not merge Draft PR #1 before that check.
 
-1. **T-131** — invalid/missing CSRF is rejected with no campaign write.
-2. **T-132** — logged-in user without plugin `tool` permission cannot use the write workflow.
-3. **T-133** — authenticated API user without `catalogue` permission cannot call `/health`.
+After visual approval:
+1. Sync/rebase the read branch with the now-advanced `feature/v0.2-campaign-crud` base and resolve documentation-only divergence safely.
+2. Re-run CR-01..CR-07.
+3. Merge Draft PR #1.
+4. Move to Edit/Update/Archive, then universal configuration + multi-location support.
 
-Important T-131 note: a prior manual attempt changed the wrong `csrf_token` belonging to a Koha header/search form. That attempt is invalid evidence, not a failed security control. The correct token is inside the plugin form posting to `/cgi-bin/koha/plugins/run.pl`, beside `action=new_promotion` and `op=cud-create_promotion`.
+## Visual URL
 
-## Remote work prepared on `feature/v0.2-campaign-read`
+`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotions`
 
-**CODE-PREPARED / NOT RUNTIME-VERIFIED**
-
-Draft PR #1 adds a deliberately low-risk read-only campaign-management slice:
-
-- Promotions list page using existing plugin tables.
-- Dashboard campaign names link to details.
-- Campaign detail page.
-- Linked-item barcode/itemnumber from plugin data.
-- Live Koha title/author/biblionumber read-through.
-- Campaign audit-history display.
-- Defensive invalid/nonexistent campaign-ID handling.
-- No schema change.
-- No edit/archive/delete write actions.
-- No Koha core changes.
-
-The branch is mergeable into `feature/v0.2-campaign-crud`, but must remain a Draft PR until KTD testing is complete.
-
-## Exact test runbook
-
-Use `docs/V0_2_TOMORROW_TEST_RUNBOOK.md` for the complete branch-switch, KTD re-initialisation and manual test sequence.
-
-Read-view acceptance tests are in `docs/V0_2_CAMPAIGN_READ_TEST.md`:
-
-- CR-01 Promotions list.
-- CR-02 Campaign detail.
-- CR-03 Live Koha item read-through.
-- CR-04 Zero-linked-item campaign.
-- CR-05 Audit history.
-- CR-06 Invalid campaign ID.
-- CR-07 Existing create-workflow regression.
-
-## Merge gate
-
-Do not merge PR #1 until:
-
-- T-131/T-132/T-133 pass;
-- CR-01..CR-07 pass;
-- no Plack/template/database errors appear;
-- normal authorized campaign creation still works;
-- Project Brain and testing records are updated with observed results.
-
-## After PR #1
-
-Next implementation slice should be campaign edit/update + archive/status transitions with audit logging, followed by universal configuration and multi-location modelling. Analytics comes after the campaign data model and management workflow stabilise.
+If not already authenticated, log in to the local KTD Koha staff interface first and then open the URL above.
