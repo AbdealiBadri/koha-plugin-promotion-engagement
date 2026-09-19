@@ -40,6 +40,10 @@
                 <h1>Promotions</h1>
                 <p class="lead">Browse saved promotion campaigns and open a campaign to review its linked Koha items and audit history.</p>
 
+                [% IF success_message %]
+                    <div class="alert alert-success">[% success_message | html %]</div>
+                [% END %]
+
                 [% IF error_message %]
                     <div class="alert alert-danger">[% error_message | html %]</div>
                 [% END %]

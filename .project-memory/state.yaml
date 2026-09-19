@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 campaign list/detail merge gate"
-  implementation_branch: "feature/v0.2-campaign-read"
-  implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
+  milestone: "v0.2 Edit / Update / Archive accepted - transition to configuration/multi-location"
+  implementation_branch: "feature/v0.2-campaign-edit-archive"
+  implementation_commit: "15da5c9"
   project_brain_branch: "docs/project-brain"
-  objective: "Merge verified campaign list/detail module, then begin Edit/Update/Archive"
+  objective: "Merge accepted Edit/Update/Archive module and start Universal Configuration + Multi-location"
   last_verified: "2026-09-19"
-  next_action: "Finish branch sync, rerun CR-01..CR-07, merge PR #1, then start Edit/Update/Archive"
+  next_action: "Merge PR #2, create configuration/multi-location branch, implement reusable vocabularies and many-location campaign model"
 
 environment:
   local:
@@ -35,9 +35,7 @@ environment:
     status: "not-deployed"
     target: "Aljamea-tus-Saifiyah Nairobi"
 
-blockers:
-  - id: "ISSUE-012"
-    summary: "T-131 invalid-CSRF and T-132 plugin-tool denial remain; T-133 API catalogue denial passed"
+blockers: []
 
 resolved_recently:
   - id: "ISSUE-004"
@@ -57,11 +55,11 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "T-133"
+  id: "EA-FINAL+CR"
   date: "2026-09-19"
-  command: "Authenticated GET /api/v1/contrib/ajsn_promotion/health using KTD identity without catalogue permission"
+  command: "Post-visual Edit/archive lifecycle + security + dashboard archive count + CR-01..CR-07 regression"
   status: "PASS"
-  result: "HTTP 403 Authorization failure with required permission catalogue=1"
+  result: "EA-01..EA-13 and CR-01..CR-07 pass; Perl syntax OK; no new runtime errors"
 
 runtime:
   plugin_version: "0.2.0"

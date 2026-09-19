@@ -21,18 +21,18 @@ modules:
     next_action: "Preserve validation/de-duplication behaviour"
 
   audit:
-    status: "partial"
+    status: "implemented-for-current-campaign-lifecycle"
     owner_system: "plugin"
     dependencies: ["campaign operations"]
-    open_issues: ["ISSUE-009"]
-    next_action: "Extend audit to edit/archive/status operations when those are built"
+    open_issues: []
+    next_action: "Preserve create/update/status/archive audit behavior during future modules"
 
   campaign_management:
-    status: "planned"
+    status: "implemented-runtime-verified-visual-pending"
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-009"]
-    next_action: "Design detail/edit/archive/list after checkpoint 1"
+    next_action: "Visual acceptance, merge, then add search/filter/pagination polish later"
 
   configuration:
     status: "partial"
@@ -70,11 +70,11 @@ modules:
     next_action: "Define KPI formulas/baseline after v0.2 management/configuration"
 
   rest_api:
-    status: "partial"
+    status: "partial-health-verified"
     owner_system: "Koha REST + plugin"
     dependencies: ["Koha authentication/authorization"]
-    open_issues: ["BUG-003", "ISSUE-012"]
-    next_action: "Runtime verify v0.2 health and security matrix after KTD recovery"
+    open_issues: []
+    next_action: "Add business endpoints only after campaign/configuration model stabilizes"
 
   reporting_exports:
     status: "planned"

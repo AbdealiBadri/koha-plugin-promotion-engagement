@@ -99,3 +99,43 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - feature/v0.2-campaign-read was synchronized with the advanced feature/v0.2-campaign-crud base; documentation conflicts were resolved in favor of the latest verified runtime state.
 - CR-01 through CR-07 were rerun after the sync and all passed again.
 - Immediate next action: merge Draft PR #1, then begin Edit / Update / Archive.
+
+### Campaign management transition — 2026-09-19
+- Draft PR #1 (Campaign List + Campaign Detail) was marked ready and merged successfully into feature/v0.2-campaign-crud.
+- Merge commit: 21a209fff1709743657393b6a849fd4cc89aa151.
+- Local base branch was fast-forwarded to the merged state.
+- Created new working branch: feature/v0.2-campaign-edit-archive.
+- Immediate implementation scope: Edit campaign, Update campaign, controlled status transitions, Archive/soft-delete, and audit rows for each write action.
+- Existing create/read behavior and Koha source-of-truth rules must remain unchanged.
+
+### Immediate hurdle clarified — 2026-09-19
+- Current milestone is Edit / Update / Archive.
+- Success gate: edit existing campaign data safely, enforce the same validation/integrity rules as create, record audit history for changes/status transitions, archive via soft-delete using deleted_at rather than destructive deletion, and keep Create/List/Detail regressions green.
+- After this gate, the next hurdle is universal configuration plus multi-location campaigns.
+
+### Edit / Update / Archive runtime gate completed — 2026-09-19
+- Added pre-filled Edit Promotion screen.
+- Added transactional update with current create-equivalent validation rules.
+- Added item reconciliation: new links insert, removed links soft-delete, removed links can reactivate without duplicates.
+- Added audit actions `campaign_updated`, `campaign_status_changed`, and `campaign_archived`.
+- Added Archive POST with Koha CSRF, explicit confirmation, campaign soft-delete and active item-link soft-delete.
+- Hardened dashboard linked-item count so archived links are excluded.
+- EA-01 through EA-13 PASS.
+- Forged-CSRF update/archive requests return HTTP 403 with no state change.
+- Invalid status values are rejected.
+- CR-01 through CR-07 regression suite PASS after final changes.
+- Perl syntax OK; git diff check clean; no new Plack/intranet application errors observed.
+- Retained visual fixture EDIT-VISUAL-20260919, campaign_id 13, status active, one linked item, three audit rows.
+- Next action: human visual acceptance, then final regression and merge.
+
+### Draft PR for Edit / Update / Archive
+- Draft PR #2 opened: v0.2 campaign edit/update/archive lifecycle.
+- Automated/runtime gate is green; only human visual acceptance of EDIT-VISUAL-20260919 remains before merge.
+
+### Edit / Update / Archive human acceptance — 2026-09-19
+- User supplied screenshots of campaign detail and Edit Promotion.
+- Visual acceptance PASS: Edit and Archive actions visible; live linked-item data and audit history render; edit form is fully pre-filled including barcode.
+- Normal Koha staff login kept navigation/session stable.
+- Non-blocking polish noted: friendly display labels for machine values and stronger status badge contrast can be addressed later.
+- Final post-visual regression rerun PASS: EA lifecycle suite, EA CSRF/security suite, dashboard archive-count test, and CR-01..CR-07.
+- Draft PR #2 is cleared for merge.

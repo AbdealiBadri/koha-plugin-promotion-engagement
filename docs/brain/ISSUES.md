@@ -77,13 +77,14 @@
 - **Expected future:** one campaign can link multiple reusable locations; analytics can compare locations.
 - **Open design:** Koha authorized values vs plugin values vs hybrid.
 
-## ISSUE-009 — No campaign detail/edit/archive lifecycle
+## ISSUE-009 — Campaign management lifecycle incomplete
 
-- **Status:** OPEN / PLANNED
+- **Status:** PARTIALLY RESOLVED
 - **Severity:** Medium
 - **Module:** campaign management
-- **Current:** create + recent list only.
-- **Needed:** detail, linked-resource view, edit, controlled status transitions, archive/soft-delete, filters/search and audit of changes.
+- **Completed:** list/detail, linked-resource read-through, edit/update, whitelisted statuses, campaign/item soft-delete archive, and audit of create/update/status/archive operations.
+- **Runtime evidence:** CR-01..CR-07 and EA-01..EA-13 pass in isolated promoeng.
+- **Remaining:** human visual acceptance for Edit/Archive, then search/filter/pagination polish.
 
 ## ISSUE-010 — Analytics engine not implemented
 

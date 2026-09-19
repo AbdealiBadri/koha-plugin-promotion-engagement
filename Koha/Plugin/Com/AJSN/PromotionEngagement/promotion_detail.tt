@@ -38,13 +38,32 @@
                     <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">
                         <i class="fa fa-arrow-left"></i> Back to promotions
                     </a>
-                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
+                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=edit_promotion&campaign_id=[% campaign.campaign_id %]">
+                        <i class="fa fa-pencil"></i> Edit promotion
+                    </a>
+                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
                         <i class="fa fa-plus"></i> New promotion
                     </a>
+                    <form method="post" action="/cgi-bin/koha/plugins/run.pl" style="display:inline" onsubmit="return confirm('Archive this campaign? It will be hidden from active campaign lists but its historical data and audit trail will be preserved.');">
+                        <input type="hidden" name="class" value="[% CLASS | html %]">
+                        <input type="hidden" name="method" value="[% METHOD | html %]">
+                        <input type="hidden" name="action" value="archive_promotion">
+                        <input type="hidden" name="op" value="cud-archive_promotion">
+                        <input type="hidden" name="campaign_id" value="[% campaign.campaign_id %]">
+                        <input type="hidden" name="archive_confirm" value="1">
+                        <input type="hidden" name="csrf_token" value="[% Koha.GenerateCSRF | html %]">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa fa-archive"></i> Archive
+                        </button>
+                    </form>
                 </div>
 
                 <h1>[% campaign.name | html %]</h1>
-                <p class="lead">Read-only campaign record. Editing and archiving are part of the next campaign-management checkpoint.</p>
+                <p class="lead">Campaign record with live Koha-linked item data and auditable management actions.</p>
+
+                [% IF success_message %]
+                    <div class="alert alert-success">[% success_message | html %]</div>
+                [% END %]
 
                 <div class="row">
                     <div class="col-md-7">
@@ -89,11 +108,12 @@
                         <div class="panel panel-default">
                             <div class="panel-heading"><strong>Current scope</strong></div>
                             <div class="panel-body">
-                                <p>This screen intentionally reads existing plugin and Koha data only.</p>
+                                <p>Campaign metadata can be edited without changing Koha catalogue records.</p>
                                 <ul>
-                                    <li>No campaign data can be edited here yet.</li>
-                                    <li>No Koha catalogue/item data is copied or modified.</li>
-                                    <li>Linked title/author data below is read live from Koha.</li>
+                                    <li>Linked barcodes are validated against live Koha items before updates are saved.</li>
+                                    <li>Removing a linked item from a campaign uses plugin soft-delete semantics.</li>
+                                    <li>Editing, status changes and archiving are recorded in the campaign audit history.</li>
+                                    <li>Linked title/author data below is always read live from Koha.</li>
                                 </ul>
                             </div>
                         </div>
