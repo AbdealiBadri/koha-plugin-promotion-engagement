@@ -149,3 +149,12 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Accepted DEC-019: plugin-managed universal vocabularies are canonical for promotion configuration; Koha Authorized Values may be an optional source later, but no Koha core changes are required.
 - Multi-location will use a normalized namespaced campaign-to-location relation with reusable configured locations and soft-remove semantics.
 - Existing legacy campaign fields remain during migration to preserve current records.
+
+### Universal configuration foundation implemented — 2026-09-19
+- Added plugin_ajsn_promo_vocab_values for reusable campaign type, channel, location, language, audience and cadence values.
+- Added plugin_ajsn_promo_campaign_locations as the normalized campaign-to-location relation table.
+- Seeded only the existing generic campaign type/channel values; no Nairobi-specific values were added.
+- Replaced the foundation-only Configure page with writable configuration management for stable code, label, sort order and active/disabled state.
+- CFG-01 through CFG-07 PASS, including forged-CSRF rejection and invalid-code validation.
+- Re-ran CR-01..CR-07, EA lifecycle/security and archive-count suites; all remain PASS.
+- Immediate next action: adopt configured type/channel values in campaign forms and implement multi-location Create/Edit persistence/rendering with legacy fallback.

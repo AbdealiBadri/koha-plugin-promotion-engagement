@@ -154,3 +154,15 @@ python3 -m zipfile -l dist/PromotionEngagement-vX.Y.Z.kpz
 ```
 
 Never put DB passwords or other secrets in this file; use local environment/configuration when executing DB commands.
+## v0.2 Universal configuration foundation — 2026-09-19
+
+- CFG-01 Configure page renders: PASS.
+- CFG-02 vocabulary and campaign-location schema + generic seeds: PASS.
+- CFG-03 save reusable location value: PASS.
+- CFG-04 disable value: PASS.
+- CFG-05 update/re-enable same dimension+code: PASS.
+- CFG-06 forged CSRF rejected with HTTP 403 and no write: PASS.
+- CFG-07 invalid stable code rejected with no write: PASS.
+- Existing CR-01..CR-07 and EA lifecycle/security/archive-count regressions after the configuration change: PASS.
+
+Next test block: campaign form adoption and multi-location persistence/rendering.

@@ -75,10 +75,169 @@ sub tool {
 
 sub configure {
     my ( $self, $args ) = @_;
+    my $cgi = $self->{cgi};
+    $self->_ensure_schema;
+
+    my $success_message;
+    my @errors;
+
+    if ( ( $cgi->request_method || q{} ) eq 'POST' ) {
+        my $op = $cgi->param('op') || q{};
+
+        if ( $op eq 'cud-save_vocab_value' ) {
+            my $dimension  = _trim( scalar $cgi->param('dimension') );
+            my $value_code = lc _trim( scalar $cgi->param('value_code') );
+            my $label      = _trim( scalar $cgi->param('label') );
+            my $sort_order = _trim( scalar $cgi->param('sort_order') );
+            my $is_active  = $cgi->param('is_active') ? 1 : 0;
+
+            my %allowed_dimensions = map { $_ => 1 } qw(
+              campaign_type channel location language audience cadence
+            );
+
+            push @errors, 'Select a valid configuration dimension.'
+              unless $allowed_dimensions{$dimension};
+            push @errors, 'Code is required.'
+              unless length $value_code;
+            push @errors, 'Code may contain only lowercase letters, numbers, underscore and hyphen.'
+              if length($value_code)
+              && $value_code !~ /^[a-z0-9][a-z0-9_-]{0,79}$/;
+            push @errors, 'Label is required.'
+              unless length $label;
+            push @errors, 'Label must be 255 characters or fewer.'
+              if length($label) > 255;
+            push @errors, 'Sort order must be a whole number from 0 to 9999.'
+              unless $sort_order =~ /^\d{1,4}$/ && $sort_order <= 9999;
+
+            unless (@errors) {
+                my $dbh   = C4::Context->dbh;
+                my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+
+                my $ok = eval {
+                    local $dbh->{RaiseError} = 1;
+                    $dbh->begin_work;
+                    $dbh->do(
+                        q{
+                            INSERT INTO plugin_ajsn_promo_vocab_values
+                                (dimension, value_code, label, sort_order, is_active,
+                                 created_by, updated_by, deleted_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
+                            ON DUPLICATE KEY UPDATE
+                                label = VALUES(label),
+                                sort_order = VALUES(sort_order),
+                                is_active = VALUES(is_active),
+                                updated_by = VALUES(updated_by),
+                                deleted_at = NULL
+                        },
+                        undef,
+                        $dimension,
+                        $value_code,
+                        $label,
+                        $sort_order,
+                        $is_active,
+                        $actor,
+                        $actor,
+                    );
+                    $dbh->commit;
+                    1;
+                };
+
+                if ($ok) {
+                    $success_message = sprintf(
+                        'Saved %s value "%s".',
+                        $dimension,
+                        $label,
+                    );
+                } else {
+                    my $error = $@ || 'Unknown database error';
+                    eval { $dbh->rollback };
+                    warn "Promotion & Engagement vocabulary save failed: $error";
+                    push @errors, 'The configuration value could not be saved. No partial change was kept.';
+                }
+            }
+        }
+        elsif ( $op eq 'cud-toggle_vocab_value' ) {
+            my $vocab_value_id = _trim( scalar $cgi->param('vocab_value_id') );
+            my $set_active     = _trim( scalar $cgi->param('set_active') );
+
+            push @errors, 'Select a valid configuration value.'
+              unless $vocab_value_id =~ /^\d+$/ && $vocab_value_id > 0;
+            push @errors, 'Invalid active-state request.'
+              unless $set_active eq '0' || $set_active eq '1';
+
+            unless (@errors) {
+                my $dbh   = C4::Context->dbh;
+                my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+                my $rows  = $dbh->do(
+                    q{
+                        UPDATE plugin_ajsn_promo_vocab_values
+                           SET is_active = ?, updated_by = ?
+                         WHERE vocab_value_id = ?
+                           AND deleted_at IS NULL
+                    },
+                    undef,
+                    $set_active,
+                    $actor,
+                    $vocab_value_id,
+                );
+
+                if ( $rows && $rows > 0 ) {
+                    $success_message = $set_active
+                      ? 'Configuration value enabled.'
+                      : 'Configuration value disabled.';
+                } else {
+                    push @errors, 'The requested configuration value was not found.';
+                }
+            }
+        }
+        elsif ( length $op ) {
+            push @errors, 'Unsupported configuration action.';
+        }
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $rows = $dbh->selectall_arrayref(
+        q{
+            SELECT vocab_value_id, dimension, value_code, label,
+                   sort_order, is_active, created_at, updated_at
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE deleted_at IS NULL
+             ORDER BY dimension, sort_order, label, value_code
+        },
+        { Slice => {} },
+    );
+
+    my @dimension_order = qw(
+      campaign_type channel location language audience cadence
+    );
+    my %dimension_labels = (
+        campaign_type => 'Campaign types',
+        channel       => 'Channels',
+        location      => 'Locations',
+        language      => 'Languages',
+        audience      => 'Audiences',
+        cadence       => 'Cadence / frequency',
+    );
+    my %values_by_dimension;
+    for my $row ( @{ $rows || [] } ) {
+        push @{ $values_by_dimension{ $row->{dimension} } }, $row;
+    }
+
+    my @vocabulary_groups = map {
+        {
+            dimension => $_,
+            label     => $dimension_labels{$_},
+            values    => $values_by_dimension{$_} || [],
+        }
+    } @dimension_order;
+
     my $template = $self->get_template( { file => 'configure.tt' } );
     $template->param(
-        plugin_version => $VERSION,
-        api_namespace  => $self->api_namespace,
+        plugin_version    => $VERSION,
+        api_namespace     => $self->api_namespace,
+        vocabulary_groups => \@vocabulary_groups,
+        success_message   => $success_message,
+        errors            => \@errors,
     );
     return $self->output_html( $template->output() );
 }
@@ -1128,6 +1287,87 @@ sub _ensure_schema {
             PRIMARY KEY (setting_key)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS plugin_ajsn_promo_vocab_values (
+            vocab_value_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            dimension VARCHAR(40) NOT NULL,
+            value_code VARCHAR(80) NOT NULL,
+            label VARCHAR(255) NOT NULL,
+            sort_order INT NOT NULL DEFAULT 100,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_by INT NULL,
+            updated_by INT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            deleted_at DATETIME NULL,
+            PRIMARY KEY (vocab_value_id),
+            UNIQUE KEY uq_promo_vocab_dimension_code (dimension, value_code),
+            KEY idx_promo_vocab_dimension_active_sort (dimension, is_active, sort_order)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS plugin_ajsn_promo_campaign_locations (
+            campaign_location_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            campaign_id BIGINT UNSIGNED NOT NULL,
+            location_value_id BIGINT UNSIGNED NOT NULL,
+            added_by INT NULL,
+            added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            deleted_at DATETIME NULL,
+            PRIMARY KEY (campaign_location_id),
+            UNIQUE KEY uq_promo_campaign_location (campaign_id, location_value_id),
+            KEY idx_promo_location_value (location_value_id),
+            CONSTRAINT fk_ajsn_promo_campaign_location_campaign
+                FOREIGN KEY (campaign_id)
+                REFERENCES plugin_ajsn_promo_campaigns (campaign_id)
+                ON DELETE CASCADE,
+            CONSTRAINT fk_ajsn_promo_campaign_location_value
+                FOREIGN KEY (location_value_id)
+                REFERENCES plugin_ajsn_promo_vocab_values (vocab_value_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    });
+
+    _seed_default_vocab_values($dbh);
+
+    return 1;
+}
+
+
+sub _seed_default_vocab_values {
+    my ($dbh) = @_;
+
+    my @defaults = (
+        [ campaign_type => subject_display     => 'Subject / thematic display', 10 ],
+        [ campaign_type => new_arrivals        => 'New arrivals',               20 ],
+        [ campaign_type => recommendation      => 'Recommendation campaign',    30 ],
+        [ campaign_type => email_campaign      => 'Email campaign',             40 ],
+        [ campaign_type => digital_signage     => 'Digital signage',            50 ],
+        [ campaign_type => physical_signage    => 'Physical signage',           60 ],
+        [ campaign_type => resource_feature    => 'Resource feature',           70 ],
+        [ campaign_type => author_feature      => 'Author feature',             80 ],
+        [ campaign_type => publication_feature => 'Publication feature',        90 ],
+        [ campaign_type => event               => 'Event',                     100 ],
+        [ campaign_type => outreach            => 'Outreach',                  110 ],
+        [ campaign_type => other               => 'Other',                     120 ],
+        [ channel       => physical_display    => 'Physical display',           10 ],
+        [ channel       => email               => 'Email',                      20 ],
+        [ channel       => digital_signage     => 'Digital signage',            30 ],
+        [ channel       => print_signage       => 'Print signage',              40 ],
+        [ channel       => web                 => 'Web',                        50 ],
+        [ channel       => social              => 'Social',                     60 ],
+        [ channel       => event               => 'Event',                      70 ],
+        [ channel       => other               => 'Other',                      80 ],
+    );
+
+    my $sth = $dbh->prepare(q{
+        INSERT IGNORE INTO plugin_ajsn_promo_vocab_values
+            (dimension, value_code, label, sort_order, is_active)
+        VALUES (?, ?, ?, ?, 1)
+    });
+    for my $row (@defaults) {
+        $sth->execute( @{$row} );
+    }
 
     return 1;
 }

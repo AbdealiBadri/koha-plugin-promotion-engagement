@@ -9,9 +9,9 @@ current:
   implementation_branch: "feature/v0.2-config-multilocation"
   implementation_commit: "82a69d4"
   project_brain_branch: "docs/project-brain"
-  objective: "Implement universal plugin-managed vocabularies and normalized multi-location campaigns"
+  objective: "Complete multi-location Create/Edit integration on verified universal configuration foundation"
   last_verified: "2026-09-19"
-  next_action: "Implement DEC-019 vocabulary schema/config UI and campaign-to-many-location relation with backward compatibility"
+  next_action: "Adopt configured type/channel in forms, add location multi-select and transactional campaign-location persistence/rendering"
 
 environment:
   local:
