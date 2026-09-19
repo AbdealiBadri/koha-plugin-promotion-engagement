@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-19
 **Active runtime branch:** `feature/v0.2-campaign-edit-archive`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** Edit / Update / Archive implementation
+**Current milestone:** Edit / Update / Archive visual acceptance
 
 ## Verified completed today
 
@@ -31,19 +31,24 @@
 - Zero-item campaign detail: PASS.
 - Browser logout issue: isolated to a stale/deep plugin login path. User confirmed that logging in through the normal Koha staff homepage prevents logout during navigation. T-131 remains PASS and this is not treated as a CSRF regression.
 
+## Edit / Update / Archive runtime result
+
+- EA-01 through EA-13: PASS.
+- Edit form prefill: PASS.
+- Transactional update and item reconciliation: PASS.
+- Update/status/archive audit: PASS.
+- Campaign/item soft-delete archive: PASS.
+- Update/archive CSRF rejection: PASS.
+- Dashboard count after archive: PASS.
+- CR-01 through CR-07 regression: PASS.
+- Perl syntax / diff check / runtime logs: PASS.
+
 ## Exact next action
 
-Implement the next campaign-management slice in this order:
-1. read current architecture/decision/data-model rules for campaign updates and soft-delete;
-2. add Edit Campaign screen pre-filled from the existing campaign;
-3. add transactional update logic with validation and audit;
-4. add controlled status transitions;
-5. add Archive action using deleted_at rather than destructive delete;
-6. run create/read regression plus new edit/archive tests;
-7. present the local Koha page for one human visual check.
+User performs one visual check of retained EDIT-VISUAL-20260919. If accepted, rerun regression, merge this branch, and begin Universal Configuration + Multi-location.
 
 ## Visual URL
 
-`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotions`
+`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=promotion_detail&campaign_id=13`
 
 If not already authenticated, log in to the local KTD Koha staff interface first and then open the URL above.

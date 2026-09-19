@@ -52,10 +52,10 @@ issues:
     summary: "Single free-text location cannot model one campaign across multiple locations"
 
   ISSUE-009:
-    status: "planned"
+    status: "partially-resolved"
     severity: "medium"
     module: "campaign-management"
-    summary: "No campaign detail/edit/archive/filter lifecycle"
+    summary: "List/detail/edit/archive lifecycle implemented; search/filter/pagination and human visual acceptance remain"
 
   ISSUE-010:
     status: "planned"
@@ -70,12 +70,11 @@ issues:
     summary: "No dedicated e-resource/non-barcode promoted-resource model"
 
   ISSUE-012:
-    status: "open-current-checkpoint"
+    status: "resolved"
     severity: "high-before-release"
     module: "security"
-    summary: "Dedicated CSRF and lower-permission matrix tests remain"
-    completed: "Authenticated health allowed; unauthenticated health denied"
-    next_action: "Run T-131 missing/invalid CSRF, T-132 no plugin tool permission, T-133 authenticated no catalogue permission"
+    summary: "CSRF and lower-permission security matrix completed"
+    completed: "T-131/T-132/T-133/T-134 PASS; edit/archive forged-CSRF tests EA-09/EA-11 also PASS"
 
   ISSUE-013:
     status: "open-release-blocker"

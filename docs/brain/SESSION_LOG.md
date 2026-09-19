@@ -112,3 +112,18 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Current milestone is Edit / Update / Archive.
 - Success gate: edit existing campaign data safely, enforce the same validation/integrity rules as create, record audit history for changes/status transitions, archive via soft-delete using deleted_at rather than destructive deletion, and keep Create/List/Detail regressions green.
 - After this gate, the next hurdle is universal configuration plus multi-location campaigns.
+
+### Edit / Update / Archive runtime gate completed — 2026-09-19
+- Added pre-filled Edit Promotion screen.
+- Added transactional update with current create-equivalent validation rules.
+- Added item reconciliation: new links insert, removed links soft-delete, removed links can reactivate without duplicates.
+- Added audit actions `campaign_updated`, `campaign_status_changed`, and `campaign_archived`.
+- Added Archive POST with Koha CSRF, explicit confirmation, campaign soft-delete and active item-link soft-delete.
+- Hardened dashboard linked-item count so archived links are excluded.
+- EA-01 through EA-13 PASS.
+- Forged-CSRF update/archive requests return HTTP 403 with no state change.
+- Invalid status values are rejected.
+- CR-01 through CR-07 regression suite PASS after final changes.
+- Perl syntax OK; git diff check clean; no new Plack/intranet application errors observed.
+- Retained visual fixture EDIT-VISUAL-20260919, campaign_id 13, status active, one linked item, three audit rows.
+- Next action: human visual acceptance, then final regression and merge.

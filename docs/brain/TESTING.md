@@ -66,6 +66,27 @@ A temporary apparent failure using `3999900002034` was **not a plugin bug**. DB 
 | T-133 | Health API without required `catalogue` permission denied | PASS | `term1` authenticated successfully via HTTP Basic but lacks `catalogue`; endpoint returned HTTP 403 with `Authorization failure. Missing required permission(s).` and required permission `{catalogue: 1}`. Test account state was left/restored at its original flags. |
 | T-134 | Authorized campaign-create smoke after security tests | PASS | Synthetic valid staff session for superlibrarian submitted normal campaign create; HTTP 200, one campaign row and one `campaign_created` audit row observed; test data cleaned up afterward. |
 
+## v0.2 Campaign management — Edit / Update / Archive
+
+| ID | Test | Status | Result |
+|---|---|---|---|
+| EA-01 | Edit form prefill | PASS | Existing fields and linked barcode rendered. |
+| EA-02 | Valid transactional update + audit | PASS | Metadata/items updated; campaign_updated and status audit rows created. |
+| EA-03 | Invalid barcode blocks entire update | PASS | No campaign/item state changed. |
+| EA-04 | Linked-item removal is soft-delete | PASS | Item-link deleted_at set; row preserved. |
+| EA-05 | Soft-deleted link can be reactivated | PASS | Existing unique row reactivated. |
+| EA-06 | Unconfirmed archive denied | PASS | Campaign remained active. |
+| EA-07 | Campaign archive soft-delete + audit | PASS | Campaign archived; rows preserved; archive audit inserted. |
+| EA-08 | Archived campaign hidden from active views | PASS | List excludes it; detail returns unavailable. |
+| EA-09 | Update with forged CSRF rejected | PASS | HTTP 403; state unchanged. |
+| EA-10 | Invalid status rejected | PASS | Status whitelist enforced. |
+| EA-11 | Archive with forged CSRF rejected | PASS | HTTP 403; campaign remained active. |
+| EA-12 | Archive soft-deletes linked items | PASS | Active links became 0; physical rows preserved. |
+| EA-13 | Dashboard active linked-item count after archive | PASS | UI/DB count returned to baseline. |
+| EA-14 | Existing CR-01..CR-07 regression | PASS | Create/list/detail behavior remained green. |
+
+Human visual acceptance is pending. See `docs/V0_2_EDIT_ARCHIVE_TEST.md`.
+
 ## KTD/runtime recovery
 
 | ID | Test | Status | Result |

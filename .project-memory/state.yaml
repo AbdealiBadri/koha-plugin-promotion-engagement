@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.2 Edit / Update / Archive"
+  milestone: "v0.2 Edit / Update / Archive visual acceptance"
   implementation_branch: "feature/v0.2-campaign-edit-archive"
   implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
   project_brain_branch: "docs/project-brain"
-  objective: "Implement auditable campaign edit/update/archive without Koha core changes"
+  objective: "Complete human visual acceptance and merge tested Edit/Update/Archive module"
   last_verified: "2026-09-19"
-  next_action: "Build edit screen, transactional update, status transitions, archive soft-delete, and regression tests"
+  next_action: "Visual check EDIT-VISUAL-20260919; rerun EA/CR regression; merge; start universal configuration + multi-location"
 
 environment:
   local:
@@ -36,8 +36,8 @@ environment:
     target: "Aljamea-tus-Saifiyah Nairobi"
 
 blockers:
-  - id: "ISSUE-012"
-    summary: "T-131 invalid-CSRF and T-132 plugin-tool denial remain; T-133 API catalogue denial passed"
+  - id: "VISUAL-EA"
+    summary: "Human visual acceptance pending for Edit / Update / Archive UI"
 
 resolved_recently:
   - id: "ISSUE-004"
@@ -57,11 +57,11 @@ critical_decisions:
   - "DEC-017"
 
 last_test:
-  id: "T-133"
+  id: "EA-13+CR"
   date: "2026-09-19"
-  command: "Authenticated GET /api/v1/contrib/ajsn_promotion/health using KTD identity without catalogue permission"
+  command: "Edit/archive + security + dashboard archive count + CR-01..CR-07 regression"
   status: "PASS"
-  result: "HTTP 403 Authorization failure with required permission catalogue=1"
+  result: "EA-01..EA-13 and CR-01..CR-07 pass; Perl syntax OK; no new runtime errors"
 
 runtime:
   plugin_version: "0.2.0"

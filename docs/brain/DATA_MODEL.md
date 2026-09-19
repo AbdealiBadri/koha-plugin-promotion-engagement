@@ -84,7 +84,9 @@ Important: Koha `items` remains authoritative. The plugin validates the barcode 
 
 Indexes: campaign, actor, created timestamp.
 
-Current creation audit details include campaign UUID, type, channel, status and item count.
+Current audit action types now include campaign_created, campaign_updated, campaign_status_changed, and campaign_archived.
+
+Update audit details record changed fields plus added/removed itemnumbers. Archive audit details record campaign identity/status and number of active links archived.
 
 ### `plugin_ajsn_promo_settings`
 
@@ -110,9 +112,15 @@ erDiagram
 
 Not every logical Koha reference is enforced as a database foreign key; validation is performed through Koha APIs where implemented.
 
-## Transaction rule
+## Transaction rules
 
-Successful campaign creation performs campaign insert, all item-link inserts and audit insert in one DB transaction. Validation errors occur before the transaction. DB exceptions trigger rollback.
+- Campaign creation performs campaign insert, item-link inserts and audit insert in one transaction.
+- Campaign update validates all submitted barcodes before any write, then updates metadata, reconciles item links and writes audit rows in one transaction.
+- Removing an item sets campaign-item deleted_at; it does not hard-delete the row.
+- Re-adding the same item reactivates the existing unique campaign-item row.
+- Campaign archive sets campaign deleted_at, soft-deletes active campaign-item links, and writes campaign_archived in one transaction.
+- Archived rows remain physically present for history/audit; active list/detail/dashboard queries exclude archived campaigns/links.
+- DB exceptions trigger rollback so partial lifecycle writes are not kept.
 
 ## Current input normalization
 

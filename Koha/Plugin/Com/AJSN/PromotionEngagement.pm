@@ -50,6 +50,26 @@ sub tool {
         return $self->_promotion_detail_screen;
     }
 
+    if ( $action eq 'edit_promotion' ) {
+        if ( ( $cgi->request_method || q{} ) eq 'POST'
+            && ( $cgi->param('op') || q{} ) eq 'cud-update_promotion' )
+        {
+            return $self->_update_promotion;
+        }
+        return $self->_edit_promotion_screen;
+    }
+
+    if ( $action eq 'archive_promotion' ) {
+        if ( ( $cgi->request_method || q{} ) eq 'POST'
+            && ( $cgi->param('op') || q{} ) eq 'cud-archive_promotion' )
+        {
+            return $self->_archive_promotion;
+        }
+        return $self->_promotions_screen(
+            { error_message => 'Archive requests must be submitted from a campaign detail page.' }
+        );
+    }
+
     return $self->_dashboard;
 }
 
@@ -103,7 +123,14 @@ sub _dashboard {
         'SELECT COUNT(*) FROM plugin_ajsn_promo_campaigns WHERE deleted_at IS NULL'
     );
     my ($item_count) = $dbh->selectrow_array(
-        'SELECT COUNT(*) FROM plugin_ajsn_promo_items WHERE deleted_at IS NULL'
+        q{
+            SELECT COUNT(*)
+              FROM plugin_ajsn_promo_items pi
+              JOIN plugin_ajsn_promo_campaigns c
+                ON c.campaign_id = pi.campaign_id
+             WHERE pi.deleted_at IS NULL
+               AND c.deleted_at IS NULL
+        }
     );
 
     my $recent_campaigns = $dbh->selectall_arrayref(
@@ -160,15 +187,17 @@ sub _promotions_screen {
 
     my $template = $self->get_template( { file => 'promotions.tt' } );
     $template->param(
-        plugin_version => $VERSION,
-        campaigns      => $campaigns || [],
-        error_message  => $args->{error_message},
+        plugin_version  => $VERSION,
+        campaigns       => $campaigns || [],
+        error_message   => $args->{error_message},
+        success_message => $args->{success_message},
     );
     return $self->output_html( $template->output() );
 }
 
 sub _promotion_detail_screen {
-    my ($self) = @_;
+    my ( $self, $args ) = @_;
+    $args ||= {};
     $self->_ensure_schema;
 
     my $cgi = $self->{cgi};
@@ -238,10 +267,11 @@ sub _promotion_detail_screen {
 
     my $template = $self->get_template( { file => 'promotion_detail.tt' } );
     $template->param(
-        plugin_version => $VERSION,
-        campaign       => $campaign,
-        linked_items   => $linked_items || [],
-        audit_rows     => $audit_rows || [],
+        plugin_version  => $VERSION,
+        campaign        => $campaign,
+        linked_items    => $linked_items || [],
+        audit_rows      => $audit_rows || [],
+        success_message => $args->{success_message},
     );
     return $self->output_html( $template->output() );
 }
@@ -492,6 +522,525 @@ sub _create_promotion {
         {
             success_message => $message,
             warning_message => $warning_message,
+        }
+    );
+}
+
+
+sub _edit_promotion_screen {
+    my ( $self, $args ) = @_;
+    $args ||= {};
+    $self->_ensure_schema;
+
+    my $cgi = $self->{cgi};
+    my $campaign_id = _trim(
+        defined $args->{campaign_id}
+        ? $args->{campaign_id}
+        : scalar $cgi->param('campaign_id')
+    );
+
+    unless ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 ) {
+        return $self->_promotions_screen(
+            { error_message => 'Select a valid campaign to edit.' }
+        );
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $campaign = $dbh->selectrow_hashref(
+        q{
+            SELECT campaign_id, campaign_uuid, campaign_type, channel, name,
+                   start_date, end_date, branchcode, target_audience,
+                   language_code, display_location, notes, status, created_by,
+                   created_at, updated_at
+              FROM plugin_ajsn_promo_campaigns
+             WHERE campaign_id = ?
+               AND deleted_at IS NULL
+        },
+        undef,
+        $campaign_id,
+    );
+
+    unless ($campaign) {
+        return $self->_promotions_screen(
+            { error_message => 'The requested campaign does not exist or is no longer available.' }
+        );
+    }
+
+    my $form = $args->{form};
+    unless ($form) {
+        $form = { %{$campaign} };
+        my $barcodes = $dbh->selectcol_arrayref(
+            q{
+                SELECT barcode
+                  FROM plugin_ajsn_promo_items
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+                 ORDER BY campaign_item_id
+            },
+            undef,
+            $campaign_id,
+        );
+        $form->{barcodes_text} = join "\n", grep { defined && length } @{ $barcodes || [] };
+    }
+    $form->{campaign_id} = $campaign_id;
+
+    my @libraries;
+    my $libraries_rs = Koha::Libraries->search( {}, { order_by => 'branchname' } );
+    while ( my $library = $libraries_rs->next ) {
+        push @libraries,
+          {
+            branchcode => $library->branchcode,
+            branchname => $library->branchname,
+          };
+    }
+
+    my $template = $self->get_template( { file => 'edit_promotion.tt' } );
+    $template->param(
+        plugin_version     => $VERSION,
+        campaign           => $campaign,
+        libraries          => \@libraries,
+        form               => $form,
+        errors             => $args->{errors} || [],
+        warnings           => $args->{warnings} || [],
+        invalid_barcodes   => $args->{invalid_barcodes} || [],
+        duplicate_barcodes => $args->{duplicate_barcodes} || [],
+        valid_item_count   => $args->{valid_item_count} || 0,
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _update_promotion {
+    my ($self) = @_;
+    my $cgi = $self->{cgi};
+    $self->_ensure_schema;
+
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    unless ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 ) {
+        return $self->_promotions_screen(
+            { error_message => 'Select a valid campaign to update.' }
+        );
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $existing = $dbh->selectrow_hashref(
+        q{
+            SELECT campaign_id, campaign_uuid, campaign_type, channel, name,
+                   start_date, end_date, branchcode, target_audience,
+                   language_code, display_location, notes, status, created_by,
+                   created_at, updated_at
+              FROM plugin_ajsn_promo_campaigns
+             WHERE campaign_id = ?
+               AND deleted_at IS NULL
+        },
+        undef,
+        $campaign_id,
+    );
+
+    unless ($existing) {
+        return $self->_promotions_screen(
+            { error_message => 'The requested campaign does not exist or is no longer available.' }
+        );
+    }
+
+    my %form = (
+        campaign_id      => $campaign_id,
+        campaign_type    => _trim( scalar $cgi->param('campaign_type') ),
+        channel          => _trim( scalar $cgi->param('channel') ),
+        name             => _trim( scalar $cgi->param('name') ),
+        start_date       => _trim( scalar $cgi->param('start_date') ),
+        end_date         => _trim( scalar $cgi->param('end_date') ),
+        branchcode       => _trim( scalar $cgi->param('branchcode') ),
+        target_audience  => _trim( scalar $cgi->param('target_audience') ),
+        language_code    => _trim( scalar $cgi->param('language_code') ),
+        display_location => _trim( scalar $cgi->param('display_location') ),
+        notes            => _trim( scalar $cgi->param('notes') ),
+        status           => _trim( scalar $cgi->param('status') ) || 'draft',
+        barcodes_text    => scalar( $cgi->param('barcodes') // q{} ),
+    );
+
+    my @errors;
+    my @warnings;
+
+    my %allowed_types = map { $_ => 1 } qw(
+      subject_display new_arrivals recommendation email_campaign digital_signage
+      physical_signage resource_feature author_feature publication_feature event
+      outreach other
+    );
+    my %allowed_channels = map { $_ => 1 } qw(
+      physical_display email digital_signage print_signage web social event other
+    );
+    my %allowed_statuses = map { $_ => 1 } qw(draft active completed);
+
+    push @errors, 'Select a valid promotion type.'
+      unless $allowed_types{ $form{campaign_type} };
+    push @errors, 'Select a valid channel.'
+      unless $allowed_channels{ $form{channel} };
+    push @errors, 'Campaign name is required.' unless length $form{name};
+    push @errors, 'Campaign name must be 255 characters or fewer.'
+      if length( $form{name} ) > 255;
+    push @errors, 'Start date is required.' unless length $form{start_date};
+    push @errors, 'Start date must use YYYY-MM-DD format.'
+      if length( $form{start_date} ) && $form{start_date} !~ /^\d{4}-\d{2}-\d{2}$/;
+    push @errors, 'End date must use YYYY-MM-DD format.'
+      if length( $form{end_date} ) && $form{end_date} !~ /^\d{4}-\d{2}-\d{2}$/;
+    push @errors, 'End date cannot be before the start date.'
+      if $form{start_date} =~ /^\d{4}-\d{2}-\d{2}$/
+      && $form{end_date} =~ /^\d{4}-\d{2}-\d{2}$/
+      && $form{end_date} lt $form{start_date};
+    push @errors, 'Target audience must be 255 characters or fewer.'
+      if length( $form{target_audience} ) > 255;
+    push @errors, 'Language must be 30 characters or fewer.'
+      if length( $form{language_code} ) > 30;
+    push @errors, 'Location must be 255 characters or fewer.'
+      if length( $form{display_location} ) > 255;
+    push @errors, 'Select a valid status.' unless $allowed_statuses{ $form{status} };
+
+    if ( length $form{branchcode} && !Koha::Libraries->find( $form{branchcode} ) ) {
+        push @errors, 'The selected Koha library does not exist.';
+    }
+
+    my %seen;
+    my @barcodes;
+    my @duplicate_barcodes;
+    for my $raw ( split /[\r\n,;]+/, $form{barcodes_text} ) {
+        my $barcode = _trim($raw);
+        next unless length $barcode;
+        if ( $seen{$barcode}++ ) {
+            push @duplicate_barcodes, $barcode;
+            next;
+        }
+        push @barcodes, $barcode;
+    }
+
+    my @items;
+    my @invalid_barcodes;
+    for my $barcode (@barcodes) {
+        my $item = Koha::Items->search( { barcode => $barcode } )->next;
+        if ($item) {
+            push @items,
+              {
+                itemnumber => $item->itemnumber,
+                barcode    => $item->barcode,
+              };
+        } else {
+            push @invalid_barcodes, $barcode;
+        }
+    }
+
+    if (@invalid_barcodes) {
+        push @errors,
+          'No changes were saved because one or more barcodes do not exist in Koha. Correct or remove the invalid barcodes and submit again.';
+    }
+    if (@duplicate_barcodes) {
+        push @warnings,
+          'Duplicate barcode entries were detected. Each duplicate is ignored and each Koha item can be linked only once per campaign.';
+    }
+
+    if (@errors) {
+        return $self->_edit_promotion_screen(
+            {
+                campaign_id        => $campaign_id,
+                form               => \%form,
+                errors             => \@errors,
+                warnings           => \@warnings,
+                invalid_barcodes   => \@invalid_barcodes,
+                duplicate_barcodes => \@duplicate_barcodes,
+                valid_item_count   => scalar @items,
+            }
+        );
+    }
+
+    my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+
+    my @tracked_fields = qw(
+      campaign_type channel name start_date end_date branchcode target_audience
+      language_code display_location notes status
+    );
+    my @changed_fields;
+    for my $field (@tracked_fields) {
+        my $before = defined $existing->{$field} ? $existing->{$field} : q{};
+        my $after  = defined $form{$field}       ? $form{$field}       : q{};
+        push @changed_fields, $field if $before ne $after;
+    }
+
+    my $existing_item_rows = $dbh->selectall_arrayref(
+        q{
+            SELECT campaign_item_id, itemnumber, barcode, deleted_at
+              FROM plugin_ajsn_promo_items
+             WHERE campaign_id = ?
+        },
+        { Slice => {} },
+        $campaign_id,
+    );
+    my %existing_by_item = map { $_->{itemnumber} => $_ } @{ $existing_item_rows || [] };
+    my %desired_by_item  = map { $_->{itemnumber} => $_ } @items;
+
+    my @added_itemnumbers;
+    my @removed_itemnumbers;
+
+    my $ok = eval {
+        local $dbh->{RaiseError} = 1;
+        $dbh->begin_work;
+
+        $dbh->do(
+            q{
+                UPDATE plugin_ajsn_promo_campaigns
+                   SET campaign_type = ?, channel = ?, name = ?, start_date = ?,
+                       end_date = ?, branchcode = ?, target_audience = ?,
+                       language_code = ?, display_location = ?, notes = ?, status = ?
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $form{campaign_type},
+            $form{channel},
+            $form{name},
+            $form{start_date},
+            length( $form{end_date} ) ? $form{end_date} : undef,
+            length( $form{branchcode} ) ? $form{branchcode} : undef,
+            length( $form{target_audience} ) ? $form{target_audience} : undef,
+            length( $form{language_code} ) ? $form{language_code} : undef,
+            length( $form{display_location} ) ? $form{display_location} : undef,
+            length( $form{notes} ) ? $form{notes} : undef,
+            $form{status},
+            $campaign_id,
+        );
+
+        for my $row ( @{ $existing_item_rows || [] } ) {
+            my $itemnumber = $row->{itemnumber};
+            if ( $desired_by_item{$itemnumber} ) {
+                if ( defined $row->{deleted_at} ) {
+                    my $item = $desired_by_item{$itemnumber};
+                    $dbh->do(
+                        q{
+                            UPDATE plugin_ajsn_promo_items
+                               SET barcode = ?, added_by = ?, added_at = NOW(), deleted_at = NULL
+                             WHERE campaign_item_id = ?
+                        },
+                        undef,
+                        $item->{barcode},
+                        $actor,
+                        $row->{campaign_item_id},
+                    );
+                    push @added_itemnumbers, $itemnumber;
+                }
+            } elsif ( !defined $row->{deleted_at} ) {
+                $dbh->do(
+                    q{
+                        UPDATE plugin_ajsn_promo_items
+                           SET deleted_at = NOW()
+                         WHERE campaign_item_id = ?
+                    },
+                    undef,
+                    $row->{campaign_item_id},
+                );
+                push @removed_itemnumbers, $itemnumber;
+            }
+        }
+
+        my $item_sth = $dbh->prepare(q{
+            INSERT INTO plugin_ajsn_promo_items
+                (campaign_id, itemnumber, barcode, added_by)
+            VALUES (?, ?, ?, ?)
+        });
+        for my $item (@items) {
+            next if $existing_by_item{ $item->{itemnumber} };
+            $item_sth->execute(
+                $campaign_id,
+                $item->{itemnumber},
+                $item->{barcode},
+                $actor,
+            );
+            push @added_itemnumbers, $item->{itemnumber};
+        }
+
+        my $details = encode_json(
+            {
+                campaign_uuid      => $existing->{campaign_uuid},
+                changed_fields     => \@changed_fields,
+                status_before      => $existing->{status},
+                status_after       => $form{status},
+                added_itemnumbers  => \@added_itemnumbers,
+                removed_itemnumbers => \@removed_itemnumbers,
+                item_count         => scalar @items,
+            }
+        );
+
+        $dbh->do(
+            q{
+                INSERT INTO plugin_ajsn_promo_audit
+                    (campaign_id, actor_borrowernumber, action_type, entity_type,
+                     entity_id, details_json)
+                VALUES (?, ?, 'campaign_updated', 'campaign', ?, ?)
+            },
+            undef,
+            $campaign_id,
+            $actor,
+            $existing->{campaign_uuid},
+            $details,
+        );
+
+        if ( ( $existing->{status} // q{} ) ne ( $form{status} // q{} ) ) {
+            my $status_details = encode_json(
+                {
+                    from => $existing->{status},
+                    to   => $form{status},
+                }
+            );
+            $dbh->do(
+                q{
+                    INSERT INTO plugin_ajsn_promo_audit
+                        (campaign_id, actor_borrowernumber, action_type, entity_type,
+                         entity_id, details_json)
+                    VALUES (?, ?, 'campaign_status_changed', 'campaign', ?, ?)
+                },
+                undef,
+                $campaign_id,
+                $actor,
+                $existing->{campaign_uuid},
+                $status_details,
+            );
+        }
+
+        $dbh->commit;
+        1;
+    };
+
+    if ( !$ok ) {
+        my $error = $@ || 'Unknown database error';
+        eval { $dbh->rollback };
+        warn "Promotion & Engagement campaign update failed: $error";
+        push @errors, 'The campaign could not be updated because of a database error. No partial changes were kept.';
+        return $self->_edit_promotion_screen(
+            {
+                campaign_id        => $campaign_id,
+                form               => \%form,
+                errors             => \@errors,
+                warnings           => \@warnings,
+                duplicate_barcodes => \@duplicate_barcodes,
+                valid_item_count   => scalar @items,
+            }
+        );
+    }
+
+    return $self->_promotion_detail_screen(
+        {
+            success_message => sprintf( 'Campaign "%s" was updated successfully.', $form{name} ),
+        }
+    );
+}
+
+sub _archive_promotion {
+    my ($self) = @_;
+    my $cgi = $self->{cgi};
+    $self->_ensure_schema;
+
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my $confirmed   = _trim( scalar $cgi->param('archive_confirm') );
+
+    unless ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 && $confirmed eq '1' ) {
+        return $self->_promotions_screen(
+            { error_message => 'The campaign was not archived because the archive request was invalid or unconfirmed.' }
+        );
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $campaign = $dbh->selectrow_hashref(
+        q{
+            SELECT campaign_id, campaign_uuid, name, status
+              FROM plugin_ajsn_promo_campaigns
+             WHERE campaign_id = ?
+               AND deleted_at IS NULL
+        },
+        undef,
+        $campaign_id,
+    );
+
+    unless ($campaign) {
+        return $self->_promotions_screen(
+            { error_message => 'The requested campaign does not exist or is already archived.' }
+        );
+    }
+
+    my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+    my $ok = eval {
+        local $dbh->{RaiseError} = 1;
+        $dbh->begin_work;
+
+        my $rows = $dbh->do(
+            q{
+                UPDATE plugin_ajsn_promo_campaigns
+                   SET deleted_at = NOW()
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $campaign_id,
+        );
+        die 'Campaign was not archived' unless $rows && $rows > 0;
+
+        my ($active_item_count) = $dbh->selectrow_array(
+            q{
+                SELECT COUNT(*)
+                  FROM plugin_ajsn_promo_items
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $campaign_id,
+        );
+
+        $dbh->do(
+            q{
+                UPDATE plugin_ajsn_promo_items
+                   SET deleted_at = NOW()
+                 WHERE campaign_id = ?
+                   AND deleted_at IS NULL
+            },
+            undef,
+            $campaign_id,
+        );
+
+        my $details = encode_json(
+            {
+                campaign_uuid  => $campaign->{campaign_uuid},
+                name           => $campaign->{name},
+                status         => $campaign->{status},
+                archived_items => $active_item_count || 0,
+            }
+        );
+        $dbh->do(
+            q{
+                INSERT INTO plugin_ajsn_promo_audit
+                    (campaign_id, actor_borrowernumber, action_type, entity_type,
+                     entity_id, details_json)
+                VALUES (?, ?, 'campaign_archived', 'campaign', ?, ?)
+            },
+            undef,
+            $campaign_id,
+            $actor,
+            $campaign->{campaign_uuid},
+            $details,
+        );
+
+        $dbh->commit;
+        1;
+    };
+
+    if ( !$ok ) {
+        my $error = $@ || 'Unknown database error';
+        eval { $dbh->rollback };
+        warn "Promotion & Engagement campaign archive failed: $error";
+        return $self->_promotions_screen(
+            {
+                error_message => 'The campaign could not be archived because of a database error. No partial archive was kept.',
+            }
+        );
+    }
+
+    return $self->_promotions_screen(
+        {
+            success_message => sprintf( 'Campaign "%s" was archived successfully.', $campaign->{name} ),
         }
     );
 }

@@ -1,16 +1,16 @@
 # Current State
 
-**Last verified:** 2026-09-19  
-**Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`  
-**Repository default branch:** `main`  
-**Active implementation branch:** `feature/v0.2-campaign-read`  
+**Last verified:** 2026-09-19
+**Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`
+**Repository default branch:** `main`
+**Active implementation branch:** `feature/v0.2-campaign-edit-archive`
 **Base branch:** `feature/v0.2-campaign-crud`
 
 ## Current milestone
 
-**v0.2 campaign management — Campaign List + Campaign Detail acceptance/merge.**
+**v0.2 campaign management — Edit / Update / Archive visual acceptance.**
 
-**v0.2 Checkpoint 1 is CLOSED.** T-131, T-132, T-133 and the post-security authorized smoke test passed in isolated `promoeng`. CR-01 through CR-07 also passed. Human visual review of Promotions, linked-item detail and zero-item detail passed. The repeated logout was isolated to entering through a stale/deep plugin login path; the user confirmed normal staff-homepage login preserves navigation, so this is not treated as a plugin CSRF defect.
+**v0.2 Checkpoint 1 and Campaign List/Detail are complete and merged.** Edit / Update / Archive is implemented on `feature/v0.2-campaign-edit-archive`. EA-01 through EA-13 and CR-01..CR-07 pass in isolated `promoeng`. Human visual acceptance of the new edit/archive UI is the remaining gate before merge.
 
 ## Overall status
 
@@ -88,9 +88,10 @@ Resolution completed:
 - type/channel are generic but still hard-coded allowed values;
 - audience/language/location are simple fields;
 - only one free-text display location is currently stored;
-- campaign list and read-only campaign detail are built and runtime/visually verified on the read branch;
-- edit/update/archive are not yet built;
-- soft-delete columns exist but no UI/workflow uses them.
+- campaign list and read-only campaign detail are built, runtime-verified, visually accepted and merged;
+- edit/update/archive are implemented and runtime-tested on the active branch;
+- campaign and item-link archive uses deleted_at and preserves history;
+- human visual acceptance remains pending before merge.
 
 ### Dashboard
 
@@ -102,7 +103,7 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 - configurable universal vocabularies;
 - recurring/cadence support;
 - e-resource/non-barcode resource model;
-- edit/update/archive and list filtering/search workflows;
+- list filtering/search workflows;
 - analytics engine;
 - before/during/after and 7/14/30/60-day KPIs;
 - conversion and days-to-first-checkout;
@@ -181,10 +182,10 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Finish synchronizing feature/v0.2-campaign-read with the advanced feature/v0.2-campaign-crud base.
-2. Re-run CR-01..CR-07 after sync.
-3. Merge Draft PR #1 if clean.
-4. Start the next module: **Edit / Update / Archive** with audit-preserving status transitions and soft-delete/archive behavior.
-5. After that, proceed to universal configuration and multi-location support.
+1. Human visual check of `EDIT-VISUAL-20260919` detail and Edit form.
+2. If visual review passes, rerun EA-01..EA-13 plus CR-01..CR-07.
+3. Merge `feature/v0.2-campaign-edit-archive`.
+4. Move to universal configuration + multi-location campaign design/implementation.
+5. Keep search/filter/pagination as remaining campaign-management polish.
 
-See SESSION_HANDOFF.md and TESTING.md.
+See `SESSION_HANDOFF.md`, `TESTING.md`, and `docs/V0_2_EDIT_ARCHIVE_TEST.md`.
