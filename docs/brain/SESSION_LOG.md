@@ -127,3 +127,7 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Perl syntax OK; git diff check clean; no new Plack/intranet application errors observed.
 - Retained visual fixture EDIT-VISUAL-20260919, campaign_id 13, status active, one linked item, three audit rows.
 - Next action: human visual acceptance, then final regression and merge.
+
+### Draft PR for Edit / Update / Archive
+- Draft PR #2 opened: v0.2 campaign edit/update/archive lifecycle.
+- Automated/runtime gate is green; only human visual acceptance of EDIT-VISUAL-20260919 remains before merge.
