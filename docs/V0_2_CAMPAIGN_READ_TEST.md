@@ -109,3 +109,24 @@ Test fixtures intentionally remain in the isolated `promoeng` database for the u
 - `READ-REGRESSION-20260919`
 
 Merge gate status: automated runtime gate is satisfied; final visual review is still pending before Draft PR #1 is merged.
+
+
+## Human visual review — Promotions list
+
+**Date:** 2026-09-19  
+**Result:** PASS for list-page rendering.
+
+The user supplied a screenshot of the local `promoeng` Promotions page. The expected three fixtures are visible:
+- `READ-REGRESSION-20260919`
+- `READ-LINKED-20260919`
+- `READ-ZERO-20260919`
+
+The page visually shows the expected campaign columns, right-side plugin navigation, active Promotions state, and New promotion action.
+
+Non-blocking polish observations:
+- campaign type/channel values are still displayed as machine labels such as `physical_display`, `new_arrivals`, and `subject_display`;
+- the `draft` status text has low visual contrast.
+
+These are UI-polish items and do not block functional acceptance of the read-view module.
+
+**Remaining visual gate:** open `READ-LINKED-20260919` and visually confirm the Campaign Detail page before merge.
