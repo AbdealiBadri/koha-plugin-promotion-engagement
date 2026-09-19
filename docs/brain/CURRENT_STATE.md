@@ -3,14 +3,14 @@
 **Last verified:** 2026-09-19  
 **Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`  
 **Repository default branch:** `main`  
-**Active implementation branch:** `feature/v0.2-campaign-crud`  
-**Implementation commit under test:** `3537b8e` — Fix health endpoint to report current plugin version
+**Active implementation branch:** `feature/v0.2-campaign-read`  
+**Base branch:** `feature/v0.2-campaign-crud`
 
 ## Current milestone
 
-**v0.2 campaign management — Campaign List + Campaign Detail runtime validation.**
+**v0.2 campaign management — Campaign List + Campaign Detail acceptance/merge.**
 
-**v0.2 Checkpoint 1 is CLOSED.** T-131, T-132, T-133 and the post-security authorized smoke test all passed in the isolated `promoeng` environment. The immediate objective is now to runtime-test Draft PR #1 (`feature/v0.2-campaign-read`) before merge.
+**v0.2 Checkpoint 1 is CLOSED.** T-131, T-132, T-133 and the post-security authorized smoke test passed in isolated `promoeng`. CR-01 through CR-07 also passed. Human visual review of Promotions, linked-item detail and zero-item detail passed. The repeated logout was isolated to entering through a stale/deep plugin login path; the user confirmed normal staff-homepage login preserves navigation, so this is not treated as a plugin CSRF defect.
 
 ## Overall status
 
@@ -88,7 +88,8 @@ Resolution completed:
 - type/channel are generic but still hard-coded allowed values;
 - audience/language/location are simple fields;
 - only one free-text display location is currently stored;
-- campaign detail/edit/delete/list management is not built;
+- campaign list and read-only campaign detail are built and runtime/visually verified on the read branch;
+- edit/update/archive are not yet built;
 - soft-delete columns exist but no UI/workflow uses them.
 
 ### Dashboard
@@ -101,7 +102,7 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 - configurable universal vocabularies;
 - recurring/cadence support;
 - e-resource/non-barcode resource model;
-- campaign detail/edit/archive/list/filter workflows;
+- edit/update/archive and list filtering/search workflows;
 - analytics engine;
 - before/during/after and 7/14/30/60-day KPIs;
 - conversion and days-to-first-checkout;
@@ -143,6 +144,17 @@ Current dashboard provides counts and recent campaigns. Conversion rate is a pla
 
 Checkpoint 1 is closed.
 
+### CAMPAIGN READ MODULE
+
+- CR-01 Promotions list: PASS.
+- CR-02 Campaign detail: PASS.
+- CR-03 Linked Koha item read-through: PASS.
+- CR-04 Zero-item campaign: PASS.
+- CR-05 Audit history: PASS.
+- CR-06 Invalid/nonexistent campaign ID handling: PASS.
+- CR-07 create-workflow regression: PASS.
+- Human visual review: PASS using normal Koha staff login path.
+
 ### NOT RUN
 
 - Koha 26.05 compatibility.
@@ -169,16 +181,10 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-Runtime-test Draft PR #1 / branch `feature/v0.2-campaign-read` in `promoeng`:
+1. Finish synchronizing feature/v0.2-campaign-read with the advanced feature/v0.2-campaign-crud base.
+2. Re-run CR-01..CR-07 after sync.
+3. Merge Draft PR #1 if clean.
+4. Start the next module: **Edit / Update / Archive** with audit-preserving status transitions and soft-delete/archive behavior.
+5. After that, proceed to universal configuration and multi-location support.
 
-1. Promotions list renders from existing campaign schema.
-2. Dashboard campaign names link to detail pages.
-3. Campaign detail renders linked Koha title/author/barcode/biblionumber.
-4. Campaign audit history renders.
-5. Zero-book campaign and invalid/nonexistent campaign IDs are handled safely.
-6. Campaign-create regression remains clean.
-7. Merge only after all CR-01..CR-07 checks pass.
-
-After merge, proceed to edit/update/archive, universal configuration and multi-location support.
-
-See `SESSION_HANDOFF.md` and `TESTING.md`.
+See SESSION_HANDOFF.md and TESTING.md.

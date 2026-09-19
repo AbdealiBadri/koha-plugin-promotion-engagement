@@ -88,3 +88,14 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 ### Local KTD login reminder
 - User requested the local `promoeng` Koha staff login reminder for visual testing.
 - Credentials are intentionally **not** written into Project Brain or source control. Use the local KTD environment values only.
+
+### Campaign read acceptance and session isolation — 2026-09-19
+- T-131, T-132, T-133 and T-134 all passed; v0.2 Checkpoint 1 is closed.
+- Campaign read runtime suite CR-01 through CR-07 passed in isolated promoeng.
+- Human visual review passed for the Promotions list, linked-item campaign detail, zero-item campaign detail and audit display.
+- User initially observed repeated Koha session-timeout prompts when entering through the plugin/deep-link login path.
+- User then logged in through the normal Koha staff homepage and confirmed navigation no longer logged out.
+- Therefore the repeated-login behavior is isolated to stale/deep-link browser session state in the test environment and is not treated as a plugin CSRF regression.
+- feature/v0.2-campaign-read was synchronized with the advanced feature/v0.2-campaign-crud base; documentation conflicts were resolved in favor of the latest verified runtime state.
+- CR-01 through CR-07 were rerun after the sync and all passed again.
+- Immediate next action: merge Draft PR #1, then begin Edit / Update / Archive.

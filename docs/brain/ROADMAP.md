@@ -2,7 +2,7 @@
 
 ## Current milestone — v0.2 Checkpoint 1: campaign creation integrity/security
 
-**Status:** IN PROGRESS / runtime environment blocked  
+**Status:** IN PROGRESS / runtime environment healthy  
 **Priority:** P0
 
 ### Completed in current checkpoint
@@ -18,16 +18,18 @@
 - [x] Dashboard counts and recent campaigns.
 - [x] Database audit verification.
 - [x] Mixed valid/invalid rollback verification.
-- [x] Code fix for health endpoint version source.
+- [x] Health endpoint version source fixed.
+- [x] Consistent `kohadev` KTD environment recovered.
+- [x] Runtime health endpoint verified at v0.2.0.
+- [x] Unauthenticated health denial verified.
 
 ### Remaining acceptance work
 
-- [ ] Recover consistent `kohadev` KTD environment. **BLOCKER**
-- [ ] Runtime verify health endpoint reports v0.2.0.
-- [ ] Re-verify unauthenticated health denial on v0.2.
-- [ ] Dedicated invalid/missing CSRF submission test.
-- [ ] Lower-permission plugin/API authorization tests.
-- [ ] Record checkpoint closure in tests/current state.
+- [ ] Dedicated invalid/missing CSRF submission test (T-131).
+- [ ] Logged-in user without plugin `tool` permission test (T-132).
+- [ ] Authenticated API user without `catalogue` permission test (T-133).
+- [ ] Authorized smoke test after permission testing.
+- [ ] Record checkpoint closure in testing/current-state files.
 
 **Acceptance criteria:** all `docs/V0_2_CHECKPOINT_1_TEST.md` pass criteria plus the security regression checks above.
 
@@ -36,12 +38,25 @@
 **Priority:** P1  
 **Dependency:** checkpoint 1 closure
 
-Planned:
+### Prepared remotely — read-only slice
 
-- campaign detail page with linked item title/author/barcode;
-- edit/update workflow with audit;
+Branch `feature/v0.2-campaign-read`, Draft PR #1:
+
+- [x] CODE: campaign list view.
+- [x] CODE: campaign detail view.
+- [x] CODE: linked item title/author/biblionumber live Koha read-through.
+- [x] CODE: campaign audit-history view.
+- [x] CODE: invalid/nonexistent campaign-ID handling.
+- [x] CODE: manual KTD test plan/runbook.
+- [x] REMOTE PREPARATION: Project Brain/roadmap/handoff updated for the exact test sequence.
+- [ ] RUNTIME: CR-01..CR-07 verification.
+- [ ] MERGE: only after T-131/T-132/T-133 and CR-01..CR-07 pass.
+
+### Planned after read-only slice
+
+- campaign edit/update workflow with audit;
 - archive/soft-delete and status transitions;
-- campaign list/search/filter;
+- campaign search/filter refinement;
 - reusable configurable campaign types/channels;
 - location vocabulary design;
 - one campaign to multiple locations;

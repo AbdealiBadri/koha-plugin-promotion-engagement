@@ -42,6 +42,14 @@ sub tool {
         return $self->_new_promotion_screen;
     }
 
+    if ( $action eq 'promotions' ) {
+        return $self->_promotions_screen;
+    }
+
+    if ( $action eq 'promotion_detail' ) {
+        return $self->_promotion_detail_screen;
+    }
+
     return $self->_dashboard;
 }
 
@@ -118,6 +126,122 @@ sub _dashboard {
         recent_campaigns => $recent_campaigns || [],
         success_message  => $args->{success_message},
         warning_message  => $args->{warning_message},
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _promotions_screen {
+    my ( $self, $args ) = @_;
+    $args ||= {};
+    $self->_ensure_schema;
+
+    my $dbh = C4::Context->dbh;
+    my $campaigns = $dbh->selectall_arrayref(
+        q{
+            SELECT c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
+                   c.name, c.start_date, c.end_date, c.branchcode,
+                   c.target_audience, c.language_code, c.display_location,
+                   c.status, c.created_at, c.updated_at,
+                   COUNT(pi.campaign_item_id) AS linked_item_count
+              FROM plugin_ajsn_promo_campaigns c
+              LEFT JOIN plugin_ajsn_promo_items pi
+                ON pi.campaign_id = c.campaign_id
+               AND pi.deleted_at IS NULL
+             WHERE c.deleted_at IS NULL
+             GROUP BY c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
+                      c.name, c.start_date, c.end_date, c.branchcode,
+                      c.target_audience, c.language_code, c.display_location,
+                      c.status, c.created_at, c.updated_at
+             ORDER BY c.campaign_id DESC
+             LIMIT 200
+        },
+        { Slice => {} }
+    );
+
+    my $template = $self->get_template( { file => 'promotions.tt' } );
+    $template->param(
+        plugin_version => $VERSION,
+        campaigns      => $campaigns || [],
+        error_message  => $args->{error_message},
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _promotion_detail_screen {
+    my ($self) = @_;
+    $self->_ensure_schema;
+
+    my $cgi = $self->{cgi};
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+
+    unless ( $campaign_id =~ /^\d+$/ && $campaign_id > 0 ) {
+        return $self->_promotions_screen(
+            { error_message => 'Select a valid campaign to view.' }
+        );
+    }
+
+    my $dbh = C4::Context->dbh;
+    my $campaign = $dbh->selectrow_hashref(
+        q{
+            SELECT campaign_id, campaign_uuid, campaign_type, channel, name,
+                   start_date, end_date, branchcode, target_audience,
+                   language_code, display_location, notes, status, created_by,
+                   created_at, updated_at
+              FROM plugin_ajsn_promo_campaigns
+             WHERE campaign_id = ?
+               AND deleted_at IS NULL
+        },
+        undef,
+        $campaign_id,
+    );
+
+    unless ($campaign) {
+        return $self->_promotions_screen(
+            { error_message => 'The requested campaign does not exist or is no longer available.' }
+        );
+    }
+
+    if ( $campaign->{branchcode} ) {
+        my $library = Koha::Libraries->find( $campaign->{branchcode} );
+        $campaign->{branchname} = $library ? $library->branchname : undef;
+    }
+
+    my $linked_items = $dbh->selectall_arrayref(
+        q{
+            SELECT pi.campaign_item_id, pi.itemnumber, pi.barcode, pi.added_at,
+                   i.biblionumber, b.title, b.author
+              FROM plugin_ajsn_promo_items pi
+              LEFT JOIN items i
+                ON i.itemnumber = pi.itemnumber
+              LEFT JOIN biblio b
+                ON b.biblionumber = i.biblionumber
+             WHERE pi.campaign_id = ?
+               AND pi.deleted_at IS NULL
+             ORDER BY pi.campaign_item_id
+        },
+        { Slice => {} },
+        $campaign_id,
+    );
+
+    my $audit_rows = $dbh->selectall_arrayref(
+        q{
+            SELECT audit_id, actor_borrowernumber, action_type, entity_type,
+                   entity_id, created_at
+              FROM plugin_ajsn_promo_audit
+             WHERE campaign_id = ?
+             ORDER BY audit_id DESC
+             LIMIT 100
+        },
+        { Slice => {} },
+        $campaign_id,
+    );
+
+    my $template = $self->get_template( { file => 'promotion_detail.tt' } );
+    $template->param(
+        plugin_version => $VERSION,
+        campaign       => $campaign,
+        linked_items   => $linked_items || [],
+        audit_rows     => $audit_rows || [],
     );
     return $self->output_html( $template->output() );
 }
