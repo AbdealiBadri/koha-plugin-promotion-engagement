@@ -172,3 +172,4 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - CFG-01 through CFG-07, CR-01 through CR-07, and EA lifecycle/security/archive-count suites all PASS after final Plack reload.
 - Retained visual fixture MULTILOC-VISUAL-20260919, campaign_id 40, with Main Entrance, First Floor and Digital Screen.
 - Next action: human visual acceptance, then final regression and merge. Analytics Engine follows.
+- Draft PR #3 opened for Universal Configuration + Multi-location. Automated CFG/ML/CR/EA gates are green; human visual acceptance of campaign 40 is the remaining merge gate.
