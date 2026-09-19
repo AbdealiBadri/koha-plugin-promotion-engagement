@@ -7,7 +7,7 @@ project:
 current:
   milestone: "v0.2 Edit / Update / Archive visual acceptance"
   implementation_branch: "feature/v0.2-campaign-edit-archive"
-  implementation_commit: "3537b8e0eef3549c57837922acce8e62c60c779e"
+  implementation_commit: "15da5c9"
   project_brain_branch: "docs/project-brain"
   objective: "Complete human visual acceptance and merge tested Edit/Update/Archive module"
   last_verified: "2026-09-19"
