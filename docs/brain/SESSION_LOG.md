@@ -39,3 +39,8 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - `promoeng` is only the dedicated KTD/Docker project name/container namespace for this plugin; it is not a new source-code repository or duplicate project folder.
 - Existing source folders remain unchanged: `~/git/plugins/koha-plugin-promotion-engagement` for the plugin and `~/git/koha-testing-docker` for KTD.
 - The older `kohadev` KTD instance is separate from the source folders and is no longer the primary runtime for this plugin.
+
+### Visual monitoring protocol
+- User asked to visually monitor ongoing work instead of following terminal commands.
+- Added a repository rule: every active module must report current status, exact local Koha review page/URL, relevant Docker/KTD names, and separate Built/Tested/Ready-for-visual-check states.
+- Current active work remains v0.2 security checkpoint (T-131/T-132/T-133) in the isolated `promoeng` runtime before feature expansion.
