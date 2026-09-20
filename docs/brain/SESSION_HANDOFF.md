@@ -3,7 +3,7 @@
 **Last updated:** 2026-09-20
 **Active runtime branch:** `feature/v0.3-analytics-engine`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** v0.3.0 Release Candidate — Monday visual acceptance
+**Current milestone:** v0.3.0 Release Candidate — local technical gates complete; external acceptance pending
 
 ## Verified completed today
 
@@ -103,10 +103,23 @@ Final post-visual EA/CR regression also passed.
 
 ## Exact next action
 
-Perform Monday human visual acceptance of Dashboard, filtered Promotions, campaign 40 Analytics, Reports and downloads. If accepted, open and merge the v0.3 pull request. Do not deploy to production until Koha 26.05, AJSN staging and backup/rollback gates are separately approved and completed.
+Perform human visual acceptance of Dashboard, filtered Promotions, campaign 40 Analytics, Reports and downloads. Then test the exact KPZ on Koha 26.05 and an institutional non-production staging copy before PR merge or any production authorization. Local clean-install, upgrade and database rollback rehearsals are complete; production backup ownership and maintenance window remain institutional decisions.
 
 ## Visual URL
 
 `http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=analytics&campaign_id=40`
 
 Log in through the normal Koha staff homepage first if required.
+
+## Post-release-candidate technical gates
+
+- Clean Koha 25.11 KPZ upload/install through the authenticated Koha handler: PASS.
+- Six plugin tables and version 0.3.0 listing without ERRORS: PASS.
+- Primary clean-install staff pages: PASS.
+- REST authentication boundary: anonymous HTTP 401; authenticated HTTP 200: PASS.
+- Disable/re-enable data preservation: PASS.
+- Approved v0.2 commit `a3e2fe4` to exact v0.3 KPZ upgrade: PASS.
+- Repeated migration idempotence and v0.2 data preservation: PASS.
+- Koha database dump/delete/restore rehearsal: PASS.
+- Disposable `promoengclean` and `promoengupgrade` projects removed; primary `promoeng` untouched.
+- Full evidence: `docs/brain/V0.3_RELEASE_GATE_REPORT.md`.

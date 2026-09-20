@@ -44,3 +44,5 @@ Later milestones include recurring campaigns, non-barcode resources, historical 
 `source -> static checks -> KTD 25.11 -> KTD 26.05 -> AJSN staging -> versioned KPZ -> production`
 
 See `docs/ARCHITECTURE.md`, `docs/SAFETY.md`, `docs/ROADMAP.md`, and `docs/REAL_WORLD_USE_CASES.md`.
+
+Release verification is recorded in `docs/brain/V0.3_RELEASE_GATE_REPORT.md`; the user acceptance path is in `docs/brain/MONDAY_ACCEPTANCE.md`.

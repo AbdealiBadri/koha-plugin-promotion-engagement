@@ -3,15 +3,15 @@ modules:
     status: "implemented"
     owner_system: "Koha Plugins framework"
     dependencies: ["Koha 25.11.x"]
-    open_issues: ["ISSUE-004"]
-    next_action: "Restore KTD readiness and re-verify plugin v0.2.0 load"
+    open_issues: []
+    next_action: "Preserve Koha-native plugin loading across compatibility targets"
 
   campaign_creation:
     status: "implemented-manually-verified"
     owner_system: "plugin"
     dependencies: ["Koha::Items", "Koha::Libraries", "plugin schema"]
     open_issues: []
-    next_action: "Run post-recovery regression smoke"
+    next_action: "Preserve validated campaign workflow during staging"
 
   barcode_linking:
     status: "implemented-manually-verified"
@@ -60,7 +60,7 @@ modules:
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-010"]
-    next_action: "Human visual acceptance of the academic dashboard on Monday"
+    next_action: "Human visual acceptance of the academic dashboard"
 
   analytics:
     status: "an-01-through-an-15-implemented-and-runtime-tested-visual-pending"
@@ -74,7 +74,7 @@ modules:
     owner_system: "Koha REST + plugin"
     dependencies: ["Koha authentication/authorization"]
     open_issues: []
-    next_action: "Verify authenticated analytics endpoint during Monday acceptance"
+    next_action: "Authenticated 200 and anonymous 401 verified; repeat on Koha 26.05 and staging"
 
   reporting_exports:
     status: "implemented-runtime-smoke-tested-visual-pending"
@@ -91,11 +91,11 @@ modules:
     next_action: "Design controlled importer with validation/audit/rollback later"
 
   kpz_packaging:
-    status: "v0.3.0-release-candidate-built-checksummed-and-extracted"
+    status: "v0.3.0-clean-install-upgrade-and-rollback-verified-on-koha-25.11"
     owner_system: "repository/Koha plugin installer"
     dependencies: ["Python 3", "Koha Plugins framework"]
-    open_issues: ["ISSUE-006", "ISSUE-013"]
-    next_action: "Perform clean Koha upload/install in the staging gate before production"
+    open_issues: ["ISSUE-013"]
+    next_action: "Repeat exact artifact installation on Koha 26.05 and institutional staging"
 
   deployment:
     status: "development-only"

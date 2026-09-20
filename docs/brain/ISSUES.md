@@ -114,8 +114,10 @@
 
 ## ISSUE-013 — Compatibility/staging gates outstanding
 
-- **Status:** OPEN
+- **Status:** OPEN — external gates only
 - **Severity:** Release blocker
 - **Module:** deployment
-- **Missing:** Koha 26.05.x validation, AJSN staging, final backup/restore/rollback rehearsal and clean Koha upload/install acceptance. The exact v0.3.0 KPZ build, checksum, extraction and extracted-code validation pass.
-- **Production:** must remain blocked until these pass.
+- **Completed:** exact v0.3.0 KPZ build/checksum/extraction, authenticated clean Koha 25.11 upload/install, v0.2-to-v0.3 upgrade preservation, repeated migration idempotence and local database backup/restore rehearsal.
+- **Missing:** human visual acceptance, Koha 26.05.x validation, institutional staging and confirmation of production backup ownership/maintenance window.
+- **Constraint:** only Koha 25.11 is local; Windows C: had 6.6 GB free, so pulling another approximately 7.5 GB image was intentionally avoided.
+- **Production:** must remain blocked until the missing external gates pass.

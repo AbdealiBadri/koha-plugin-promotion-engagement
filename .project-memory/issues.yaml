@@ -34,10 +34,10 @@ issues:
     summary: "WSL GitHub port 443 route failure while Windows connectivity worked"
 
   ISSUE-006:
-    status: "open-documentation-debt"
+    status: "resolved"
     severity: "low"
     module: "kpz"
-    summary: "Existing KPZ test plan examples remain v0.1-specific"
+    summary: "KPZ test plan updated for v0.3 with executed clean-install, upgrade and rollback evidence"
 
   TECHDEBT-007:
     status: "resolved"
@@ -77,7 +77,7 @@ issues:
     completed: "T-131/T-132/T-133/T-134 PASS; edit/archive forged-CSRF tests EA-09/EA-11 also PASS"
 
   ISSUE-013:
-    status: "open-release-blocker"
+    status: "open-external-gates"
     severity: "high-release"
     module: "compatibility-deployment"
-    summary: "v0.3.0 KPZ/checksum/extraction pass; Koha 26.05, clean upload/install, staging and rollback gates remain"
+    summary: "Clean v0.3 install, v0.2 upgrade and local rollback pass on Koha 25.11; human visual, Koha 26.05 and institutional staging remain"

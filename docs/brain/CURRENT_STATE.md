@@ -183,3 +183,9 @@ Checkpoint 1 is closed.
 4. Keep production deployment blocked until Koha 26.05, institutional staging, backup/rollback and exact-install gates are approved and executed.
 
 Architecture decisions DEC-019 and DEC-020 govern the active work.
+
+## Distribution-gate update — 2026-09-20
+
+Local technical release gates are complete on Koha 25.11: exact KPZ upload/install, six-table creation, primary page rendering, REST authentication, disable/re-enable preservation, v0.2-to-v0.3 upgrade preservation, repeated migration idempotence and database backup/restore all pass.
+
+The remaining release blockers are external: human visual acceptance, Koha 26.05 compatibility, institutional staging and explicit production backup/change-window ownership. The full result is recorded in `V0.3_RELEASE_GATE_REPORT.md`.

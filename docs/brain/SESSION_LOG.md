@@ -236,3 +236,16 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Built exact v0.3.0 KPZ release candidate; checksum and extracted artifact validation PASS.
 - Created MONDAY_ACCEPTANCE.md.
 - Exact next action: Monday human visual acceptance, then open/merge v0.3 PR. Production remains gated.
+
+## 2026-09-20 — v0.3 distribution and recovery gates
+
+- Started isolated `promoengclean` Koha 25.11 without `--single-plugin`.
+- Uploaded exact v0.3 KPZ through authenticated Koha plugin upload workflow.
+- Verified version, six tables, staff pages, API authentication and disable/re-enable preservation.
+- Built v0.2.0 from approved commit `a3e2fe4` in a temporary detached worktree.
+- Started isolated `promoengupgrade`, installed v0.2.0, created preservation fixtures and upgraded through the v0.3 KPZ.
+- Verified fixture preservation and migration idempotence across two install runs.
+- Created a Koha database backup, deleted a sentinel, restored the SQL dump and verified recovery.
+- Did not pull Koha 26.05 because only 6.6 GB was free on Windows C: and the local 25.11 image is approximately 7.5 GB.
+- Removed both disposable KTD projects and the temporary worktree; primary `promoeng` and campaign 40 were untouched.
+- Added `V0.3_RELEASE_GATE_REPORT.md` and updated Project Brain/KPZ records.

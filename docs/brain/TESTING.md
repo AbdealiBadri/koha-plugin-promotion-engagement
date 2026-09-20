@@ -238,3 +238,21 @@ Human visual review is complete; the milestone is cleared for merge.
 - v0.3.0 KPZ build, SHA-256 verification, exact archive extraction and extracted-module syntax: PASS.
 - Human professional-UI visual acceptance: PENDING for Monday.
 - Koha 26.05, institutional staging and production gates: NOT RUN; remain explicitly blocked.
+
+## v0.3.0 clean installation, upgrade and rollback — 2026-09-20
+
+- Exact artifact: `PromotionEngagement-v0.3.0.kpz`.
+- SHA-256: `b2242bd87fd7fa7fc62a164ead52943a0bda29a0d53ed23027962e8831fd9885`.
+- Clean Koha 25.11 instance without plugin bind mount: PASS.
+- Authenticated Koha upload and version 0.3.0 discovery: PASS.
+- Six-table schema creation: PASS.
+- Dashboard, Promotions, Analytics, Reports, Configuration and New Promotion: PASS.
+- REST health authentication: anonymous 401; authenticated 200 with version 0.3.0.
+- Disable/re-enable sentinel preservation: PASS.
+- v0.2.0 (`a3e2fe4`) to v0.3.0 upgrade and data preservation: PASS.
+- Migration run twice without loss: PASS.
+- `koha-dump`, deliberate deletion and SQL restore: PASS.
+- Koha 26.05: NOT RUN; image unavailable locally and host C: free space was 6.6 GB.
+- Institutional staging and human visual acceptance: PENDING.
+
+See `docs/brain/V0.3_RELEASE_GATE_REPORT.md` for complete evidence and boundaries.

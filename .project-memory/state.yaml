@@ -11,7 +11,7 @@ current:
   project_brain_branch: "docs/project-brain"
   objective: "Complete and visually accept the v0.3.0 Analytics, Reports and professional management UI release candidate"
   last_verified: "2026-09-20"
-  next_action: "Human Monday visual acceptance of Dashboard, Promotions, Analytics and Reports; then open/merge the v0.3 PR"
+  next_action: "Human visual acceptance; then Koha 26.05 and institutional staging validation before PR merge and any production authorization"
 
 environment:
   local:
@@ -24,11 +24,12 @@ environment:
       - "promoeng-koha-1/db-1/memcached-1 up"
       - "promoeng-intra.localhost HTTP 200"
       - "KTD startup log says ready to be enjoyed"
-      - "Promotion & Engagement 0.2.0 installed during startup"
+      - "Promotion & Engagement 0.3.0 mounted in primary development runtime"
     isolation_rule: "Do not touch unrelated repositories/containers; no global Docker cleanup"
   clean_kpz_test:
-    historical_instance: "kpztest"
-    state: "removed-after-v0.1-test"
+    instance: "promoengclean"
+    state: "v0.3-pass-and-removed"
+    evidence: "authenticated KPZ upload, six tables, primary pages, API auth and disable/re-enable preservation passed"
   staging:
     status: "not-run"
   production:
@@ -61,7 +62,7 @@ last_test:
   date: "2026-09-20"
   command: "prove -v t/*.t; syntax/API/OpenAPI/render/service/KPZ/checksum gates"
   status: "PASS"
-  result: "48 assertions pass for AN-01..AN-15; four UI routes render; exact KPZ validates; synthetic database residue is zero"
+  result: "48 assertions pass; clean v0.3 KPZ install, v0.2-to-v0.3 upgrade, API auth, data preservation and database rollback pass on Koha 25.11"
 
 runtime:
   plugin_version: "0.3.0"
