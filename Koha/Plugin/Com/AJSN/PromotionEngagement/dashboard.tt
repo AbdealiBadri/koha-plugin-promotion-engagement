@@ -72,6 +72,7 @@
                 </div>
                 <div class="btn-group" style="margin-bottom:20px">
                     <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics"><i class="fa fa-bar-chart"></i> Campaign analytics</a>
+                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact"><i class="fa fa-book"></i> Book Display Impact</a>
                     <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-file-text-o"></i> Comparative reports</a>
                 </div>
 
@@ -147,6 +148,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                     </ul>
                 </div>

@@ -183,3 +183,13 @@ Comparative reports use the shared Analytics service and provide CSV/JSON export
 Book-display effectiveness is presented through comparable Koha checkout behaviour and title-level response. Increased circulation supports a conclusion of improved discovery and borrowing engagement, but the plugin must not claim to count physical views without a separate approved observation mechanism such as anonymous QR interactions or manual footfall data.
 
 The professional academic dashboard may interpret results in plain language, but every finding must remain traceable to baseline, during and follow-up checkout counts from the shared Analytics service. Future-dated and in-progress campaigns must be labelled awaiting or provisional rather than failed or final.
+
+## DEC-023 — Book Display Impact uses native Koha Suggestions, not direct orders
+
+**Status:** Accepted — 2026-09-20
+
+Book Display Impact is part of the existing plugin. It may calculate and preserve
+explainable recommendation evidence, but it must not create acquisition orders or
+choose vendors/funds. After explicit librarian approval, an authorized user may
+create a native Koha ASKED suggestion transactionally. Acquisitions staff retain
+acceptance, vendor, fund, price, currency, basket and order authority.

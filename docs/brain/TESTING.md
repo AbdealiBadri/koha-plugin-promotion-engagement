@@ -268,3 +268,26 @@ See `docs/brain/V0.3_RELEASE_GATE_REPORT.md` for complete evidence and boundarie
 - Dashboard/Analytics/Reports server-side render smoke: PASS.
 - Plack status after restart: running.
 - Human visual acceptance: PENDING.
+
+## BDI-01 through BDI-17 — Book Display Impact
+
+PASS on Koha 25.11 KTD:
+
+- displayed item to biblio aggregation;
+- live active-hold and serviceable-copy evidence;
+- holds-per-copy, priority, evidence grade and quantity;
+- approval decision and reviewed quantity persistence;
+- native Koha Suggestion creation with ASKED status, quantity and biblionumber;
+- rollback leaves no synthetic test records.
+
+Full suite: 4 files, 72 assertions, PASS.
+Authenticated browser render: PASS.
+End-to-end approve → submit → Koha row/audit verification → cleanup: PASS.
+KPZ checksum, ZIP integrity and inclusion of both new module files: PASS.
+
+## Exact v0.4 KPZ clean-install gate
+
+PASS in disposable `promoengpkg` Koha 25.11: authenticated KPZ upload,
+version 0.4.0, seven tables and Book Display Impact render. The exact installed
+artifact checksum is `f71eeb9a1d12df8d0e051ee13b1fb4c342b74a7a912ea30f42ce0b838eb70dbf`.
+Disposable runtime removed after verification.

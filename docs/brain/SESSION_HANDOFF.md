@@ -132,3 +132,18 @@ Log in through the normal Koha staff homepage first if required.
 - Full Analytics suite: 55 assertions PASS.
 - Campaign 40 service and server-side UI render smoke: PASS.
 - Human visual confirmation of the refined Dashboard and Campaign 40 Analytics remains the immediate next action.
+
+## 2026-09-20 — Book Display Impact implementation
+
+- User approved all ten implementation/documentation points and fixed the product name as **Book Display Impact**.
+- Active branch: `feature/v0.4-book-display-impact`.
+- Plugin version: 0.4.0.
+- Module remains inside Koha Promotion & Engagement.
+- Added title aggregation, circulation/copy/hold evidence, priority, evidence grade and Koha HoldRatioDefault-aware quantity.
+- Added audited approval/rejection, immutable submitted state and evidence snapshots.
+- Added permission-checked transactional handoff to native Koha ASKED Suggestions.
+- BDI-01..BDI-17 and complete 72 assertions: PASS.
+- Authenticated render smoke and full approve → submit → verify → cleanup workflow: PASS.
+- Added installation/user SOPs, Monday checklist, conference/video plan, public-release/legal guide and verified screenshot.
+- v0.4 KPZ structure and checksum: PASS.
+- Immediate gate: user visual acceptance, followed by Koha 26.05 and institutional staging.

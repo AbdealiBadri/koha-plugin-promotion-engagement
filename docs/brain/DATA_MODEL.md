@@ -164,3 +164,10 @@ Preferred architecture is derived calculation from Koha circulation/statistics r
 ## Privacy
 
 Patron identifiers are available through Koha for staff analysis but must not be copied/exposed unnecessarily. Any user-ranking feature needs explicit access controls and aggregation/privacy review.
+## v0.4 recommendation table
+
+`plugin_ajsn_promo_recommendations` stores one decision per campaign and Koha
+biblionumber. Fields include decision status, reviewed quantity, reviewer note,
+evidence JSON snapshot, reviewer/timestamps and the resulting Koha suggestion ID.
+The unique campaign/biblionumber key prevents duplicate plugin recommendations.
+Koha's `suggestions` table remains authoritative after submission.

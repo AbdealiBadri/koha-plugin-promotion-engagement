@@ -144,3 +144,12 @@ Items in this backlog are not approved implementation scope until promoted throu
 Analytics Engine AN-01..AN-16, title-level display evidence, professional management UI, comparative Reports, exports, campaign filtering and read-only Analytics API are implemented in the release candidate. The checkpoint is code/runtime complete and awaits Monday human visual acceptance before pull-request merge.
 
 Later roadmap items remain recurrence/templates, non-barcode resources, restricted analytics, historical import, forward compatibility, staging and production deployment.
+
+## v0.4 Book Display Impact — implemented, external gates pending
+
+- Title-level display response and sustained-demand ranking: implemented.
+- Live holds, serviceable copies and Koha hold-ratio-aware quantity: implemented.
+- Librarian approval/rejection and evidence snapshot: implemented.
+- Native Koha Suggestions handoff: implemented and runtime-tested.
+- Beginner SOP, Monday acceptance, KohaCon26/video and public release pack: implemented.
+- Remaining: human visual acceptance, Koha 26.05 and institutional staging.

@@ -6,16 +6,19 @@ use base qw(Koha::Plugins::Base);
 use C4::Context;
 use Koha::Items;
 use Koha::Libraries;
+use Koha::Patrons;
+use Koha::Suggestion;
 use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
+use Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
-our $VERSION = '0.3.0';
+our $VERSION = '0.4.0';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
     author          => 'Aljamea-tus-Saifiyah Nairobi',
     date_authored   => '2026-08-15',
-    date_updated    => '2026-09-19',
+    date_updated    => '2026-09-20',
     minimum_version => '25.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -49,6 +52,17 @@ sub tool {
 
     if ( $action eq 'analytics' ) {
         return $self->_analytics_screen;
+    }
+
+    if ( $action eq 'book_display_impact' ) {
+        my $op = $cgi->param('op') || q{};
+        return $self->_save_impact_decision
+          if ( $cgi->request_method || q{} ) eq 'POST'
+          && $op eq 'cud-save_impact_decision';
+        return $self->_submit_impact_suggestion
+          if ( $cgi->request_method || q{} ) eq 'POST'
+          && $op eq 'cud-submit_impact_suggestion';
+        return $self->_book_display_impact_screen;
     }
 
     if ( $action eq 'reports' ) {
@@ -465,6 +479,214 @@ sub _analytics_screen {
         error_message  => $error_message,
     );
     return $self->output_html( $template->output() );
+}
+
+sub _book_display_impact_screen {
+    my ( $self, $args ) = @_;
+    $args ||= {};
+    $self->_ensure_schema;
+    my $cgi = $self->{cgi};
+    my $dbh = C4::Context->dbh;
+    my $campaigns = $dbh->selectall_arrayref(
+        q{
+            SELECT campaign_id, name, start_date, end_date, status
+              FROM plugin_ajsn_promo_campaigns
+             WHERE deleted_at IS NULL
+             ORDER BY campaign_id DESC LIMIT 200
+        }, { Slice => {} },
+    ) || [];
+    my $campaign_id = _analytics_campaign_id(
+        scalar $cgi->param('campaign_id'), $campaigns
+    );
+    my ( $impact, $error_message );
+    if ( length $campaign_id && $campaign_id =~ /^\d+$/ ) {
+        eval {
+            $impact =
+              Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact
+              ->new( { dbh => $dbh } )->campaign_rows($campaign_id);
+            1;
+        } or do {
+            warn "Book Display Impact calculation failed: $@";
+            $error_message = 'Book Display Impact could not be calculated.';
+        };
+    }
+    my $template = $self->get_template( { file => 'book_display_impact.tt' } );
+    $template->param(
+        plugin_version => $VERSION,
+        campaigns => $campaigns,
+        selected_id => $campaign_id,
+        impact => $impact,
+        error_message => $error_message || $args->{error_message},
+        success_message => $args->{success_message},
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _save_impact_decision {
+    my ($self) = @_;
+    $self->_ensure_schema;
+    my $cgi = $self->{cgi};
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my $biblionumber = _trim( scalar $cgi->param('biblionumber') );
+    my $decision = _trim( scalar $cgi->param('decision_status') );
+    my $quantity = _trim( scalar $cgi->param('recommended_quantity') );
+    my $note = _trim( scalar $cgi->param('reviewer_note') );
+    my @errors;
+    push @errors, 'Invalid campaign.' unless $campaign_id =~ /^\d+$/;
+    push @errors, 'Invalid title.' unless $biblionumber =~ /^\d+$/;
+    push @errors, 'Select Approve or Reject.'
+      unless $decision eq 'approved' || $decision eq 'rejected';
+    push @errors, 'Quantity must be from 1 to 99.'
+      unless $quantity =~ /^\d+$/ && $quantity >= 1 && $quantity <= 99;
+    return $self->_book_display_impact_screen(
+        { error_message => join q{ }, @errors }
+    ) if @errors;
+
+    my $dbh = C4::Context->dbh;
+    my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+    my ($valid) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_campaigns c
+          JOIN plugin_ajsn_promo_items pi ON pi.campaign_id=c.campaign_id
+          JOIN items i ON i.itemnumber=pi.itemnumber
+          WHERE c.campaign_id=? AND i.biblionumber=? AND c.deleted_at IS NULL
+            AND pi.deleted_at IS NULL},
+        undef, $campaign_id, $biblionumber,
+    );
+    return $self->_book_display_impact_screen(
+        { error_message => 'The selected title is not linked to this campaign.' }
+    ) unless $valid;
+    my ($already_submitted) = $dbh->selectrow_array(
+        q{SELECT koha_suggestion_id FROM plugin_ajsn_promo_recommendations
+          WHERE campaign_id=? AND biblionumber=?},
+        undef, $campaign_id, $biblionumber,
+    );
+    return $self->_book_display_impact_screen( {
+        error_message => 'A submitted Koha suggestion cannot be overwritten.'
+    } ) if $already_submitted;
+
+    my $impact =
+      Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact
+      ->new( { dbh => $dbh } )->campaign_rows($campaign_id);
+    my ($evidence_row) =
+      grep { $_->{biblionumber} == $biblionumber } @{ $impact->{rows} };
+    my $evidence_json = encode_json( {
+        baseline_count => 0 + ( $evidence_row->{baseline_count} || 0 ),
+        during_count => 0 + ( $evidence_row->{during_count} || 0 ),
+        after_60_count => 0 + ( $evidence_row->{after_60_count} || 0 ),
+        serviceable_copies => 0 + ( $evidence_row->{serviceable_copies} || 0 ),
+        active_holds => 0 + ( $evidence_row->{active_holds} || 0 ),
+        hold_ratio => 0 + ( $evidence_row->{hold_ratio} || 0 ),
+        priority => $evidence_row->{priority},
+        evidence_grade => $evidence_row->{evidence_grade},
+    } );
+
+    $dbh->do(
+        q{
+            INSERT INTO plugin_ajsn_promo_recommendations
+              (campaign_id,biblionumber,decision_status,recommended_quantity,
+               reviewer_note,evidence_json,decided_by,decided_at)
+            VALUES (?,?,?,?,?,?,?,NOW())
+            ON DUPLICATE KEY UPDATE decision_status=VALUES(decision_status),
+              recommended_quantity=VALUES(recommended_quantity),
+              reviewer_note=VALUES(reviewer_note),
+              evidence_json=VALUES(evidence_json),decided_by=VALUES(decided_by),
+              decided_at=NOW()
+        }, undef, $campaign_id, $biblionumber, $decision, $quantity,
+        $note, $evidence_json, $actor,
+    );
+    $dbh->do(
+        q{INSERT INTO plugin_ajsn_promo_audit
+          (campaign_id,actor_borrowernumber,action_type,entity_type,entity_id,details_json)
+          VALUES (?,?,'impact_decision_recorded','biblio',?,?)},
+        undef, $campaign_id, $actor, $biblionumber,
+        encode_json( { decision => $decision, quantity => 0 + $quantity } ),
+    );
+    return $self->_book_display_impact_screen( {
+        success_message => ucfirst($decision) . ' decision saved with audit history.'
+    } );
+}
+
+sub _submit_impact_suggestion {
+    my ($self) = @_;
+    $self->_ensure_schema;
+    my $cgi = $self->{cgi};
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my $biblionumber = _trim( scalar $cgi->param('biblionumber') );
+    return $self->_book_display_impact_screen(
+        { error_message => 'Invalid campaign or title.' }
+    ) unless $campaign_id =~ /^\d+$/ && $biblionumber =~ /^\d+$/;
+
+    my $actor = C4::Context->userenv ? C4::Context->userenv->{number} : undef;
+    my $patron = $actor ? Koha::Patrons->find($actor) : undef;
+    my $allowed = $patron && (
+        $patron->has_permission( { suggestions => 'suggestions_create' } )
+        || $patron->has_permission( { suggestions => 'suggestions_manage' } )
+    );
+    return $self->_book_display_impact_screen( {
+        error_message => 'Your Koha account needs purchase-suggestion permission.'
+    } ) unless $allowed;
+
+    my $dbh = C4::Context->dbh;
+    my $row = $dbh->selectrow_hashref(
+        q{SELECT r.*,c.name AS campaign_name,c.branchcode,b.title,b.author
+          FROM plugin_ajsn_promo_recommendations r
+          JOIN plugin_ajsn_promo_campaigns c ON c.campaign_id=r.campaign_id
+          JOIN biblio b ON b.biblionumber=r.biblionumber
+          WHERE r.campaign_id=? AND r.biblionumber=?},
+        undef, $campaign_id, $biblionumber,
+    );
+    return $self->_book_display_impact_screen( {
+        error_message => 'Approve this recommendation before submitting it.'
+    } ) unless $row && $row->{decision_status} eq 'approved';
+    return $self->_book_display_impact_screen( {
+        error_message => 'This recommendation has already been submitted to Koha.'
+    } ) if $row->{koha_suggestion_id};
+
+    my $suggestion;
+    my $ok = eval {
+        local $dbh->{RaiseError} = 1;
+        $dbh->begin_work;
+        $suggestion = Koha::Suggestion->new( {
+            suggestedby => $actor, title => $row->{title},
+            author => $row->{author}, biblionumber => $biblionumber,
+            branchcode => $row->{branchcode}, quantity => $row->{recommended_quantity},
+            STATUS => 'ASKED',
+            patronreason => 'Evidence-based additional-copy recommendation from Book Display Impact.',
+            staff_note => sprintf(
+                'Campaign: %s (ID %d). %s',
+                $row->{campaign_name}, $campaign_id, $row->{reviewer_note} || q{}
+            ),
+        } )->store;
+        $dbh->do(
+            q{UPDATE plugin_ajsn_promo_recommendations
+              SET decision_status='submitted',koha_suggestion_id=?,submitted_at=NOW()
+              WHERE recommendation_id=?},
+            undef, $suggestion->suggestionid, $row->{recommendation_id},
+        );
+        $dbh->do(
+            q{INSERT INTO plugin_ajsn_promo_audit
+              (campaign_id,actor_borrowernumber,action_type,entity_type,entity_id,details_json)
+              VALUES (?,?,'impact_suggestion_submitted','suggestion',?,?)},
+            undef, $campaign_id, $actor, $suggestion->suggestionid,
+            encode_json( { biblionumber => 0 + $biblionumber,
+                quantity => 0 + $row->{recommended_quantity} } ),
+        );
+        $dbh->commit;
+        1;
+    };
+    unless ($ok) {
+        eval { $dbh->rollback };
+        warn "Book Display Impact suggestion submission failed: $@";
+        return $self->_book_display_impact_screen( {
+            error_message => 'Koha could not create the purchase suggestion. No duplicate submission was recorded.'
+        } );
+    }
+    return $self->_book_display_impact_screen( {
+        success_message => sprintf(
+            'Koha purchase suggestion %d was created successfully.',
+            $suggestion->suggestionid
+        )
+    } );
 }
 
 sub _reports_screen {
@@ -1932,6 +2154,41 @@ sub _ensure_schema {
                 REFERENCES plugin_ajsn_promo_vocab_values (vocab_value_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS plugin_ajsn_promo_recommendations (
+            recommendation_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            campaign_id BIGINT UNSIGNED NOT NULL,
+            biblionumber INT NOT NULL,
+            decision_status VARCHAR(20) NOT NULL DEFAULT 'candidate',
+            recommended_quantity SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+            reviewer_note TEXT NULL,
+            evidence_json LONGTEXT NULL,
+            decided_by INT NULL,
+            decided_at DATETIME NULL,
+            koha_suggestion_id INT NULL,
+            submitted_at DATETIME NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (recommendation_id),
+            UNIQUE KEY uq_promo_recommendation_campaign_biblio
+                (campaign_id,biblionumber),
+            KEY idx_promo_recommendation_status (decision_status),
+            KEY idx_promo_recommendation_suggestion (koha_suggestion_id),
+            CONSTRAINT fk_ajsn_promo_recommendation_campaign
+                FOREIGN KEY (campaign_id)
+                REFERENCES plugin_ajsn_promo_campaigns (campaign_id)
+                ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    });
+
+    unless ( _column_exists( $dbh, 'plugin_ajsn_promo_recommendations', 'evidence_json' ) ) {
+        $dbh->do(q{
+            ALTER TABLE plugin_ajsn_promo_recommendations
+            ADD COLUMN evidence_json LONGTEXT NULL AFTER reviewer_note
+        });
+    }
 
     _seed_default_vocab_values($dbh);
 

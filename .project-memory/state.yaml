@@ -5,13 +5,13 @@ project:
   status: "pre-alpha-development"
 
 current:
-  milestone: "v0.3 Analytics Engine"
-  implementation_branch: "feature/v0.3-analytics-engine"
-  implementation_commit: "422163c"
+  milestone: "v0.4 Book Display Impact"
+  implementation_branch: "feature/v0.4-book-display-impact"
+  implementation_commit: "pending-final-commit"
   project_brain_branch: "docs/project-brain"
-  objective: "Complete and visually accept the v0.3.0 Analytics, Reports and professional management UI release candidate"
+  objective: "Complete Book Display Impact, Koha Suggestions handoff, SOPs and public/conference release package"
   last_verified: "2026-09-20"
-  next_action: "Human visual acceptance; then Koha 26.05 and institutional staging validation before PR merge and any production authorization"
+  next_action: "Human visual acceptance of Book Display Impact; then Koha 26.05 and institutional staging validation before production authorization"
 
 environment:
   local:
@@ -60,14 +60,14 @@ critical_decisions:
   - "DEC-022"
 
 last_test:
-  id: "v0.3.0-release-candidate-gate"
+  id: "v0.4.0-book-display-impact-gate"
   date: "2026-09-20"
-  command: "prove -v t/*.t; syntax/API/OpenAPI/render/service/KPZ/checksum gates"
+  command: "prove -v t/*.t; authenticated render; approve/submit Suggestions workflow; KPZ/checksum gates"
   status: "PASS"
-  result: "55 assertions pass including AN-16 display-impact/title evidence; clean install, upgrade, API auth, preservation and rollback pass on Koha 25.11"
+  result: "72 assertions pass; native Koha ASKED suggestion handoff and cleanup pass; v0.4 KPZ structure/checksum pass on Koha 25.11"
 
 runtime:
-  plugin_version: "0.3.0"
+  plugin_version: "0.4.0"
   primary_environment: "promoeng"
   primary_environment_ready: true
 

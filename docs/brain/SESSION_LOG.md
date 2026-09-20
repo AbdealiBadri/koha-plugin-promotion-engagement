@@ -259,3 +259,24 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Added a four-step evidence pathway and direct View impact actions to the Dashboard.
 - Expanded the Analytics suite from 48 to 55 assertions; all passed.
 - Campaign 40 smoke and server-side render verification passed after Plack restart.
+
+## 2026-09-20 — v0.4 Book Display Impact
+
+- Created `feature/v0.4-book-display-impact` from the verified v0.3 branch.
+- Implemented Book Display Impact as a module within the existing plugin.
+- Added one namespaced recommendation table with idempotent evidence-snapshot migration.
+- Added biblio-level baseline/during/follow-up, copies, availability, holds and demand classification.
+- Added professional Koha-native UI, approval/rejection, audit trail and duplicate protection.
+- Added transactional native Koha Purchase Suggestion creation with least-permission check.
+- Found and corrected a POST form routing defect through the end-to-end browser test.
+- Added 17 dedicated assertions; full suite expanded from 55 to 72 and passes.
+- Authenticated page render and actual Koha ASKED suggestion workflow pass; fixtures cleaned.
+- Added beginner installation, user acceptance, KohaCon26/video and public-release documentation.
+- Generated and visually inspected `docs/images/book-display-impact.png`.
+- First KPZ build omitted untracked new files; staged sources, rebuilt and verified the corrected 16-file KPZ.
+- Final checksum at this checkpoint: `f71eeb9a1d12df8d0e051ee13b1fb4c342b74a7a912ea30f42ce0b838eb70dbf`.
+
+- Started isolated `promoengpkg` Koha 25.11 without a plugin source mount.
+- Uploaded the exact final v0.4 KPZ through Koha's authenticated upload handler.
+- Verified version 0.4.0, seven plugin tables and Book Display Impact rendering.
+- Removed the disposable containers, volumes and network; primary `promoeng` was untouched.

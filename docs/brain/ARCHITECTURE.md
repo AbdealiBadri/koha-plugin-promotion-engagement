@@ -219,3 +219,9 @@ No staging or production deployment is currently verified.
 6. Keep analytics logic shared across interfaces.
 7. Keep institution-specific vocabulary configurable.
 8. Treat patron-level analytics as restricted data, not a public dashboard feature.
+## Book Display Impact boundary
+
+The module reads campaign links from plugin tables and live catalogue, circulation,
+item and hold evidence from Koha. It persists only review state and an evidence
+snapshot. Approved handoff uses `Koha::Suggestion`; it never writes acquisition
+orders or patches Koha core. UI and runtime tests use the same calculation service.

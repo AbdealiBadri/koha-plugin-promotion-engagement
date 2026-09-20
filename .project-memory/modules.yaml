@@ -103,3 +103,9 @@ modules:
     dependencies: ["security", "compatibility", "KPZ", "backup/rollback"]
     open_issues: ["ISSUE-013"]
     next_action: "Do not deploy until release gates pass"
+  book_display_impact:
+    status: "implemented-runtime-tested-visual-pending"
+    owner_system: "plugin decisions; Koha circulation, holds, copies and Suggestions authoritative"
+    dependencies: ["campaign links", "analytics", "Koha suggestions permissions"]
+    open_issues: ["ISSUE-010", "ISSUE-013"]
+    next_action: "Human visual acceptance, Koha 26.05 and institutional staging"

@@ -193,3 +193,16 @@ The remaining release blockers are external: human visual acceptance, Koha 26.05
 ## Display-impact evidence refinement — 2026-09-20
 
 AN-16 is implemented and runtime-tested. Campaign Analytics now states the display-impact finding in plain language and shows each displayed title's before, during and 60-day follow-up checkout response. The Dashboard now explains the evidence pathway and provides direct View impact actions. The UI explicitly avoids claiming direct physical visibility from checkout data.
+
+## Book Display Impact update — 2026-09-20
+
+The active branch is now `feature/v0.4-book-display-impact`; plugin version is
+0.4.0. Book Display Impact is implemented inside the existing plugin. It
+aggregates displayed items by biblionumber, combines circulation response with
+live copy/hold pressure, records audited approvals/rejections and transactionally
+creates native Koha ASKED suggestions for authorized staff.
+
+BDI-01..BDI-17 and the full 72-assertion suite pass. Authenticated render and
+the complete approve-to-Suggestions browser workflow pass with synthetic records
+cleaned afterward. The v0.4 KPZ contains the new service/template and its checksum
+passes. Human visual acceptance, Koha 26.05 and institutional staging remain open.
