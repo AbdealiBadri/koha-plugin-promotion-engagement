@@ -147,3 +147,10 @@ Log in through the normal Koha staff homepage first if required.
 - Added installation/user SOPs, Monday checklist, conference/video plan, public-release/legal guide and verified screenshot.
 - v0.4 KPZ structure and checksum: PASS.
 - Immediate gate: user visual acceptance, followed by Koha 26.05 and institutional staging.
+
+## v0.4 checkpoint commit
+
+Implementation, tests, screenshot and documentation were committed as `1e53813`
+and pushed to `origin/feature/v0.4-book-display-impact`. The working tree must
+remain clean after the state-only follow-up commit. Human visual acceptance is
+the only immediate user gate; Koha 26.05 and institutional staging remain external.

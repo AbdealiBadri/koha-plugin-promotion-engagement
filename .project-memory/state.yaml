@@ -7,7 +7,7 @@ project:
 current:
   milestone: "v0.4 Book Display Impact"
   implementation_branch: "feature/v0.4-book-display-impact"
-  implementation_commit: "pending-final-commit"
+  implementation_commit: "1e53813"
   project_brain_branch: "docs/project-brain"
   objective: "Complete Book Display Impact, Koha Suggestions handoff, SOPs and public/conference release package"
   last_verified: "2026-09-20"
