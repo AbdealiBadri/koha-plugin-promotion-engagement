@@ -9,9 +9,9 @@ current:
   implementation_branch: "feature/v0.3-analytics-engine"
   implementation_commit: "afb544f"
   project_brain_branch: "docs/project-brain"
-  objective: "Implement one shared, privacy-aware Analytics Engine from Koha circulation history"
-  last_verified: "2026-09-19"
-  next_action: "Recheck Dashboard > Analytics auto-loads campaign 40, then implement and run AN-11..AN-15"
+  objective: "Complete and visually accept the v0.3.0 Analytics, Reports and professional management UI release candidate"
+  last_verified: "2026-09-20"
+  next_action: "Human Monday visual acceptance of Dashboard, Promotions, Analytics and Reports; then open/merge the v0.3 PR"
 
 environment:
   local:
@@ -57,14 +57,14 @@ critical_decisions:
   - "DEC-020"
 
 last_test:
-  id: "AN-01..AN-10-partial"
-  date: "2026-09-19"
-  command: "prove -v t/analytics_engine.t plus campaign 40 smoke and Perl syntax"
+  id: "v0.3.0-release-candidate-gate"
+  date: "2026-09-20"
+  command: "prove -v t/*.t; syntax/API/OpenAPI/render/service/KPZ/checksum gates"
   status: "PASS"
-  result: "23 assertions pass; fixtures rolled back with zero residue; campaign 40 smoke returns valid zero-event metrics; main plugin and Analytics module syntax OK"
+  result: "48 assertions pass for AN-01..AN-15; four UI routes render; exact KPZ validates; synthetic database residue is zero"
 
 runtime:
-  plugin_version: "0.2.0"
+  plugin_version: "0.3.0"
   primary_environment: "promoeng"
   primary_environment_ready: true
 

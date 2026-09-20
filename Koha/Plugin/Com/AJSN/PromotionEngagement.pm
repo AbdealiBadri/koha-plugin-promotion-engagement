@@ -9,13 +9,13 @@ use Koha::Libraries;
 use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 
-our $VERSION = '0.2.0';
+our $VERSION = '0.3.0';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
     author          => 'Aljamea-tus-Saifiyah Nairobi',
     date_authored   => '2026-08-15',
-    date_updated    => '2026-08-18',
+    date_updated    => '2026-09-19',
     minimum_version => '25.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -49,6 +49,14 @@ sub tool {
 
     if ( $action eq 'analytics' ) {
         return $self->_analytics_screen;
+    }
+
+    if ( $action eq 'reports' ) {
+        return $self->_reports_screen;
+    }
+
+    if ( $action eq 'report_export' ) {
+        return $self->_report_export;
     }
 
     if ( $action eq 'promotion_detail' ) {
@@ -297,13 +305,57 @@ sub _dashboard {
         }
     );
 
+    my ($active_count) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_campaigns
+           WHERE deleted_at IS NULL AND status = 'active'}
+    );
+    my ($completed_count) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_campaigns
+           WHERE deleted_at IS NULL AND status = 'completed'}
+    );
+    my ($location_count) = $dbh->selectrow_array(
+        q{SELECT COUNT(*) FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension = 'location' AND is_active = 1 AND deleted_at IS NULL}
+    );
+    my $campaign_ids = $dbh->selectcol_arrayref(
+        q{SELECT campaign_id FROM plugin_ajsn_promo_campaigns
+           WHERE deleted_at IS NULL AND start_date IS NOT NULL
+           ORDER BY campaign_id DESC LIMIT 50}
+    ) || [];
+    my ( $portfolio, $channel_comparison, $location_comparison );
+    if ( @{$campaign_ids} ) {
+        my $service =
+          Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+            { dbh => $dbh }
+          );
+        eval {
+            $portfolio = $service->portfolio_metrics($campaign_ids);
+            $channel_comparison =
+              $service->comparison_metrics( 'channel', $campaign_ids );
+            $location_comparison =
+              $service->comparison_metrics( 'location', $campaign_ids );
+            1;
+        } or warn "Promotion & Engagement dashboard analytics failed: $@";
+    }
+
     my $recent_campaigns = $dbh->selectall_arrayref(
         q{
-            SELECT campaign_id, campaign_type, channel, name, start_date, end_date,
-                   target_audience, status, created_at
-              FROM plugin_ajsn_promo_campaigns
-             WHERE deleted_at IS NULL
-             ORDER BY campaign_id DESC
+            SELECT c.campaign_id, c.campaign_type, c.channel, c.name,
+                   c.start_date, c.end_date, c.target_audience, c.status,
+                   c.created_at,
+                   COALESCE(vt.label, c.campaign_type) AS campaign_type_label,
+                   COALESCE(vc.label, c.channel) AS channel_label
+              FROM plugin_ajsn_promo_campaigns c
+              LEFT JOIN plugin_ajsn_promo_vocab_values vt
+                ON vt.dimension = 'campaign_type'
+               AND vt.value_code = c.campaign_type
+               AND vt.deleted_at IS NULL
+              LEFT JOIN plugin_ajsn_promo_vocab_values vc
+                ON vc.dimension = 'channel'
+               AND vc.value_code = c.channel
+               AND vc.deleted_at IS NULL
+             WHERE c.deleted_at IS NULL
+             ORDER BY c.campaign_id DESC
              LIMIT 10
         },
         { Slice => {} }
@@ -314,6 +366,12 @@ sub _dashboard {
         plugin_version   => $VERSION,
         campaign_count   => $campaign_count || 0,
         item_count       => $item_count || 0,
+        active_count     => $active_count || 0,
+        completed_count  => $completed_count || 0,
+        location_count   => $location_count || 0,
+        portfolio        => $portfolio,
+        channel_rows     => $channel_comparison ? $channel_comparison->{rows} : [],
+        location_rows    => $location_comparison ? $location_comparison->{rows} : [],
         recent_campaigns => $recent_campaigns || [],
         success_message  => $args->{success_message},
         warning_message  => $args->{warning_message},
@@ -409,12 +467,141 @@ sub _analytics_screen {
     return $self->output_html( $template->output() );
 }
 
+sub _reports_screen {
+    my ($self) = @_;
+    $self->_ensure_schema;
+    my $dbh = C4::Context->dbh;
+    my $campaign_ids = $dbh->selectcol_arrayref(
+        q{
+            SELECT campaign_id
+              FROM plugin_ajsn_promo_campaigns
+             WHERE deleted_at IS NULL
+               AND start_date IS NOT NULL
+             ORDER BY campaign_id
+        }
+    ) || [];
+
+    my ( $portfolio, %comparisons, $error_message );
+    if ( @{$campaign_ids} ) {
+        my $service =
+          Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+            { dbh => $dbh }
+          );
+        my $ok = eval {
+            $portfolio = $service->portfolio_metrics($campaign_ids);
+            for my $dimension (qw(campaign_type channel location language_code target_audience)) {
+                $comparisons{$dimension} =
+                  $service->comparison_metrics( $dimension, $campaign_ids );
+            }
+            1;
+        };
+        unless ($ok) {
+            warn "Promotion & Engagement reports failed: $@";
+            $error_message = 'Reports could not be calculated.';
+        }
+    }
+
+    my $template = $self->get_template( { file => 'reports.tt' } );
+    $template->param(
+        campaign_count => scalar @{$campaign_ids},
+        portfolio      => $portfolio,
+        type_rows      => $comparisons{campaign_type}
+          ? $comparisons{campaign_type}->{rows} : [],
+        channel_rows   => $comparisons{channel}
+          ? $comparisons{channel}->{rows} : [],
+        location_rows  => $comparisons{location}
+          ? $comparisons{location}->{rows} : [],
+        language_rows  => $comparisons{language_code}
+          ? $comparisons{language_code}->{rows} : [],
+        audience_rows  => $comparisons{target_audience}
+          ? $comparisons{target_audience}->{rows} : [],
+        error_message  => $error_message,
+    );
+    return $self->output_html( $template->output() );
+}
+
+sub _report_export {
+    my ($self) = @_;
+    $self->_ensure_schema;
+    my $cgi = $self->{cgi};
+    my $format = lc _trim( scalar $cgi->param('format') || 'csv' );
+    my $dimension = _trim( scalar $cgi->param('dimension') || 'channel' );
+    my %allowed = map { $_ => 1 }
+      qw(campaign_type channel location language_code target_audience);
+    $dimension = 'channel' unless $allowed{$dimension};
+    $format = 'csv' unless $format eq 'json';
+
+    my $dbh = C4::Context->dbh;
+    my $campaign_ids = $dbh->selectcol_arrayref(
+        q{SELECT campaign_id FROM plugin_ajsn_promo_campaigns
+           WHERE deleted_at IS NULL AND start_date IS NOT NULL
+           ORDER BY campaign_id}
+    ) || [];
+    my $rows = [];
+    if ( @{$campaign_ids} ) {
+        my $service =
+          Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+            { dbh => $dbh }
+          );
+        $rows = $service->comparison_metrics( $dimension, $campaign_ids )->{rows};
+    }
+
+    if ( $format eq 'json' ) {
+        print $cgi->header(
+            -type       => 'application/json',
+            -attachment => "promotion-$dimension-report.json",
+            -charset    => 'UTF-8',
+        );
+        print encode_json(
+            {
+                spec_version => $Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics::SPEC_VERSION,
+                dimension    => $dimension,
+                rows         => $rows,
+            }
+        );
+        return;
+    }
+
+    print $cgi->header(
+        -type       => 'text/csv',
+        -attachment => "promotion-$dimension-report.csv",
+        -charset    => 'UTF-8',
+    );
+    print "code,label,campaign_count,eligible_item_count,checkout_count,multi_location_campaign_count\n";
+    for my $row ( @{$rows} ) {
+        print join(
+            q{,},
+            map { _csv_value($_) } (
+                $row->{code},
+                $row->{label},
+                $row->{campaign_count},
+                $row->{eligible_item_count},
+                $row->{checkout_count},
+                $row->{multi_location_campaign_count},
+            )
+        ), "\n";
+    }
+    return;
+}
+
+sub _csv_value {
+    my ($value) = @_;
+    $value = q{} unless defined $value;
+    $value =~ s/"/""/g;
+    return qq{"$value"};
+}
+
 sub _promotions_screen {
     my ( $self, $args ) = @_;
     $args ||= {};
     $self->_ensure_schema;
 
     my $dbh = C4::Context->dbh;
+    my $query = _trim( scalar $self->{cgi}->param('q') );
+    my $status_filter = _trim( scalar $self->{cgi}->param('status') );
+    my %filter_statuses = map { $_ => 1 } qw(draft active completed);
+    $status_filter = q{} unless $filter_statuses{$status_filter};
+
     my $campaigns = $dbh->selectall_arrayref(
         q{
             SELECT c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
@@ -446,6 +633,8 @@ sub _promotions_screen {
                AND vc.value_code = c.channel
                AND vc.deleted_at IS NULL
              WHERE c.deleted_at IS NULL
+               AND (? = '' OR c.name LIKE ? OR c.notes LIKE ?)
+               AND (? = '' OR c.status = ?)
              GROUP BY c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
                       c.name, c.start_date, c.end_date, c.branchcode,
                       c.target_audience, c.language_code, c.display_location,
@@ -453,13 +642,20 @@ sub _promotions_screen {
              ORDER BY c.campaign_id DESC
              LIMIT 200
         },
-        { Slice => {} }
+        { Slice => {} },
+        $query,
+        '%' . $query . '%',
+        '%' . $query . '%',
+        $status_filter,
+        $status_filter,
     );
 
     my $template = $self->get_template( { file => 'promotions.tt' } );
     $template->param(
         plugin_version  => $VERSION,
         campaigns       => $campaigns || [],
+        search_query    => $query,
+        status_filter   => $status_filter,
         error_message   => $args->{error_message},
         success_message => $args->{success_message},
     );

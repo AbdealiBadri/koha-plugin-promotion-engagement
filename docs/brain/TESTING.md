@@ -217,3 +217,24 @@ Human visual review is complete; the milestone is cleared for merge.
 - Combined t/analytics_engine.t + t/analytics_navigation.t: 28 assertions PASS.
 - Plugin syntax and Plack restart/status: PASS.
 - Dashboard > Analytics post-fix human visual recheck: PENDING.
+
+## v0.3.0 release-candidate verification — 2026-09-20
+
+- AN-01..AN-10 core engine: 23 assertions PASS.
+- Analytics navigation/default selection: 5 assertions PASS.
+- AN-11 overlap and portfolio issue-ID de-duplication: PASS.
+- AN-12 stable-code/friendly-label comparisons and multi-location marking: PASS.
+- AN-13 minimum-five privacy suppression: PASS.
+- AN-14 archived-campaign historical authorization: PASS.
+- AN-15 staff UI/API shared-service KPI parity: PASS.
+- Advanced suite: 20 assertions PASS.
+- Combined Analytics suite: 48 assertions PASS.
+- Dashboard, Analytics, Reports and filtered Promotions render through Koha plugin loader without template failures: PASS.
+- Analytics and comparative Reports service smoke against campaign fixtures: PASS.
+- Main plugin, Analytics service and Analytics API syntax: PASS.
+- OpenAPI JSON parse: PASS.
+- Synthetic issues/old_issues/campaign residue: 0/0/0 PASS.
+- Plack restart/status: PASS.
+- v0.3.0 KPZ build, SHA-256 verification, exact archive extraction and extracted-module syntax: PASS.
+- Human professional-UI visual acceptance: PENDING for Monday.
+- Koha 26.05, institutional staging and production gates: NOT RUN; remain explicitly blocked.

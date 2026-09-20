@@ -1,9 +1,9 @@
 # Session Handoff
 
-**Last updated:** 2026-09-19
+**Last updated:** 2026-09-20
 **Active runtime branch:** `feature/v0.3-analytics-engine`
 **Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** v0.3 Analytics Engine
+**Current milestone:** v0.3.0 Release Candidate — Monday visual acceptance
 
 ## Verified completed today
 
@@ -89,9 +89,21 @@ Final post-visual EA/CR regression also passed.
 - Added `t/analytics_navigation.t`; five default/manual/empty-list assertions PASS.
 - Combined Analytics suite: 28 assertions PASS; plugin syntax and Plack restart PASS.
 
+## v0.3.0 weekend release-candidate result
+
+- AN-01..AN-15 are implemented and runtime-tested.
+- Combined Analytics suite: 48 assertions PASS.
+- Professional academic Dashboard, Analytics, Promotions, Detail, Create, Edit, Configuration and Reports styling is implemented.
+- Comparative Reports and CSV/JSON exports are implemented.
+- Read-only authenticated campaign Analytics API is implemented through the shared service.
+- Promotions search/status filtering is implemented.
+- Version is 0.3.0.
+- KPZ release candidate, checksum and extracted-artifact validation: PASS.
+- Detailed user review path: `docs/brain/MONDAY_ACCEPTANCE.md`.
+
 ## Exact next action
 
-Recheck Dashboard > Analytics and confirm campaign 40 is automatically selected and calculated. After visual acceptance, continue AN-11..AN-15 (overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity).
+Perform Monday human visual acceptance of Dashboard, filtered Promotions, campaign 40 Analytics, Reports and downloads. If accepted, open and merge the v0.3 pull request. Do not deploy to production until Koha 26.05, AJSN staging and backup/rollback gates are separately approved and completed.
 
 ## Visual URL
 

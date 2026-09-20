@@ -8,7 +8,7 @@
 
 ## Current milestone
 
-**v0.3 Analytics Engine — ACTIVE.**
+**v0.3.0 Analytics, Reports and Professional UI — RELEASE CANDIDATE / HUMAN VISUAL ACCEPTANCE PENDING.**
 
 Checkpoint 1, Campaign List/Detail, Edit/Update/Archive, Universal Configuration and Multi-location are complete. PR #3 merged into `feature/v0.2-campaign-crud` as `17915cd`. The active v0.3 branch now defines and implements one shared Analytics Engine using Koha circulation history without duplicating Koha operational data.
 
@@ -100,21 +100,19 @@ Current dashboard provides counts, recent campaigns and an Analytics entry point
 
 ## Unimplemented approved functionality
 
+The v0.3.0 release candidate now includes AN-01..AN-15, professional Dashboard/Analytics/Reports screens, campaign search/status filters, channel/location/type/language/audience comparisons, CSV/JSON exports and an authenticated read-only campaign Analytics API.
+
+The following remain later approved milestones:
+
 - recurring/cadence behavior beyond configuration values;
 - e-resource/non-barcode resource model;
-- list filtering/search workflows;
-- Analytics AN-11..AN-15 overlap, portfolio, privacy, authorization and UI/API parity coverage;
-- channel/location/subject/language/audience comparison views;
-- chart-based professional management dashboard;
-- restricted top user/student and top Darajah/class/group/category analytics;
-- reports and CSV/JSON exports;
-- external campaign/analytics APIs;
+- subject/collection comparison after an authoritative mapping is approved;
+- restricted identifiable top-user/student analytics and approved permission design;
 - OAuth2 integration guide;
 - historical spreadsheet importer;
-- automated test suite for release gate;
 - Koha 26.05 validation;
 - AJSN staging deployment;
-- production deployment.
+- production backup/rollback rehearsal and deployment.
 
 ## Test state
 
@@ -179,9 +177,9 @@ Checkpoint 1 is closed.
 
 ## Immediate next task
 
-1. Recheck Dashboard > Analytics and confirm campaign 40 now loads automatically.
-2. Complete AN-11..AN-15 for overlap/portfolio de-duplication, configured comparisons, privacy suppression, archived authorization and UI/API parity.
-3. Preserve aggregate-only privacy behavior and a minimum cohort of five distinct borrowers.
-4. Keep staff UI, reports and future APIs on the same service methods.
+1. Complete the Monday human visual acceptance in `MONDAY_ACCEPTANCE.md`.
+2. Confirm Dashboard, filtered Promotions, campaign 40 Analytics, comparative Reports and downloads.
+3. Open and merge the v0.3 pull request after visual acceptance.
+4. Keep production deployment blocked until Koha 26.05, institutional staging, backup/rollback and exact-install gates are approved and executed.
 
 Architecture decisions DEC-019 and DEC-020 govern the active work.

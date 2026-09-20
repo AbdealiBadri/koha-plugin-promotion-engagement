@@ -14,17 +14,19 @@ API-first Koha Tool Plugin for recording library promotion activity and measurin
 
 Koha remains authoritative for bibliographic records, items, barcodes, patrons, branches and circulation. The plugin stores only promotion-specific operational data in namespaced plugin tables.
 
-Planned capabilities include:
+The v0.3.0 release candidate includes:
 
-- Promotion/campaign management
-- Bulk barcode scan/paste and Koha item validation
-- Before/after circulation impact analysis
-- 7/14/30/60-day KPIs
-- Target audience, subject, language and branch analytics
+- Campaign create/list/detail/edit/archive with audit history
+- Universal campaign types, channels and reusable multi-location configuration
+- Bulk barcode scan/paste with live Koha validation
+- Baseline, During and After 7/14/30/60-day circulation analytics
+- Conversion, uplift, days-to-first-checkout and portfolio de-duplication
+- Privacy-aware channel, location, type, language and audience comparisons
+- Professional Koha-native dashboard and reports
 - CSV/JSON exports
-- Authenticated REST API for external AJS applications
-- Audit trail and role-based access
-- Historical migration from spreadsheet-based promotion records
+- Authenticated health and read-only campaign Analytics API
+
+Later milestones include recurring campaigns, non-barcode resources, historical import, Koha 26.05 validation and institutional staging.
 
 ## Safety rules
 

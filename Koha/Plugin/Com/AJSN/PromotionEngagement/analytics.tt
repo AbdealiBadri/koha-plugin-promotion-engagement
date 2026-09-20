@@ -7,6 +7,14 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha: Promotion analytics</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+.promo-hero{background:linear-gradient(135deg,#17324d,#245b64);color:#fff;border-radius:8px;padding:24px 28px;margin-bottom:20px;box-shadow:0 4px 14px rgba(23,50,77,.18)}
+.promo-hero h1{color:#fff;margin:0 0 7px;font-family:Georgia,serif}.promo-hero p{color:#dcebed;margin:0;font-size:1.08rem}
+.selector-panel,.analytics-panel{border:1px solid #d8e1e5;border-radius:7px;box-shadow:0 2px 8px rgba(23,50,77,.06)}.selector-panel>.panel-heading,.analytics-panel>.panel-heading{background:#f1f5f6;color:#17324d;border-bottom:1px solid #d8e1e5}
+.metric-card{background:#fff;border:1px solid #d8e1e5;border-top:4px solid #b28b32;border-radius:7px;padding:17px;min-height:112px;margin-bottom:16px;box-shadow:0 2px 8px rgba(23,50,77,.08)}
+.metric-card.teal{border-top-color:#2d7372}.metric-card.blue{border-top-color:#3d6685}.metric-card strong{color:#526b78;text-transform:uppercase;letter-spacing:.04em;font-size:.8rem}.metric-number{color:#17324d;font-family:Georgia,serif;font-size:2.25rem;line-height:1.25}
+.analytics-title{font-family:Georgia,serif;color:#17324d}.analytics-panel th{background:#f8fafb;color:#294d5b}
+</style>
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -30,14 +38,16 @@
     <div class="row">
         <div class="col-sm-10 col-sm-push-2">
             <main>
-                <h1>Promotion analytics</h1>
-                <p class="lead">Before, during and after circulation impact calculated from Koha checkout history.</p>
+                <div class="promo-hero">
+                    <h1>Promotion analytics</h1>
+                    <p>Assess circulation response before, during and after each campaign using one transparent measurement framework.</p>
+                </div>
 
                 [% IF error_message %]
                     <div class="alert alert-danger">[% error_message | html %]</div>
                 [% END %]
 
-                <div class="panel panel-default">
+                <div class="panel panel-default selector-panel">
                     <div class="panel-heading"><strong>Select a campaign</strong></div>
                     <div class="panel-body">
                         <form method="get" action="/cgi-bin/koha/plugins/run.pl" class="form-inline">
@@ -61,58 +71,30 @@
                 </div>
 
                 [% IF analytics %]
-                    <h2>[% analytics.campaign.name | html %]</h2>
+                    <h2 class="analytics-title">[% analytics.campaign.name | html %]</h2>
                     <p>
                         Measurement specification [% analytics.spec_version | html %].
                         Eligible promoted items: <strong>[% analytics.eligible_item_count %]</strong>.
                     </p>
                     <div class="row">
-                        <div class="col-md-3">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <strong>During checkouts</strong><br>
-                                    <span style="font-size:2rem">[% analytics.metrics.during.checkout_count %]</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <strong>Conversion rate</strong><br>
-                                    [% IF analytics.eligible_item_count %]
-                                        <span style="font-size:2rem">[% analytics.metrics.during.conversion_rate %]%</span>
-                                    [% ELSE %]
-                                        <span class="text-muted">Not available</span>
-                                    [% END %]
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <strong>Uplift vs baseline</strong><br>
-                                    [% IF analytics.uplift_available %]
-                                        <span style="font-size:2rem">[% analytics.uplift_percent %]%</span>
-                                    [% ELSE %]
-                                        <span class="text-muted">No baseline rate</span>
-                                    [% END %]
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <strong>Days to first checkout</strong><br>
-                                    [% IF analytics.days_to_first_available %]
-                                        <span style="font-size:2rem">[% analytics.days_to_first_checkout %]</span>
-                                    [% ELSE %]
-                                        <span class="text-muted">No response yet</span>
-                                    [% END %]
-                                </div>
-                            </div>
-                        </div>
+                        <div class="col-md-3"><div class="metric-card">
+                            <strong>During checkouts</strong><br>
+                            <span class="metric-number">[% analytics.metrics.during.checkout_count %]</span>
+                        </div></div>
+                        <div class="col-md-3"><div class="metric-card teal">
+                            <strong>Conversion rate</strong><br>
+                            [% IF analytics.eligible_item_count %]<span class="metric-number">[% analytics.metrics.during.conversion_rate %]%</span>[% ELSE %]<span class="text-muted">Not available</span>[% END %]
+                        </div></div>
+                        <div class="col-md-3"><div class="metric-card blue">
+                            <strong>Uplift vs baseline</strong><br>
+                            [% IF analytics.uplift_available %]<span class="metric-number">[% analytics.uplift_percent %]%</span>[% ELSE %]<span class="text-muted">No baseline rate</span>[% END %]
+                        </div></div>
+                        <div class="col-md-3"><div class="metric-card">
+                            <strong>Days to first checkout</strong><br>
+                            [% IF analytics.days_to_first_available %]<span class="metric-number">[% analytics.days_to_first_checkout %]</span>[% ELSE %]<span class="text-muted">No response yet</span>[% END %]
+                        </div></div>
                     </div>
-                    <div class="panel panel-default">
+                    <div class="panel panel-default analytics-panel">
                         <div class="panel-heading"><strong>Measurement windows</strong></div>
                         <div class="panel-body">
                             <div class="table-responsive">
@@ -170,7 +152,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><span class="text-muted">Reports</span></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                     </ul>
                 </div>
             </aside>

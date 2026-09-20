@@ -27,5 +27,38 @@
         }
       }
     }
+  },
+  "/analytics/{campaign_id}": {
+    "get": {
+      "x-mojo-to": "Com::AJSN::PromotionEngagement::API::Analytics#get",
+      "operationId": "getAjsnPromotionCampaignAnalytics",
+      "tags": ["ajsn_promotion"],
+      "summary": "Aggregate analytics for one active campaign",
+      "produces": ["application/json"],
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "type": "integer",
+          "minimum": 1
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Campaign analytics calculated by the shared Analytics service",
+          "schema": {"type": "object"}
+        },
+        "400": {"description": "Invalid or archived campaign"},
+        "401": {"description": "Authentication required"},
+        "403": {"description": "Access forbidden"},
+        "404": {"description": "Campaign not found"}
+      },
+      "x-koha-authorization": {
+        "permissions": {
+          "catalogue": "1"
+        }
+      }
+    }
   }
 }

@@ -77,21 +77,21 @@
 
 ## ISSUE-009 — Campaign management lifecycle incomplete
 
-- **Status:** PARTIALLY RESOLVED
+- **Status:** RESOLVED FOR v0.3
 - **Severity:** Medium
 - **Module:** campaign management
-- **Completed:** list/detail, linked-resource read-through, edit/update, whitelisted statuses, campaign/item soft-delete archive, and audit of create/update/status/archive operations.
-- **Runtime evidence:** CR-01..CR-07 and EA-01..EA-13 pass in isolated promoeng.
-- **Remaining:** search/filter/pagination polish only; lifecycle and human visual acceptance are complete.
+- **Completed:** list/detail, linked-resource read-through, edit/update, whitelisted statuses, campaign/item soft-delete archive, audit operations, name/notes search and status filtering.
+- **Runtime evidence:** CR-01..CR-07, EA-01..EA-13 and filtered Promotions render smoke pass in isolated promoeng.
+- **Later scale polish:** pagination remains optional for a future large-dataset milestone.
 
 ## ISSUE-010 — Analytics engine not implemented
 
-- **Status:** OPEN / PLANNED
-- **Severity:** Product-critical but not current blocker
-- **Module:** analytics/dashboard
-- **Current:** counts only; conversion tile says later phase.
-- **Needed:** before/during/after, 7/14/30/60 windows, unique conversion, days-to-first-checkout, channel/location/subject/audience comparisons, restricted user/class benefit analytics.
-- **Dependency:** stable campaign/resource/configuration model.
+- **Status:** RESOLVED FOR v0.3.0 RELEASE CANDIDATE
+- **Severity:** Product-critical
+- **Module:** analytics/dashboard/reports
+- **Completed:** AN-01..AN-15, before/during/after windows, conversion, uplift, days-to-first, portfolio de-duplication, multi-attribution, privacy suppression, configured comparisons, professional UI, exports and shared read-only API.
+- **Evidence:** 48 assertions plus service/render/OpenAPI/KPZ gates PASS on 2026-09-20.
+- **Remaining gate:** human professional-UI visual acceptance. Restricted identifiable analytics remain a separate future privacy milestone.
 
 ## ISSUE-011 — Non-barcode resource model not implemented
 
@@ -117,5 +117,5 @@
 - **Status:** OPEN
 - **Severity:** Release blocker
 - **Module:** deployment
-- **Missing:** Koha 26.05.x validation, AJSN staging, final backup/restore/rollback rehearsal, exact v0.2+ KPZ acceptance.
+- **Missing:** Koha 26.05.x validation, AJSN staging, final backup/restore/rollback rehearsal and clean Koha upload/install acceptance. The exact v0.3.0 KPZ build, checksum, extraction and extracted-code validation pass.
 - **Production:** must remain blocked until these pass.

@@ -8,6 +8,12 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha: Promotions</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-width:920px}
+.panel-default{border-color:#d8e1e5;border-radius:6px;box-shadow:0 2px 8px rgba(23,50,77,.05)}
+.panel-default>.panel-heading{background:#f1f5f6;color:#17324d;border-color:#d8e1e5;padding:12px 15px}
+.table>thead>tr>th{background:#f8fafb;color:#294d5b}.btn-primary{background:#245b64;border-color:#1c4d55}.btn-primary:hover{background:#17324d;border-color:#17324d}
+</style>
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -37,8 +43,10 @@
                     </a>
                 </div>
 
-                <h1>Promotions</h1>
-                <p class="lead">Browse saved promotion campaigns and open a campaign to review its linked Koha items and audit history.</p>
+                <div style="background:linear-gradient(135deg,#17324d,#245b64);color:#fff;border-radius:8px;padding:22px 26px;margin-bottom:20px">
+                    <h1 style="color:#fff;margin-top:0">Promotion portfolio</h1>
+                    <p style="color:#dcebed;margin-bottom:0;font-size:1.05rem">Search, review and manage the library's evidence-linked engagement campaigns.</p>
+                </div>
 
                 [% IF success_message %]
                     <div class="alert alert-success">[% success_message | html %]</div>
@@ -47,6 +55,28 @@
                 [% IF error_message %]
                     <div class="alert alert-danger">[% error_message | html %]</div>
                 [% END %]
+
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Find campaigns</strong></div>
+                    <div class="panel-body">
+                        <form method="get" action="/cgi-bin/koha/plugins/run.pl" class="form-inline">
+                            <input type="hidden" name="class" value="[% CLASS | html %]">
+                            <input type="hidden" name="method" value="[% METHOD | html %]">
+                            <input type="hidden" name="action" value="promotions">
+                            <label for="promo-q">Search</label>
+                            <input id="promo-q" name="q" type="search" class="form-control" value="[% search_query | html %]" placeholder="Campaign name or notes">
+                            <label for="promo-status">Status</label>
+                            <select id="promo-status" name="status" class="form-control">
+                                <option value="">All statuses</option>
+                                <option value="draft"[% IF status_filter == 'draft' %] selected="selected"[% END %]>Draft</option>
+                                <option value="active"[% IF status_filter == 'active' %] selected="selected"[% END %]>Active</option>
+                                <option value="completed"[% IF status_filter == 'completed' %] selected="selected"[% END %]>Completed</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Apply filters</button>
+                            [% IF search_query || status_filter %]<a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Clear</a>[% END %]
+                        </form>
+                    </div>
+                </div>
 
                 <div class="panel panel-default">
                     <div class="panel-heading"><strong>Saved campaigns</strong></div>
@@ -107,7 +137,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><span class="text-muted">Reports</span></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                     </ul>
                 </div>
             </aside>

@@ -2,9 +2,11 @@
 
 A Koha Tool Plugin for recording library promotion activity and measuring circulation impact while keeping Koha as the source of truth.
 
-## v0.1.0
+## v0.3.0 release candidate
 
-Foundation release only. The promotion-entry form is deliberately read-only until validation, permissions, CSRF handling and audit logging are implemented and tested.
+The plugin now provides audited campaign creation and editing, configurable promotion metadata and multi-location selection, Koha-linked item validation, circulation-impact analytics, portfolio comparison reports, CSV/JSON exports, and authenticated REST analytics. Staff pages use a consistent professional academic visual system.
+
+The release candidate is runtime-tested in the dedicated KTD environment. Production deployment remains gated by Monday visual acceptance, clean KPZ installation, Koha 26.05 compatibility, staging, backup, and rollback checks.
 
 ## Safety rules
 

@@ -52,16 +52,16 @@ issues:
     summary: "Normalized campaign-to-many-location model implemented and verified"
 
   ISSUE-009:
-    status: "partially-resolved"
+    status: "resolved-for-v0.3"
     severity: "medium"
     module: "campaign-management"
-    summary: "List/detail/edit/archive lifecycle and human visual acceptance completed; search/filter/pagination remain later polish"
+    summary: "Lifecycle, visual acceptance, name/notes search and status filtering completed; pagination remains optional scale polish"
 
   ISSUE-010:
-    status: "planned"
+    status: "resolved-release-candidate"
     severity: "product-critical"
     module: "analytics"
-    summary: "Analytics engine and professional KPI dashboard not implemented"
+    summary: "AN-01..AN-15, professional dashboard/reports, exports and shared read-only API implemented; human visual acceptance pending"
 
   ISSUE-011:
     status: "planned"
@@ -80,4 +80,4 @@ issues:
     status: "open-release-blocker"
     severity: "high-release"
     module: "compatibility-deployment"
-    summary: "Koha 26.05, staging, v0.2 exact KPZ and rollback gates outstanding"
+    summary: "v0.3.0 KPZ/checksum/extraction pass; Koha 26.05, clean upload/install, staging and rollback gates remain"

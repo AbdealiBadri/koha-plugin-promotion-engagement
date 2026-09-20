@@ -1,0 +1,85 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE Asset %]
+[% PROCESS 'i18n.inc' %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Koha: Promotion reports</title>
+[% INCLUDE 'doc-head-close.inc' %]
+<style>
+.promo-hero{background:linear-gradient(135deg,#17324d,#245b64);color:#fff;border-radius:8px;padding:24px 28px;margin:0 0 20px;box-shadow:0 4px 14px rgba(23,50,77,.18)}
+.promo-hero h1{color:#fff;margin:0 0 7px}.promo-hero p{margin:0;color:#dcebed;font-size:1.1rem}
+.metric-card{background:#fff;border:1px solid #d8e1e5;border-top:4px solid #b28b32;border-radius:6px;padding:18px;min-height:112px;box-shadow:0 2px 8px rgba(23,50,77,.08);margin-bottom:18px}
+.metric-label{color:#526b78;text-transform:uppercase;letter-spacing:.04em;font-size:.83rem;font-weight:700}
+.metric-value{color:#17324d;font-family:Georgia,serif;font-size:2.3rem;line-height:1.2;margin-top:5px}
+.report-panel{border:1px solid #d8e1e5;border-radius:6px;box-shadow:0 2px 8px rgba(23,50,77,.06);margin-bottom:20px}
+.report-panel .panel-heading{background:#f1f5f6;border-bottom:1px solid #d8e1e5;color:#17324d;padding:13px 16px}
+.report-panel table{margin-bottom:0}.report-panel th{color:#294d5b;background:#f8fafb}
+.export-bar{margin:0 0 18px}.export-bar .btn{margin-right:6px;margin-bottom:6px}
+</style>
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+[% WRAPPER 'sub-header.inc' %]
+ [% WRAPPER breadcrumbs %]
+  [% WRAPPER breadcrumb_item %]<a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>[% END %]
+  [% WRAPPER breadcrumb_item %]<a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>[% END %]
+  [% WRAPPER breadcrumb_item bc_active=1 %]<span>Reports</span>[% END %]
+ [% END %]
+[% END %]
+<div class="container-fluid"><div class="row">
+<div class="col-sm-10 col-sm-push-2"><main>
+<div class="promo-hero">
+ <h1>Promotion impact reports</h1>
+ <p>Evidence-based comparisons across campaigns, channels and display locations.</p>
+</div>
+[% IF error_message %]<div class="alert alert-danger">[% error_message | html %]</div>[% END %]
+<div class="row">
+ <div class="col-md-4"><div class="metric-card"><div class="metric-label">Campaigns measured</div><div class="metric-value">[% campaign_count %]</div></div></div>
+ <div class="col-md-4"><div class="metric-card"><div class="metric-label">De-duplicated checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</div></div></div>
+ <div class="col-md-4"><div class="metric-card"><div class="metric-label">Multi-attributed events</div><div class="metric-value">[% IF portfolio %][% portfolio.multi_attributed_issue_count %][% ELSE %]0[% END %]</div></div></div>
+</div>
+<div class="export-bar">
+ <strong>Download:</strong>
+ <a class="btn btn-default btn-sm" href="?class=[% CLASS %]&method=[% METHOD %]&action=report_export&dimension=channel&format=csv"><i class="fa fa-download"></i> Channel CSV</a>
+ <a class="btn btn-default btn-sm" href="?class=[% CLASS %]&method=[% METHOD %]&action=report_export&dimension=location&format=csv"><i class="fa fa-download"></i> Location CSV</a>
+ <a class="btn btn-default btn-sm" href="?class=[% CLASS %]&method=[% METHOD %]&action=report_export&dimension=campaign_type&format=json"><i class="fa fa-code"></i> Type JSON</a>
+</div>
+[% BLOCK comparison_table %]
+<div class="panel report-panel">
+ <div class="panel-heading"><strong>[% heading %]</strong></div>
+ <div class="table-responsive"><table class="table table-striped table-hover">
+  <thead><tr><th>Configured value</th><th>Campaigns</th><th>Eligible resources</th><th>Checkouts</th><th>Multi-location</th></tr></thead>
+  <tbody>
+  [% IF rows.size %]
+   [% FOREACH row IN rows %]
+   <tr>
+    <td><strong>[% row.label | html %]</strong><br><small class="text-muted">[% row.code | html %]</small></td>
+    <td>[% row.campaign_count %]</td>
+    <td>[% row.eligible_item_count %]</td>
+    <td>[% row.checkout_count %]</td>
+    <td>[% row.multi_location_campaign_count %]</td>
+   </tr>
+   [% END %]
+  [% ELSE %]<tr><td colspan="5" class="text-muted">No measurable records for this dimension.</td></tr>[% END %]
+  </tbody>
+ </table></div>
+</div>
+[% END %]
+[% PROCESS comparison_table heading='Performance by channel' rows=channel_rows %]
+[% PROCESS comparison_table heading='Performance by location' rows=location_rows %]
+[% PROCESS comparison_table heading='Performance by campaign type' rows=type_rows %]
+[% PROCESS comparison_table heading='Performance by language' rows=language_rows %]
+[% PROCESS comparison_table heading='Performance by audience' rows=audience_rows %]
+<div class="alert alert-info"><strong>Interpretation note:</strong> Portfolio totals de-duplicate checkout issue IDs. Multi-location campaigns may appear under every linked location and are labelled explicitly.</div>
+</main></div>
+<div class="col-sm-2 col-sm-pull-10"><aside><div class="sidebar_menu"><ul>
+ <li><a href="?class=[% CLASS %]&method=[% METHOD %]">Dashboard</a></li>
+ <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
+ <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
+ <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
+ <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
+</ul></div></aside></div>
+</div></div>
+[% INCLUDE 'intranet-bottom.inc' %]

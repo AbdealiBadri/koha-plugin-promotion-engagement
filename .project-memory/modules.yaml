@@ -32,7 +32,7 @@ modules:
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-009"]
-    next_action: "Merge PR #3; add search/filter/pagination polish later"
+    next_action: "Search/status filters implemented; retain pagination as future scale polish"
 
   configuration:
     status: "implemented-runtime-and-visual-verified"
@@ -56,32 +56,32 @@ modules:
     next_action: "Design resource abstraction for e-resources/authors/themes"
 
   dashboard:
-    status: "partial"
+    status: "professional-v0.3-release-candidate-runtime-tested"
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-010"]
-    next_action: "Keep counts/recent list stable; modernize after analytics rules"
+    next_action: "Human visual acceptance of the academic dashboard on Monday"
 
   analytics:
-    status: "service-and-first-ui-implemented-runtime-tested-visual-pending"
+    status: "an-01-through-an-15-implemented-and-runtime-tested-visual-pending"
     owner_system: "shared plugin analytics layer; Koha circulation source of truth"
     dependencies: ["stable campaign model", "Koha issues/old_issues", "configuration"]
     open_issues: ["ISSUE-010"]
-    next_action: "Visual-check campaign 40 Analytics page, then complete AN-11..AN-15"
+    next_action: "Human visual acceptance of campaign 40 Analytics and comparative Reports"
 
   rest_api:
-    status: "partial-health-verified"
+    status: "health-and-read-only-campaign-analytics-implemented"
     owner_system: "Koha REST + plugin"
     dependencies: ["Koha authentication/authorization"]
     open_issues: []
-    next_action: "Add business endpoints only after campaign/configuration model stabilizes"
+    next_action: "Verify authenticated analytics endpoint during Monday acceptance"
 
   reporting_exports:
-    status: "planned"
+    status: "implemented-runtime-smoke-tested-visual-pending"
     owner_system: "plugin"
     dependencies: ["analytics"]
     open_issues: []
-    next_action: "Implement after stable analytics service"
+    next_action: "Human-check Reports page plus CSV and JSON downloads"
 
   historical_import:
     status: "planned"
@@ -91,11 +91,11 @@ modules:
     next_action: "Design controlled importer with validation/audit/rollback later"
 
   kpz_packaging:
-    status: "implemented-v0.1-verified-v0.2-needs-release-test"
+    status: "v0.3.0-release-candidate-built-checksummed-and-extracted"
     owner_system: "repository/Koha plugin installer"
     dependencies: ["Python 3", "Koha Plugins framework"]
     open_issues: ["ISSUE-006", "ISSUE-013"]
-    next_action: "Run version-aware clean KPZ acceptance for release candidate"
+    next_action: "Perform clean Koha upload/install in the staging gate before production"
 
   deployment:
     status: "development-only"

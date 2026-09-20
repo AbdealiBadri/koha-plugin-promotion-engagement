@@ -202,3 +202,21 @@ Status: current Koha-native UI is `PARTIAL`; modern dashboard is `PLANNED`.
 5. Baseline methodology for circulation uplift when a campaign is not running.
 6. Whether recurring activities should use recurrence definitions, campaign templates, generated occurrences, or another model.
 7. Exact permissions matrix beyond current Koha plugin tool and catalogue health permissions.
+## 15. v0.3.0 implementation update — 2026-09-20
+
+This section supersedes older PLANNED/PARTIAL labels above where they conflict with verified current code.
+
+IMPLEMENTED in the v0.3.0 release candidate:
+
+- Campaign list/detail/edit/update/archive and multi-location configuration.
+- AN-01..AN-15 Analytics Engine with shared UI/API business rules.
+- Baseline, During and After 7/14/30/60 KPIs.
+- Portfolio issue-ID de-duplication and multi-attribution reporting.
+- Aggregate privacy suppression below five borrowers.
+- Professional academic Dashboard, Analytics and Reports surfaces.
+- Channel, location, campaign-type, language and audience comparisons.
+- Campaign search and status filtering.
+- CSV and JSON comparative exports.
+- Authenticated read-only campaign Analytics API.
+
+Still PLANNED: recurrence, non-barcode resources, historical import, OAuth2 guide, restricted identifiable analytics, Koha 26.05 validation, staging and production deployment.

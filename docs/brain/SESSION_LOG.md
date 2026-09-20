@@ -223,3 +223,16 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Added five navigation-selection assertions; combined Analytics result is 28 assertions PASS.
 - Main plugin syntax PASS; Plack restart/status PASS.
 - Exact next action: recheck Dashboard > Analytics auto-loads campaign 40, then continue AN-11..AN-15.
+
+### Weekend v0.3.0 release-candidate completion — 2026-09-20
+- Completed AN-11..AN-15: overlap attribution, portfolio de-duplication, configured comparisons, privacy suppression, archived-history authorization and UI/API parity.
+- Added authenticated read-only campaign Analytics API using the shared Analytics service.
+- Added professional academic navy/teal/gold visual system across management screens.
+- Rebuilt Dashboard with institutional KPI cards and evidence-framework guidance.
+- Added comparative Reports for channel, location, campaign type, language and audience.
+- Added CSV/JSON report exports and Promotions search/status filtering.
+- Advanced plugin version to 0.3.0.
+- Combined Analytics suite: 48 assertions PASS; render, service, syntax, OpenAPI, residue and Plack gates PASS.
+- Built exact v0.3.0 KPZ release candidate; checksum and extracted artifact validation PASS.
+- Created MONDAY_ACCEPTANCE.md.
+- Exact next action: Monday human visual acceptance, then open/merge v0.3 PR. Production remains gated.

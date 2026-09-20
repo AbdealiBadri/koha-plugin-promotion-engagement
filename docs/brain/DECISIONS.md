@@ -165,3 +165,12 @@ This log preserves both current decisions and important superseded/rejected appr
 - **Privacy:** core analytics are aggregate-only; cohorts below five distinct borrowers are suppressed; identifiable patron analytics require a later restricted design.
 - **Consistency:** staff UI, reports and future APIs must call one shared analytics service.
 - **Specification:** `docs/brain/ANALYTICS_SPEC.md`.
+
+## DEC-021 — v0.3.0 management UI and report boundary
+
+**Status:** Accepted
+**Date:** 2026-09-20
+
+The v0.3.0 release candidate uses a restrained academic visual system—navy, teal, warm gold, serif display headings and Koha-native responsive panels. Dashboard, Analytics and Reports remain server-rendered and accessible without an external frontend framework.
+
+Comparative reports use the shared Analytics service and provide CSV/JSON exports. General staff views remain aggregate-only. Production deployment, identifiable patron ranking, recurrence, non-barcode resources and historical import are not silently absorbed into v0.3.0; they retain separate design and deployment gates.

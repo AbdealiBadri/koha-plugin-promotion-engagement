@@ -72,3 +72,14 @@ decisions:
   DEC-018:
     status: "accepted-reconciliation"
     summary: "Current four source-defined tables override old planned events-table assumption"
+  DEC-019:
+    status: "accepted"
+    summary: "Universal promotion configuration and normalized multi-location links preserve legacy fallback"
+
+  DEC-020:
+    status: "accepted-and-implemented"
+    summary: "Shared privacy-aware Analytics Engine uses issues plus old_issues with fixed cohorts and exact comparison windows"
+
+  DEC-021:
+    status: "accepted-and-implemented"
+    summary: "v0.3.0 uses a Koha-native academic management UI and shared-service comparative reports/exports"

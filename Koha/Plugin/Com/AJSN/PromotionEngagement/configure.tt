@@ -7,6 +7,12 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha: Configure Promotion &amp; Engagement</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<style>
+main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-width:920px}
+.panel-default{border-color:#d8e1e5;border-radius:6px;box-shadow:0 2px 8px rgba(23,50,77,.05)}
+.panel-default>.panel-heading{background:#f1f5f6;color:#17324d;border-color:#d8e1e5;padding:12px 15px}
+.table>thead>tr>th{background:#f8fafb;color:#294d5b}.btn-primary{background:#245b64;border-color:#1c4d55}.btn-primary:hover{background:#17324d;border-color:#17324d}
+</style>
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
