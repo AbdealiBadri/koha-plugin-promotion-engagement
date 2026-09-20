@@ -104,3 +104,16 @@ Each response includes:
 ## Current environment limitation
 
 The isolated `promoeng` database currently contains zero rows in `statistics`, `issues` and `old_issues`. Runtime correctness will therefore use transaction-scoped synthetic checkout fixtures that are rolled back or removed after every test. No production patron or circulation data is required.
+
+## Display-impact interpretation and title-level evidence
+
+AN-16 adds a librarian-facing interpretation layer without changing the authoritative checkout calculations.
+
+- Each campaign returns a display-impact finding: awaiting activity, no items, no response, new response, positive response, unchanged or below baseline.
+- Findings are marked provisional while the campaign window is still open.
+- Each eligible displayed Koha item returns barcode, title, author, baseline checkouts, during-display checkouts, 60-day follow-up checkouts and a response classification.
+- A positive or new circulation response is evidence that the promoted collection received increased borrowing engagement.
+- Circulation uplift is a proxy for discovery/engagement; it must never be described as a direct count of people who physically saw the display.
+- Future campaigns must be shown as awaiting activity, not as unsuccessful.
+
+Acceptance test AN-16 covers the finding, provisional flag, linked-title evidence, Koha barcode, during-display attribution, response classification and future-campaign state.

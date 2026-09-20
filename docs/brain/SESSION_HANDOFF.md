@@ -91,8 +91,8 @@ Final post-visual EA/CR regression also passed.
 
 ## v0.3.0 weekend release-candidate result
 
-- AN-01..AN-15 are implemented and runtime-tested.
-- Combined Analytics suite: 48 assertions PASS.
+- AN-01..AN-16 are implemented and runtime-tested.
+- Combined Analytics suite: 55 assertions PASS.
 - Professional academic Dashboard, Analytics, Promotions, Detail, Create, Edit, Configuration and Reports styling is implemented.
 - Comparative Reports and CSV/JSON exports are implemented.
 - Read-only authenticated campaign Analytics API is implemented through the shared service.
@@ -123,3 +123,12 @@ Log in through the normal Koha staff homepage first if required.
 - Koha database dump/delete/restore rehearsal: PASS.
 - Disposable `promoengclean` and `promoengupgrade` projects removed; primary `promoeng` untouched.
 - Full evidence: `docs/brain/V0.3_RELEASE_GATE_REPORT.md`.
+
+## Display-impact refinement before final visual check
+
+- AN-16 display-impact interpretation: implemented.
+- Displayed-title before/during/after response table: implemented.
+- Dashboard evidence pathway and per-campaign View impact actions: implemented.
+- Full Analytics suite: 55 assertions PASS.
+- Campaign 40 service and server-side UI render smoke: PASS.
+- Human visual confirmation of the refined Dashboard and Campaign 40 Analytics remains the immediate next action.

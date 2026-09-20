@@ -227,8 +227,8 @@ Human visual review is complete; the milestone is cleared for merge.
 - AN-13 minimum-five privacy suppression: PASS.
 - AN-14 archived-campaign historical authorization: PASS.
 - AN-15 staff UI/API shared-service KPI parity: PASS.
-- Advanced suite: 20 assertions PASS.
-- Combined Analytics suite: 48 assertions PASS.
+- Advanced suite: 27 assertions PASS.
+- Combined Analytics suite: 55 assertions PASS.
 - Dashboard, Analytics, Reports and filtered Promotions render through Koha plugin loader without template failures: PASS.
 - Analytics and comparative Reports service smoke against campaign fixtures: PASS.
 - Main plugin, Analytics service and Analytics API syntax: PASS.
@@ -242,7 +242,7 @@ Human visual review is complete; the milestone is cleared for merge.
 ## v0.3.0 clean installation, upgrade and rollback — 2026-09-20
 
 - Exact artifact: `PromotionEngagement-v0.3.0.kpz`.
-- SHA-256: `b2242bd87fd7fa7fc62a164ead52943a0bda29a0d53ed23027962e8831fd9885`.
+- SHA-256: `f8158110e09c954e4e65849a040f980c2769e25429cffd82028f5505d48b164d`.
 - Clean Koha 25.11 instance without plugin bind mount: PASS.
 - Authenticated Koha upload and version 0.3.0 discovery: PASS.
 - Six-table schema creation: PASS.
@@ -256,3 +256,15 @@ Human visual review is complete; the milestone is cleared for merge.
 - Institutional staging and human visual acceptance: PENDING.
 
 See `docs/brain/V0.3_RELEASE_GATE_REPORT.md` for complete evidence and boundaries.
+
+## AN-16 display-impact evidence — 2026-09-20
+
+- Analytics service and main plugin syntax: PASS.
+- Full Analytics suite: 55 assertions PASS.
+- Display-impact finding and provisional state: PASS.
+- Title/barcode before/during/after response: PASS.
+- Future campaign shown as awaiting activity: PASS.
+- Campaign 40 runtime smoke exposes title `E Street shuffle`, barcode `3999900000001` and honest provisional no-response finding: PASS.
+- Dashboard/Analytics/Reports server-side render smoke: PASS.
+- Plack status after restart: running.
+- Human visual acceptance: PENDING.

@@ -41,8 +41,8 @@ Zero circulation is expected in this isolated development database; it is not a 
 
 ## Automated evidence
 
-- AN-01 through AN-15: PASS
-- Analytics test suite: 48 assertions PASS
+- AN-01 through AN-16: PASS
+- Analytics test suite: 55 assertions PASS
 - Dashboard, Analytics, Reports and filtered Promotions render smoke: PASS
 - Main plugin, Analytics service and Analytics API Perl syntax: PASS
 - OpenAPI JSON validation: PASS

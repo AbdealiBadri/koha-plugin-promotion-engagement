@@ -14,6 +14,10 @@
 .metric-card{background:#fff;border:1px solid #d8e1e5;border-top:4px solid #b28b32;border-radius:7px;padding:17px;min-height:112px;margin-bottom:16px;box-shadow:0 2px 8px rgba(23,50,77,.08)}
 .metric-card.teal{border-top-color:#2d7372}.metric-card.blue{border-top-color:#3d6685}.metric-card strong{color:#526b78;text-transform:uppercase;letter-spacing:.04em;font-size:.8rem}.metric-number{color:#17324d;font-family:Georgia,serif;font-size:2.25rem;line-height:1.25}
 .analytics-title{font-family:Georgia,serif;color:#17324d}.analytics-panel th{background:#f8fafb;color:#294d5b}
+.impact-card{background:#f8fafb;border:1px solid #d8e1e5;border-left:6px solid #3d6685;border-radius:7px;padding:18px 20px;margin:16px 0 20px;box-shadow:0 2px 8px rgba(23,50,77,.06)}
+.impact-card.impact-success{border-left-color:#2d7372;background:#f2f8f7}.impact-card.impact-warning{border-left-color:#b28b32;background:#fffaf0}.impact-card h3{font-family:Georgia,serif;color:#17324d;margin:0 0 6px}.impact-card p{margin:0 0 7px;font-size:1.02rem}.evidence-note{color:#607780;font-size:.9rem}
+.response-badge{display:inline-block;border-radius:12px;padding:3px 9px;background:#edf2f4;color:#294d5b;font-size:.82rem;font-weight:700}.response-badge.positive{background:#e3f2ef;color:#1c605d}
+.promo-kicker{text-transform:uppercase;letter-spacing:.1em;font-size:.76rem;font-weight:700;margin-bottom:5px}
 </style>
 </head>
 <body>
@@ -76,6 +80,15 @@
                         Measurement specification [% analytics.spec_version | html %].
                         Eligible promoted items: <strong>[% analytics.eligible_item_count %]</strong>.
                     </p>
+                    <div class="impact-card impact-[% analytics.impact_evidence.tone | html %]">
+                        <div class="promo-kicker" style="color:#526b78">Display impact finding</div>
+                        <h3>[% analytics.impact_evidence.label | html %][% IF analytics.impact_evidence.provisional %] <small>Provisional</small>[% END %]</h3>
+                        <p>[% analytics.impact_evidence.finding | html %]</p>
+                        <div class="evidence-note">
+                            <i class="fa fa-info-circle"></i>
+                            Evidence is based on Koha checkout behaviour. Increased circulation supports improved discovery and engagement, but does not directly count how many people physically saw the display.
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-3"><div class="metric-card">
                             <strong>During checkouts</strong><br>
@@ -131,6 +144,33 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default analytics-panel">
+                        <div class="panel-heading"><strong>Displayed-title response</strong></div>
+                        <div class="panel-body">
+                            <p class="text-muted">See which promoted books changed circulation after being placed on display.</p>
+                            [% IF analytics.item_response_rows.size %]
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead><tr><th>Displayed book</th><th>Barcode</th><th>Before display</th><th>During display</th><th>After display (60 days)</th><th>Response</th></tr></thead>
+                                        <tbody>
+                                            [% FOREACH item IN analytics.item_response_rows %]
+                                                <tr>
+                                                    <td><strong>[% item.title | html %]</strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]</td>
+                                                    <td>[% item.barcode | html %]</td>
+                                                    <td>[% item.baseline_count %]</td>
+                                                    <td>[% item.during_count %]</td>
+                                                    <td>[% item.after_60_count %]</td>
+                                                    <td><span class="response-badge[% IF item.response_label == 'Increased' %] positive[% END %]">[% item.response_label | html %]</span></td>
+                                                </tr>
+                                            [% END %]
+                                        </tbody>
+                                    </table>
+                                </div>
+                            [% ELSE %]
+                                <p class="text-muted">No linked Koha items are available for title-level measurement.</p>
+                            [% END %]
                         </div>
                     </div>
                     <div class="alert alert-info">

@@ -141,6 +141,6 @@ Modern professional dashboard, visual hierarchy and responsive refinement should
 Items in this backlog are not approved implementation scope until promoted through a decision/PRD update.
 ## v0.3.0 checkpoint update — 2026-09-20
 
-Analytics Engine AN-01..AN-15, professional management UI, comparative Reports, exports, campaign filtering and read-only Analytics API are implemented in the release candidate. The checkpoint is code/runtime complete and awaits Monday human visual acceptance before pull-request merge.
+Analytics Engine AN-01..AN-16, title-level display evidence, professional management UI, comparative Reports, exports, campaign filtering and read-only Analytics API are implemented in the release candidate. The checkpoint is code/runtime complete and awaits Monday human visual acceptance before pull-request merge.
 
 Later roadmap items remain recurrence/templates, non-barcode resources, restricted analytics, historical import, forward compatibility, staging and production deployment.

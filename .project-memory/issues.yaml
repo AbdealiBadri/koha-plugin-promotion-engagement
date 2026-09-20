@@ -61,7 +61,7 @@ issues:
     status: "resolved-release-candidate"
     severity: "product-critical"
     module: "analytics"
-    summary: "AN-01..AN-15, professional dashboard/reports, exports and shared read-only API implemented; human visual acceptance pending"
+    summary: "AN-01..AN-16, dynamic academic dashboard, title-level display evidence, reports, exports and shared read-only API implemented; human visual acceptance pending"
 
   ISSUE-011:
     status: "planned"

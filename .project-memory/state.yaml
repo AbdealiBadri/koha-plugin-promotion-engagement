@@ -56,13 +56,15 @@ critical_decisions:
   - "DEC-017"
   - "DEC-019"
   - "DEC-020"
+  - "DEC-021"
+  - "DEC-022"
 
 last_test:
   id: "v0.3.0-release-candidate-gate"
   date: "2026-09-20"
   command: "prove -v t/*.t; syntax/API/OpenAPI/render/service/KPZ/checksum gates"
   status: "PASS"
-  result: "48 assertions pass; clean v0.3 KPZ install, v0.2-to-v0.3 upgrade, API auth, data preservation and database rollback pass on Koha 25.11"
+  result: "55 assertions pass including AN-16 display-impact/title evidence; clean install, upgrade, API auth, preservation and rollback pass on Koha 25.11"
 
 runtime:
   plugin_version: "0.3.0"

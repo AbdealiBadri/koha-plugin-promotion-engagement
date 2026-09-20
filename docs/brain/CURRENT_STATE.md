@@ -100,7 +100,7 @@ Current dashboard provides counts, recent campaigns and an Analytics entry point
 
 ## Unimplemented approved functionality
 
-The v0.3.0 release candidate now includes AN-01..AN-15, professional Dashboard/Analytics/Reports screens, campaign search/status filters, channel/location/type/language/audience comparisons, CSV/JSON exports and an authenticated read-only campaign Analytics API.
+The v0.3.0 release candidate now includes AN-01..AN-16, professional Dashboard/Analytics/Reports screens, campaign search/status filters, channel/location/type/language/audience comparisons, CSV/JSON exports and an authenticated read-only campaign Analytics API.
 
 The following remain later approved milestones:
 
@@ -189,3 +189,7 @@ Architecture decisions DEC-019 and DEC-020 govern the active work.
 Local technical release gates are complete on Koha 25.11: exact KPZ upload/install, six-table creation, primary page rendering, REST authentication, disable/re-enable preservation, v0.2-to-v0.3 upgrade preservation, repeated migration idempotence and database backup/restore all pass.
 
 The remaining release blockers are external: human visual acceptance, Koha 26.05 compatibility, institutional staging and explicit production backup/change-window ownership. The full result is recorded in `V0.3_RELEASE_GATE_REPORT.md`.
+
+## Display-impact evidence refinement — 2026-09-20
+
+AN-16 is implemented and runtime-tested. Campaign Analytics now states the display-impact finding in plain language and shows each displayed title's before, during and 60-day follow-up checkout response. The Dashboard now explains the evidence pathway and provides direct View impact actions. The UI explicitly avoids claiming direct physical visibility from checkout data.

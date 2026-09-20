@@ -209,7 +209,7 @@ This section supersedes older PLANNED/PARTIAL labels above where they conflict w
 IMPLEMENTED in the v0.3.0 release candidate:
 
 - Campaign list/detail/edit/update/archive and multi-location configuration.
-- AN-01..AN-15 Analytics Engine with shared UI/API business rules.
+- AN-01..AN-16 Analytics Engine with shared UI/API business rules and title-level display evidence.
 - Baseline, During and After 7/14/30/60 KPIs.
 - Portfolio issue-ID de-duplication and multi-attribution reporting.
 - Aggregate privacy suppression below five borrowers.
@@ -220,3 +220,14 @@ IMPLEMENTED in the v0.3.0 release candidate:
 - Authenticated read-only campaign Analytics API.
 
 Still PLANNED: recurrence, non-barcode resources, historical import, OAuth2 guide, restricted identifiable analytics, Koha 26.05 validation, staging and production deployment.
+
+## 16. Book-display evidence and dynamic academic dashboard — 2026-09-20
+
+IMPLEMENTED before final visual acceptance:
+
+- Dashboard explains the four-step evidence pathway: record display, establish baseline, observe response and present finding.
+- Every recent campaign has a direct **View impact** action.
+- Campaign Analytics presents a plain-language display-impact finding and provisional state.
+- Analytics provides a displayed-title response table with Koha title, author, barcode and before/during/after checkout counts.
+- The interface explicitly distinguishes measured checkout engagement from unmeasured physical visibility.
+- UI remains Koha-native, responsive and institution-neutral; no external design framework or runtime skill is required.

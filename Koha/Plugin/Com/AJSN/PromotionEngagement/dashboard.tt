@@ -17,6 +17,7 @@
 .metric-label{color:#5a707a;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem;font-weight:700}.metric-value{font-family:Georgia,serif;color:#17324d;font-size:2.25rem;line-height:1.15;margin:7px 0 2px}.metric-help{color:#73868e;font-size:.86rem}
 .academic-panel{border:1px solid #d9e2e6;border-radius:7px;box-shadow:0 2px 9px rgba(23,50,77,.06)}.academic-panel>.panel-heading{background:#f1f5f6;color:#17324d;padding:13px 16px;border-bottom:1px solid #d9e2e6}
 .academic-panel th{background:#f8fafb;color:#294d5b}.section-title{color:#17324d;font-family:Georgia,serif;margin:8px 0 14px}
+.evidence-step{background:#fff;border:1px solid #d9e2e6;border-radius:7px;padding:16px;min-height:145px;margin-bottom:18px;position:relative;box-shadow:0 2px 8px rgba(23,50,77,.06)}.evidence-step .step-number{display:inline-block;background:#17324d;color:#fff;width:27px;height:27px;border-radius:50%;line-height:27px;text-align:center;font-weight:700;margin-bottom:9px}.evidence-step h3{font-family:Georgia,serif;color:#17324d;font-size:1.2rem;margin:0 0 6px}.evidence-step p{color:#607780;margin:0}.evidence-step.highlight{border-top:4px solid #b28b32;background:#fffdf7}
 </style>
 </head>
 <body>
@@ -67,11 +68,19 @@
                     <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Completed</div><div class="metric-value">[% completed_count %]</div><div class="metric-help">Finished campaigns</div></div></div>
                     <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Resources</div><div class="metric-value">[% item_count %]</div><div class="metric-help">Koha items linked</div></div></div>
                     <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Locations</div><div class="metric-value">[% location_count %]</div><div class="metric-help">Configured displays</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</div><div class="metric-help">De-duplicated impact</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Measured checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</div><div class="metric-help">Attributed after promotion</div></div></div>
                 </div>
                 <div class="btn-group" style="margin-bottom:20px">
                     <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics"><i class="fa fa-bar-chart"></i> Campaign analytics</a>
                     <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-file-text-o"></i> Comparative reports</a>
+                </div>
+
+                <h2 class="section-title">How a book display becomes evidence</h2>
+                <div class="row">
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">1</span><h3>Record the display</h3><p>Capture dates, location, audience and every promoted Koha barcode.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>Measure the same books in an equal period immediately before the display.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>Track checkouts during the display and through the 60-day follow-up.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Show uplift and title-level response as evidence of circulation engagement.</p></div></div>
                 </div>
 
                 <div class="panel panel-default academic-panel">
@@ -89,6 +98,7 @@
                                             <th>End</th>
                                             <th>Audience</th>
                                             <th>Status</th>
+                                            <th>Evidence</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,6 +115,7 @@
                                                 <td>[% campaign.end_date | html %]</td>
                                                 <td>[% campaign.target_audience | html %]</td>
                                                 <td><span class="label label-default">[% campaign.status | html %]</span></td>
+                                                <td><a class="btn btn-xs btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics&campaign_id=[% campaign.campaign_id %]"><i class="fa fa-line-chart"></i> View impact</a></td>
                                             </tr>
                                         [% END %]
                                     </tbody>

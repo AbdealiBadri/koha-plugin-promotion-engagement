@@ -89,8 +89,8 @@
 - **Status:** RESOLVED FOR v0.3.0 RELEASE CANDIDATE
 - **Severity:** Product-critical
 - **Module:** analytics/dashboard/reports
-- **Completed:** AN-01..AN-15, before/during/after windows, conversion, uplift, days-to-first, portfolio de-duplication, multi-attribution, privacy suppression, configured comparisons, professional UI, exports and shared read-only API.
-- **Evidence:** 48 assertions plus service/render/OpenAPI/KPZ gates PASS on 2026-09-20.
+- **Completed:** AN-01..AN-16, display-impact findings, title-level response, before/during/after windows, conversion, uplift, days-to-first, portfolio de-duplication, multi-attribution, privacy suppression, configured comparisons, professional UI, exports and shared read-only API.
+- **Evidence:** 55 assertions plus service/render/OpenAPI/KPZ gates PASS on 2026-09-20.
 - **Remaining gate:** human professional-UI visual acceptance. Restricted identifiable analytics remain a separate future privacy milestone.
 
 ## ISSUE-011 — Non-barcode resource model not implemented

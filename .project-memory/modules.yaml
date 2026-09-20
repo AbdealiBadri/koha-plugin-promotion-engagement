@@ -56,14 +56,14 @@ modules:
     next_action: "Design resource abstraction for e-resources/authors/themes"
 
   dashboard:
-    status: "professional-v0.3-release-candidate-runtime-tested"
+    status: "dynamic-academic-evidence-dashboard-runtime-tested"
     owner_system: "plugin"
     dependencies: ["campaign_creation"]
     open_issues: ["ISSUE-010"]
     next_action: "Human visual acceptance of the academic dashboard"
 
   analytics:
-    status: "an-01-through-an-15-implemented-and-runtime-tested-visual-pending"
+    status: "an-01-through-an-16-implemented-and-runtime-tested-visual-pending"
     owner_system: "shared plugin analytics layer; Koha circulation source of truth"
     dependencies: ["stable campaign model", "Koha issues/old_issues", "configuration"]
     open_issues: ["ISSUE-010"]

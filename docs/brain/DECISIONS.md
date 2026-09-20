@@ -174,3 +174,12 @@ This log preserves both current decisions and important superseded/rejected appr
 The v0.3.0 release candidate uses a restrained academic visual system—navy, teal, warm gold, serif display headings and Koha-native responsive panels. Dashboard, Analytics and Reports remain server-rendered and accessible without an external frontend framework.
 
 Comparative reports use the shared Analytics service and provide CSV/JSON exports. General staff views remain aggregate-only. Production deployment, identifiable patron ranking, recurrence, non-barcode resources and historical import are not silently absorbed into v0.3.0; they retain separate design and deployment gates.
+
+## DEC-022 — Circulation evidence is not a direct visibility count
+
+**Status:** Accepted
+**Date:** 2026-09-20
+
+Book-display effectiveness is presented through comparable Koha checkout behaviour and title-level response. Increased circulation supports a conclusion of improved discovery and borrowing engagement, but the plugin must not claim to count physical views without a separate approved observation mechanism such as anonymous QR interactions or manual footfall data.
+
+The professional academic dashboard may interpret results in plain language, but every finding must remain traceable to baseline, during and follow-up checkout counts from the shared Analytics service. Future-dated and in-progress campaigns must be labelled awaiting or provisional rather than failed or final.

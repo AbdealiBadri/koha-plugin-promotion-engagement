@@ -72,6 +72,17 @@ sub campaign_metrics {
     my $days_to_first = defined $first_checkout
       ? _round( ( $first_checkout - $windows->{during}->{start_epoch} ) / 86_400 )
       : undef;
+    my $impact_evidence = _impact_evidence(
+        $metrics{baseline},
+        $metrics{during},
+        scalar @itemnumbers,
+        $windows->{during},
+    );
+    my $item_response_rows = $self->_item_response_rows(
+        \@itemnumbers,
+        $events,
+        $windows,
+    );
 
     return {
         spec_version           => $SPEC_VERSION,
@@ -83,10 +94,141 @@ sub campaign_metrics {
         absolute_rate_delta    => $absolute_delta,
         uplift_percent         => $uplift_percent,
         days_to_first_checkout => $days_to_first,
+        impact_evidence        => $impact_evidence,
+        item_response_rows     => $item_response_rows,
         multi_attributed_issue_count => 0,
         data_quality_warnings  => [],
         calculated_at          => DateTime->now( time_zone => 'floating' )->strftime('%F %T'),
     };
+}
+
+sub _impact_evidence {
+    my ( $baseline, $during, $eligible_count, $during_window ) = @_;
+    my $now_epoch = DateTime->now( time_zone => 'floating' )->epoch;
+
+    return {
+        code    => 'no_items',
+        label   => 'No promoted items to measure',
+        tone    => 'default',
+        finding => 'Link Koha items to this campaign before circulation impact can be measured.',
+        provisional => 0,
+    } unless $eligible_count;
+
+    return {
+        code    => 'scheduled',
+        label   => 'Awaiting campaign activity',
+        tone    => 'info',
+        finding => 'This display has not started. Baseline data is available, but impact cannot yet be assessed.',
+        provisional => 1,
+    } if $now_epoch < $during_window->{start_epoch};
+
+    my $provisional = $now_epoch < $during_window->{end_epoch} ? 1 : 0;
+    my $baseline_rate = $baseline->{daily_checkout_rate} || 0;
+    my $during_rate   = $during->{daily_checkout_rate} || 0;
+    my ( $code, $label, $tone, $finding );
+
+    if ( !$during->{checkout_count} ) {
+        ( $code, $label, $tone, $finding ) = (
+            'no_response',
+            'No circulation response recorded',
+            'default',
+            'No promoted item checkout has been recorded during the display period.',
+        );
+    } elsif ( !$baseline->{checkout_count} && $during->{checkout_count} ) {
+        ( $code, $label, $tone, $finding ) = (
+            'new_response',
+            'New circulation response',
+            'success',
+            'Promoted items with no baseline checkout activity were borrowed during the display.',
+        );
+    } elsif ( $during_rate > $baseline_rate ) {
+        ( $code, $label, $tone, $finding ) = (
+            'positive',
+            'Positive circulation response',
+            'success',
+            'The promoted collection is circulating faster during the display than in the comparable baseline period.',
+        );
+    } elsif ( $during_rate < $baseline_rate ) {
+        ( $code, $label, $tone, $finding ) = (
+            'lower',
+            'Circulation below baseline',
+            'warning',
+            'The promoted collection is circulating more slowly during the display than in the comparable baseline period.',
+        );
+    } else {
+        ( $code, $label, $tone, $finding ) = (
+            'unchanged',
+            'No measured circulation change',
+            'info',
+            'The promoted collection is circulating at the same daily rate as the comparable baseline period.',
+        );
+    }
+
+    return {
+        code        => $code,
+        label       => $label,
+        tone        => $tone,
+        finding     => $finding,
+        provisional => $provisional,
+    };
+}
+
+sub _item_response_rows {
+    my ( $self, $itemnumbers, $events, $windows ) = @_;
+    return [] unless @{$itemnumbers};
+
+    my $placeholders = join q{,}, (q{?}) x @{$itemnumbers};
+    my $metadata = $self->{dbh}->selectall_arrayref(
+        qq{
+            SELECT i.itemnumber, i.barcode, b.title, b.author
+              FROM items i
+              JOIN biblio b ON b.biblionumber = i.biblionumber
+             WHERE i.itemnumber IN ($placeholders)
+        },
+        { Slice => {} },
+        @{$itemnumbers},
+    ) || [];
+    my %metadata = map { $_->{itemnumber} => $_ } @{$metadata};
+
+    my %counts;
+    for my $event ( @{$events} ) {
+        my $itemnumber = $event->{itemnumber};
+        if ( $event->{issuedate_epoch} >= $windows->{baseline}->{start_epoch}
+            && $event->{issuedate_epoch} < $windows->{baseline}->{end_epoch} ) {
+            $counts{$itemnumber}->{baseline}++;
+        }
+        if ( $event->{issuedate_epoch} >= $windows->{during}->{start_epoch}
+            && $event->{issuedate_epoch} < $windows->{during}->{end_epoch} ) {
+            $counts{$itemnumber}->{during}++;
+        }
+        if ( $event->{issuedate_epoch} >= $windows->{after_60}->{start_epoch}
+            && $event->{issuedate_epoch} < $windows->{after_60}->{end_epoch} ) {
+            $counts{$itemnumber}->{after}++;
+        }
+    }
+
+    return [
+        map {
+            my $itemnumber = $_;
+            my $baseline = $counts{$itemnumber}->{baseline} || 0;
+            my $during   = $counts{$itemnumber}->{during} || 0;
+            my $response =
+                $during > $baseline ? 'Increased'
+              : $during < $baseline ? 'Lower'
+              : $during             ? 'Unchanged'
+              :                       'No checkout';
+            {
+                itemnumber       => $itemnumber,
+                barcode          => $metadata{$itemnumber}->{barcode} || q{},
+                title            => $metadata{$itemnumber}->{title} || "Item $itemnumber",
+                author           => $metadata{$itemnumber}->{author} || q{},
+                baseline_count   => $baseline,
+                during_count     => $during,
+                after_60_count   => $counts{$itemnumber}->{after} || 0,
+                response_label   => $response,
+            }
+        } @{$itemnumbers}
+    ];
 }
 
 sub portfolio_metrics {

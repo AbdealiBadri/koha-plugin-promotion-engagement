@@ -97,6 +97,22 @@ my $api_fixture = $service->campaign_metrics(40);
 is_deeply( $api_fixture->{metrics}, $ui_fixture->{metrics}, 'AN-15 UI/API shared service KPI parity' );
 is( $api_fixture->{spec_version}, $ui_fixture->{spec_version}, 'AN-15 specification version parity' );
 
+ok( $ui_fixture->{impact_evidence}->{label}, 'AN-16 display impact finding is exposed' );
+ok( defined $ui_fixture->{impact_evidence}->{provisional}, 'AN-16 provisional state is explicit' );
+my ($displayed_item) = grep { $_->{itemnumber} == 1 } @{ $ui_fixture->{item_response_rows} };
+ok( $displayed_item, 'AN-16 displayed-title response includes linked item' );
+is( $displayed_item->{barcode}, '3999900000001', 'AN-16 displayed-title response retains Koha barcode' );
+cmp_ok( $displayed_item->{during_count}, '>=', 1, 'AN-16 during-display checkout is attributed to title' );
+ok( $displayed_item->{response_label}, 'AN-16 title-level response classification is exposed' );
+
+my $scheduled = Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics::_impact_evidence(
+    { checkout_count => 0, daily_checkout_rate => 0 },
+    { checkout_count => 0, daily_checkout_rate => 0 },
+    1,
+    { start_epoch => time + 86_400, end_epoch => time + 172_800 },
+);
+is( $scheduled->{code}, 'scheduled', 'AN-16 future display is not presented as failed impact' );
+
 $dbh->rollback;
 pass('Advanced synthetic fixtures rolled back');
 

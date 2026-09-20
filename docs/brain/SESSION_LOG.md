@@ -249,3 +249,13 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Did not pull Koha 26.05 because only 6.6 GB was free on Windows C: and the local 25.11 image is approximately 7.5 GB.
 - Removed both disposable KTD projects and the temporary worktree; primary `promoeng` and campaign 40 were untouched.
 - Added `V0.3_RELEASE_GATE_REPORT.md` and updated Project Brain/KPZ records.
+
+## 2026-09-20 — book-display evidence and academic dashboard refinement
+
+- Clarified the product claim: Koha checkouts measure borrowing response and support discovery/engagement evidence; they do not directly count physical views.
+- Added AN-16 impact classifications with provisional/future-campaign handling.
+- Added title-level barcode/title/author response across baseline, display and 60-day follow-up windows.
+- Added a prominent Display impact finding to Campaign Analytics.
+- Added a four-step evidence pathway and direct View impact actions to the Dashboard.
+- Expanded the Analytics suite from 48 to 55 assertions; all passed.
+- Campaign 40 smoke and server-side render verification passed after Plack restart.

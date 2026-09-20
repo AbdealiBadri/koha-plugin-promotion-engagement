@@ -83,3 +83,7 @@ decisions:
   DEC-021:
     status: "accepted-and-implemented"
     summary: "v0.3.0 uses a Koha-native academic management UI and shared-service comparative reports/exports"
+
+  DEC-022:
+    status: "accepted-and-implemented"
+    summary: "Display impact uses checkout response as an engagement proxy and never claims direct physical visibility without separate evidence"
