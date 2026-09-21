@@ -48,5 +48,7 @@ grep -q "was created successfully" "$work_dir/submitted.html"
 suggestion_id="$(sql "SELECT koha_suggestion_id FROM plugin_ajsn_promo_recommendations WHERE campaign_id=40 AND biblionumber=$biblio")"
 test -n "$suggestion_id"
 test "$(sql "SELECT COUNT(*) FROM suggestions WHERE suggestionid=$suggestion_id AND STATUS='ASKED' AND quantity=2 AND biblionumber=$biblio")" = 1
+test "$(sql "SELECT COUNT(*) FROM suggestions WHERE suggestionid=$suggestion_id AND reason='Book Display Impact' AND (patronreason IS NULL OR patronreason='')")" = 1
+test "$(sql "SELECT COUNT(*) FROM suggestions WHERE suggestionid=$suggestion_id AND staff_note LIKE 'Evidence-based additional-copy recommendation.%'")" = 1
 test "$(sql "SELECT COUNT(*) FROM plugin_ajsn_promo_audit WHERE campaign_id=40 AND action_type='impact_suggestion_submitted'")" = 1
-printf 'book-display-workflow-smoke PASS suggestion=%s\n' "$suggestion_id"
+printf 'book-display-workflow-smoke PASS suggestion=%s reason=Book_Display_Impact\n' "$suggestion_id"

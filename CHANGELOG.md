@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1] - 2026-09-21
+
+### Changed
+- Polished all staff screens with consistent professional Koha-native navigation, buttons, tables, focus states and contrast.
+- Added all-campaign Analytics comparison and clearer campaign selectors.
+- Added Reports campaign/status/date filters, retained export filters and explicit single-location evidence.
+- Added Dashboard display-location intelligence without falsely attributing multi-location campaigns.
+- Standardized native Koha Purchase Suggestion reason as `Book Display Impact`.
+- Added upgrade-survival audit and repeatable staging/rollback procedure.
+
+### Fixed
+- Isolated Book Display Impact tests from pre-existing real recommendations.
+- Kept multi-location campaigns out of misleading “best location” calculations.
+
 ## [0.4.0] - 2026-09-20
 
 ### Added

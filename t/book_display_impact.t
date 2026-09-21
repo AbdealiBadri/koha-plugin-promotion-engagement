@@ -56,6 +56,11 @@ is( $row->{evidence_grade}, 'Strong', 'BDI-09 circulation plus holds is strong e
 cmp_ok( $row->{suggested_quantity}, '>=', 1, 'BDI-10 additional-copy quantity suggested' );
 
 $dbh->do(
+    q{DELETE FROM plugin_ajsn_promo_recommendations
+       WHERE campaign_id=40 AND biblionumber=?},
+    undef, $biblionumber,
+);
+$dbh->do(
     q{INSERT INTO plugin_ajsn_promo_recommendations
       (campaign_id,biblionumber,decision_status,recommended_quantity,
        reviewer_note,decided_by,decided_at)
@@ -76,14 +81,19 @@ my $suggestion = Koha::Suggestion->new( {
     branchcode => $branchcode,
     quantity => 2,
     STATUS => 'ASKED',
-    patronreason => 'BDI integration test',
+    reason => 'Book Display Impact',
+    staff_note => 'Evidence-based additional-copy recommendation.',
 } )->store;
 ok( $suggestion->suggestionid, 'BDI-13 native Koha suggestion created' );
 is( $suggestion->STATUS, 'ASKED', 'BDI-14 native suggestion enters pending state' );
 is( $suggestion->quantity, 2, 'BDI-15 native suggestion retains quantity' );
 is( $suggestion->biblionumber, $biblionumber,
     'BDI-16 native suggestion links existing Koha title' );
+is( $suggestion->reason, 'Book Display Impact',
+    'BDI-17 staff decision reason is explicit without changing Koha authorised values' );
+ok( !defined $suggestion->patronreason || $suggestion->patronreason eq q{},
+    'BDI-18 native patron-reason authorised values are not forged by the plugin' );
 
 $dbh->rollback;
-pass('BDI-17 synthetic holds, decision and suggestion rolled back');
+pass('BDI-19 synthetic holds, decision and suggestion rolled back');
 done_testing;

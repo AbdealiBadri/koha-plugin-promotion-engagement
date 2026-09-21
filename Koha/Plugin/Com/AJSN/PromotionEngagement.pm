@@ -12,13 +12,13 @@ use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 use Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
-our $VERSION = '0.4.0';
+our $VERSION = '0.4.1';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
     author          => 'Aljamea-tus-Saifiyah Nairobi',
     date_authored   => '2026-08-15',
-    date_updated    => '2026-09-20',
+    date_updated    => '2026-09-21',
     minimum_version => '25.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -386,6 +386,9 @@ sub _dashboard {
         portfolio        => $portfolio,
         channel_rows     => $channel_comparison ? $channel_comparison->{rows} : [],
         location_rows    => $location_comparison ? $location_comparison->{rows} : [],
+        leading_location => _leading_location(
+            $location_comparison ? $location_comparison->{rows} : []
+        ),
         recent_campaigns => $recent_campaigns || [],
         success_message  => $args->{success_message},
         warning_message  => $args->{warning_message},
@@ -651,9 +654,10 @@ sub _submit_impact_suggestion {
             author => $row->{author}, biblionumber => $biblionumber,
             branchcode => $row->{branchcode}, quantity => $row->{recommended_quantity},
             STATUS => 'ASKED',
-            patronreason => 'Evidence-based additional-copy recommendation from Book Display Impact.',
+            reason => 'Book Display Impact',
+            patronreason => undef,
             staff_note => sprintf(
-                'Campaign: %s (ID %d). %s',
+                'Evidence-based additional-copy recommendation. Campaign: %s (ID %d). %s',
                 $row->{campaign_name}, $campaign_id, $row->{reviewer_note} || q{}
             ),
         } )->store;
@@ -692,16 +696,17 @@ sub _submit_impact_suggestion {
 sub _reports_screen {
     my ($self) = @_;
     $self->_ensure_schema;
+    my $cgi = $self->{cgi};
     my $dbh = C4::Context->dbh;
-    my $campaign_ids = $dbh->selectcol_arrayref(
-        q{
-            SELECT campaign_id
-              FROM plugin_ajsn_promo_campaigns
-             WHERE deleted_at IS NULL
-               AND start_date IS NOT NULL
-             ORDER BY campaign_id
-        }
+    my $campaigns = $dbh->selectall_arrayref(
+        q{SELECT campaign_id,name,start_date,end_date,status
+            FROM plugin_ajsn_promo_campaigns
+           WHERE deleted_at IS NULL AND start_date IS NOT NULL
+           ORDER BY campaign_id DESC},
+        { Slice => {} },
     ) || [];
+    my $filters = _report_filters($cgi);
+    my $campaign_ids = _filtered_campaign_ids( $campaigns, $filters );
 
     my ( $portfolio, %comparisons, $error_message );
     if ( @{$campaign_ids} ) {
@@ -723,6 +728,8 @@ sub _reports_screen {
         }
     }
 
+    my $location_rows = $comparisons{location}
+      ? $comparisons{location}->{rows} : [];
     my $template = $self->get_template( { file => 'reports.tt' } );
     $template->param(
         campaign_count => scalar @{$campaign_ids},
@@ -731,12 +738,18 @@ sub _reports_screen {
           ? $comparisons{campaign_type}->{rows} : [],
         channel_rows   => $comparisons{channel}
           ? $comparisons{channel}->{rows} : [],
-        location_rows  => $comparisons{location}
-          ? $comparisons{location}->{rows} : [],
+        location_rows  => $location_rows,
         language_rows  => $comparisons{language_code}
           ? $comparisons{language_code}->{rows} : [],
         audience_rows  => $comparisons{target_audience}
           ? $comparisons{target_audience}->{rows} : [],
+        campaigns      => $campaigns,
+        selected_campaign_id => $filters->{campaign_id},
+        selected_status => $filters->{status},
+        date_from      => $filters->{date_from},
+        date_to        => $filters->{date_to},
+        filter_query   => _report_filter_query($filters),
+        leading_location => _leading_location($location_rows),
         error_message  => $error_message,
     );
     return $self->output_html( $template->output() );
@@ -754,11 +767,16 @@ sub _report_export {
     $format = 'csv' unless $format eq 'json';
 
     my $dbh = C4::Context->dbh;
-    my $campaign_ids = $dbh->selectcol_arrayref(
-        q{SELECT campaign_id FROM plugin_ajsn_promo_campaigns
+    my $campaigns = $dbh->selectall_arrayref(
+        q{SELECT campaign_id,name,start_date,end_date,status
+            FROM plugin_ajsn_promo_campaigns
            WHERE deleted_at IS NULL AND start_date IS NOT NULL
-           ORDER BY campaign_id}
+           ORDER BY campaign_id DESC},
+        { Slice => {} },
     ) || [];
+    my $campaign_ids = _filtered_campaign_ids(
+        $campaigns, _report_filters($cgi)
+    );
     my $rows = [];
     if ( @{$campaign_ids} ) {
         my $service =
@@ -789,21 +807,78 @@ sub _report_export {
         -attachment => "promotion-$dimension-report.csv",
         -charset    => 'UTF-8',
     );
-    print "code,label,campaign_count,eligible_item_count,checkout_count,multi_location_campaign_count\n";
+    my @csv_columns = qw(
+      code label campaign_count eligible_item_count checkout_count
+    );
+    push @csv_columns, qw(exclusive_checkout_count exclusive_campaign_count)
+      if $dimension eq 'location';
+    push @csv_columns, 'multi_location_campaign_count';
+
+    print join( q{,}, @csv_columns ), "\n";
     for my $row ( @{$rows} ) {
         print join(
             q{,},
-            map { _csv_value($_) } (
-                $row->{code},
-                $row->{label},
-                $row->{campaign_count},
-                $row->{eligible_item_count},
-                $row->{checkout_count},
-                $row->{multi_location_campaign_count},
-            )
+            map { _csv_value( $row->{$_} ) } @csv_columns
         ), "\n";
     }
     return;
+}
+
+sub _report_filters {
+    my ($cgi) = @_;
+    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my $status = _trim( scalar $cgi->param('status') );
+    my $date_from = _trim( scalar $cgi->param('date_from') );
+    my $date_to = _trim( scalar $cgi->param('date_to') );
+    $campaign_id = q{} unless $campaign_id =~ /^\d+$/;
+    $status = q{} unless $status =~ /^(?:draft|active|completed)$/;
+    $date_from = q{} unless $date_from =~ /^\d{4}-\d{2}-\d{2}$/;
+    $date_to = q{} unless $date_to =~ /^\d{4}-\d{2}-\d{2}$/;
+    return {
+        campaign_id => $campaign_id,
+        status      => $status,
+        date_from   => $date_from,
+        date_to     => $date_to,
+    };
+}
+
+sub _filtered_campaign_ids {
+    my ( $campaigns, $filters ) = @_;
+    return [
+        map { 0 + $_->{campaign_id} }
+        grep {
+            ( !$filters->{campaign_id}
+                || $_->{campaign_id} == $filters->{campaign_id} )
+              && ( !$filters->{status}
+                || ( $_->{status} || q{} ) eq $filters->{status} )
+              && ( !$filters->{date_from}
+                || ( $_->{end_date} || $_->{start_date} ) ge $filters->{date_from} )
+              && ( !$filters->{date_to}
+                || $_->{start_date} le $filters->{date_to} )
+        } @{ $campaigns || [] }
+    ];
+}
+
+sub _report_filter_query {
+    my ($filters) = @_;
+    return join q{&}, map {
+        my $value = $filters->{$_};
+        length $value ? $_ . q{=} . $value : ()
+    } qw(campaign_id status date_from date_to);
+}
+
+sub _leading_location {
+    my ($rows) = @_;
+    my @eligible = grep {
+        lc( $_->{code} || q{} ) ne 'unassigned'
+          && ( $_->{exclusive_campaign_count} || 0 ) > 0
+          && ( $_->{exclusive_checkout_count} || 0 ) > 0
+    } @{ $rows || [] };
+    @eligible = sort {
+        $b->{exclusive_checkout_count} <=> $a->{exclusive_checkout_count}
+          || lc( $a->{label} ) cmp lc( $b->{label} )
+    } @eligible;
+    return $eligible[0];
 }
 
 sub _csv_value {

@@ -371,12 +371,19 @@ sub comparison_metrics {
                 campaign_ids     => {},
                 eligible_items   => {},
                 checkout_issues  => {},
+                exclusive_campaign_ids => {},
+                exclusive_checkout_issues => {},
                 multi_location_campaign_count => 0,
             };
             $group->{campaign_ids}->{$campaign_id} = 1;
             $group->{eligible_items}->{$_} = 1
               for @{ $result->{eligible_itemnumbers} };
             $group->{checkout_issues}->{ $_->{issue_id} } = 1 for @{$events};
+            if ( $dimension eq 'location' && @values == 1 ) {
+                $group->{exclusive_campaign_ids}->{$campaign_id} = 1;
+                $group->{exclusive_checkout_issues}->{ $_->{issue_id} } = 1
+                  for @{$events};
+            }
             $group->{multi_location_campaign_count}++
               if $dimension eq 'location' && @values > 1;
         }
@@ -390,6 +397,10 @@ sub comparison_metrics {
             campaign_count   => scalar keys %{ $group->{campaign_ids} },
             eligible_item_count => scalar keys %{ $group->{eligible_items} },
             checkout_count   => scalar keys %{ $group->{checkout_issues} },
+            exclusive_campaign_count =>
+              scalar keys %{ $group->{exclusive_campaign_ids} },
+            exclusive_checkout_count =>
+              scalar keys %{ $group->{exclusive_checkout_issues} },
             multi_location_campaign_count =>
               $group->{multi_location_campaign_count},
         }

@@ -56,6 +56,29 @@ is(
     1,
     'AN-12 multi-location contribution is explicit'
 );
+is(
+    $main_entrance->{exclusive_campaign_count},
+    0,
+    'AN-12 multi-location campaign is excluded from best-location evidence'
+);
+is(
+    $main_entrance->{exclusive_checkout_count},
+    0,
+    'AN-12 ambiguous checkouts are not presented as a physical pickup location'
+);
+my $mixed_locations = $service->comparison_metrics( 'location', [ 40, 990041 ] );
+my ($unassigned) = grep { $_->{code} eq 'unassigned' } @{ $mixed_locations->{rows} };
+is(
+    $unassigned->{exclusive_campaign_count},
+    1,
+    'AN-12 single-location or unassigned campaign remains separately measurable'
+);
+cmp_ok(
+    $unassigned->{exclusive_checkout_count},
+    '>=',
+    1,
+    'AN-12 unambiguous campaign contributes to exclusive location evidence'
+);
 
 my $channels = $service->comparison_metrics( 'channel', [40] );
 is( scalar @{ $channels->{rows} }, 1, 'AN-12 channel comparison grouped' );

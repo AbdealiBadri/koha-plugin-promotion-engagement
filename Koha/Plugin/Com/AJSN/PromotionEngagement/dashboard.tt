@@ -18,6 +18,21 @@
 .academic-panel{border:1px solid #d9e2e6;border-radius:7px;box-shadow:0 2px 9px rgba(23,50,77,.06)}.academic-panel>.panel-heading{background:#f1f5f6;color:#17324d;padding:13px 16px;border-bottom:1px solid #d9e2e6}
 .academic-panel th{background:#f8fafb;color:#294d5b}.section-title{color:#17324d;font-family:Georgia,serif;margin:8px 0 14px}
 .evidence-step{background:#fff;border:1px solid #d9e2e6;border-radius:7px;padding:16px;min-height:145px;margin-bottom:18px;position:relative;box-shadow:0 2px 8px rgba(23,50,77,.06)}.evidence-step .step-number{display:inline-block;background:#17324d;color:#fff;width:27px;height:27px;border-radius:50%;line-height:27px;text-align:center;font-weight:700;margin-bottom:9px}.evidence-step h3{font-family:Georgia,serif;color:#17324d;font-size:1.2rem;margin:0 0 6px}.evidence-step p{color:#607780;margin:0}.evidence-step.highlight{border-top:4px solid #b28b32;background:#fffdf7}
+
+/* Shared professional interaction treatment */
+.btn-primary{background:#245b64!important;border-color:#1c4d55!important;color:#fff!important;font-weight:700;box-shadow:0 2px 5px rgba(23,50,77,.18)}
+.btn-primary:hover,.btn-primary:focus{background:#17324d!important;border-color:#17324d!important;color:#fff!important}
+.btn-default{background:#fff!important;border:1px solid #91a5ad!important;color:#17324d!important;font-weight:700;box-shadow:0 1px 3px rgba(23,50,77,.10)}
+.btn-default:hover,.btn-default:focus{background:#edf4f4!important;border-color:#245b64!important;color:#102c43!important}
+.btn-danger{color:#fff!important;font-weight:700}.btn i{margin-right:4px}
+#toolbar,.btn-group,.export-bar{margin-bottom:18px}.table{background:#fff}.table>thead>tr>th{border-bottom:2px solid #9db2ba!important}
+.table>tbody>tr:hover{background:#eef5f5!important}.table td,.table th{vertical-align:middle!important}
+.sidebar_menu ul{border:1px solid #d8e1e5;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(23,50,77,.06)}
+.sidebar_menu ul li a{display:block;padding:11px 13px;color:#17324d!important;font-weight:700;border-left:4px solid transparent}
+.sidebar_menu ul li a:hover,.sidebar_menu ul li a:focus{background:#edf4f4;text-decoration:none;border-left-color:#2d7372}
+.sidebar_menu ul li.active a{background:#e5f0ef!important;color:#17324d!important;border-left-color:#2d7372!important}
+.form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
+.panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -82,6 +97,26 @@
                     <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>Measure the same books in an equal period immediately before the display.</p></div></div>
                     <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>Track checkouts during the display and through the 60-day follow-up.</p></div></div>
                     <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Show uplift and title-level response as evidence of circulation engagement.</p></div></div>
+                </div>
+
+                <div class="panel panel-default academic-panel">
+                    <div class="panel-heading"><strong><i class="fa fa-map-marker"></i> Display-location intelligence</strong></div>
+                    <div class="panel-body">
+                        [% IF leading_location %]
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="promo-kicker" style="color:#7b6226">Leading single-location evidence</div>
+                                    <h3 style="color:#17324d;margin:4px 0 8px">[% leading_location.label | html %]</h3>
+                                    <p><strong>[% leading_location.exclusive_checkout_count %]</strong> measured checkout(s) across <strong>[% leading_location.exclusive_campaign_count %]</strong> campaign(s) assigned only to this location.</p>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-map"></i> Review location evidence</a>
+                                </div>
+                            </div>
+                        [% ELSE %]
+                            <p><strong>No leading location can be named yet.</strong> Add checkout evidence from campaigns assigned to one display location. Multi-location campaigns are excluded from this conclusion because Koha cannot identify at which physical point the reader discovered the book.</p>
+                        [% END %]
+                    </div>
                 </div>
 
                 <div class="panel panel-default academic-panel">
@@ -150,6 +185,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
+                        <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>
                 </div>
             </aside>

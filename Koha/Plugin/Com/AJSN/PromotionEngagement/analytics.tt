@@ -18,6 +18,21 @@
 .impact-card.impact-success{border-left-color:#2d7372;background:#f2f8f7}.impact-card.impact-warning{border-left-color:#b28b32;background:#fffaf0}.impact-card h3{font-family:Georgia,serif;color:#17324d;margin:0 0 6px}.impact-card p{margin:0 0 7px;font-size:1.02rem}.evidence-note{color:#607780;font-size:.9rem}
 .response-badge{display:inline-block;border-radius:12px;padding:3px 9px;background:#edf2f4;color:#294d5b;font-size:.82rem;font-weight:700}.response-badge.positive{background:#e3f2ef;color:#1c605d}
 .promo-kicker{text-transform:uppercase;letter-spacing:.1em;font-size:.76rem;font-weight:700;margin-bottom:5px}
+
+/* Shared professional interaction treatment */
+.btn-primary{background:#245b64!important;border-color:#1c4d55!important;color:#fff!important;font-weight:700;box-shadow:0 2px 5px rgba(23,50,77,.18)}
+.btn-primary:hover,.btn-primary:focus{background:#17324d!important;border-color:#17324d!important;color:#fff!important}
+.btn-default{background:#fff!important;border:1px solid #91a5ad!important;color:#17324d!important;font-weight:700;box-shadow:0 1px 3px rgba(23,50,77,.10)}
+.btn-default:hover,.btn-default:focus{background:#edf4f4!important;border-color:#245b64!important;color:#102c43!important}
+.btn-danger{color:#fff!important;font-weight:700}.btn i{margin-right:4px}
+#toolbar,.btn-group,.export-bar{margin-bottom:18px}.table{background:#fff}.table>thead>tr>th{border-bottom:2px solid #9db2ba!important}
+.table>tbody>tr:hover{background:#eef5f5!important}.table td,.table th{vertical-align:middle!important}
+.sidebar_menu ul{border:1px solid #d8e1e5;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(23,50,77,.06)}
+.sidebar_menu ul li a{display:block;padding:11px 13px;color:#17324d!important;font-weight:700;border-left:4px solid transparent}
+.sidebar_menu ul li a:hover,.sidebar_menu ul li a:focus{background:#edf4f4;text-decoration:none;border-left-color:#2d7372}
+.sidebar_menu ul li.active a{background:#e5f0ef!important;color:#17324d!important;border-left-color:#2d7372!important}
+.form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
+.panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -70,6 +85,8 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa fa-bar-chart"></i> Calculate analytics
                             </button>
+                            <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-table"></i> Compare all campaigns</a>
+                            <p class="help-block" style="margin-top:10px"><strong>Campaign Analytics</strong> explains one display in depth. Use Comparative Reports for an institution-wide view.</p>
                         </form>
                     </div>
                 </div>
@@ -194,6 +211,7 @@
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
+                        <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>
                 </div>
             </aside>

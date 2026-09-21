@@ -12,6 +12,21 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
 .panel-default{border-color:#d8e1e5;border-radius:6px;box-shadow:0 2px 8px rgba(23,50,77,.05)}
 .panel-default>.panel-heading{background:#f1f5f6;color:#17324d;border-color:#d8e1e5;padding:12px 15px}
 .table>thead>tr>th{background:#f8fafb;color:#294d5b}.btn-primary{background:#245b64;border-color:#1c4d55}.btn-primary:hover{background:#17324d;border-color:#17324d}
+
+/* Shared professional interaction treatment */
+.btn-primary{background:#245b64!important;border-color:#1c4d55!important;color:#fff!important;font-weight:700;box-shadow:0 2px 5px rgba(23,50,77,.18)}
+.btn-primary:hover,.btn-primary:focus{background:#17324d!important;border-color:#17324d!important;color:#fff!important}
+.btn-default{background:#fff!important;border:1px solid #91a5ad!important;color:#17324d!important;font-weight:700;box-shadow:0 1px 3px rgba(23,50,77,.10)}
+.btn-default:hover,.btn-default:focus{background:#edf4f4!important;border-color:#245b64!important;color:#102c43!important}
+.btn-danger{color:#fff!important;font-weight:700}.btn i{margin-right:4px}
+#toolbar,.btn-group,.export-bar{margin-bottom:18px}.table{background:#fff}.table>thead>tr>th{border-bottom:2px solid #9db2ba!important}
+.table>tbody>tr:hover{background:#eef5f5!important}.table td,.table th{vertical-align:middle!important}
+.sidebar_menu ul{border:1px solid #d8e1e5;border-radius:7px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(23,50,77,.06)}
+.sidebar_menu ul li a{display:block;padding:11px 13px;color:#17324d!important;font-weight:700;border-left:4px solid transparent}
+.sidebar_menu ul li a:hover,.sidebar_menu ul li a:focus{background:#edf4f4;text-decoration:none;border-left-color:#2d7372}
+.sidebar_menu ul li.active a{background:#e5f0ef!important;color:#17324d!important;border-left-color:#2d7372!important}
+.form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
+.panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -158,11 +173,14 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
 
         <div class="col-sm-2 col-sm-pull-10">
             <aside>
-                <div id="navmenu">
+                <div class="sidebar_menu">
                     <ul>
                         <li><a href="?class=[% CLASS %]&method=tool">Dashboard</a></li>
                         <li><a href="?class=[% CLASS %]&method=tool&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=tool&action=promotions">Promotions</a></li>
+                        <li><a href="?class=[% CLASS %]&method=tool&action=analytics">Analytics</a></li>
+                        <li><a href="?class=[% CLASS %]&method=tool&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=tool&action=reports">Reports</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>
                 </div>

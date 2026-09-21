@@ -14,7 +14,7 @@ API-first Koha Tool Plugin for recording library promotion activity and measurin
 
 Koha remains authoritative for bibliographic records, items, barcodes, patrons, branches and circulation. The plugin stores only promotion-specific operational data in namespaced plugin tables.
 
-The v0.4.0 development candidate includes:
+The v0.4.1 development candidate includes:
 
 - Campaign create/list/detail/edit/archive with audit history
 - Universal campaign types, channels and reusable multi-location configuration
@@ -36,6 +36,7 @@ Beginner documentation:
 - [Book Display Impact user guide and acceptance checklist](docs/BOOK_DISPLAY_IMPACT_USER_GUIDE.md)
 - [KohaCon26 demo and video package](docs/KOHACON26_DEMO_AND_VIDEO.md)
 - [Public release and legal guidance](docs/PUBLIC_RELEASE_GUIDE.md)
+- [Koha upgrade survival audit and SOP](docs/UPGRADE_SURVIVAL_AUDIT.md)
 
 Later milestones include recurring campaigns, non-barcode resources, historical import, Koha 26.05 validation and institutional staging.
 

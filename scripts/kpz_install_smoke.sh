@@ -18,14 +18,14 @@ grep -q "Koha staff interface" "$work/home.html"
 curl -fsS -c "$cookie" -b "$cookie" "$base_url/cgi-bin/koha/plugins/plugins-upload.pl" -o "$work/upload.html"
 csrf="$(sed -n 's/.*name="csrf_token" value="\([^"]*\)".*/\1/p' "$work/upload.html" | head -1)"
 curl -fsS -L -c "$cookie" -b "$cookie" \
- -F "csrf_token=$csrf" -F "op=cud-Upload" -F "uploadfile=@$kpz;filename=PromotionEngagement-v0.4.0.kpz" \
+ -F "csrf_token=$csrf" -F "op=cud-Upload" -F "uploadfile=@$kpz;filename=PromotionEngagement-v0.4.1.kpz" \
  "$base_url/cgi-bin/koha/plugins/plugins-upload.pl" -o "$work/plugins.html"
 grep -q "Promotion &amp; Engagement" "$work/plugins.html"
-grep -q "0.4.0" "$work/plugins.html"
+grep -q "0.4.1" "$work/plugins.html"
 docker exec "$container" sudo koha-plack --restart kohadev >/dev/null
 tables="$(docker exec "$container" sudo koha-mysql kohadev -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name LIKE 'plugin_ajsn_promo_%'")"
 test "$tables" = 7
 curl -fsS -c "$cookie" -b "$cookie" "$base_url/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=book_display_impact" -o "$work/impact.html"
 grep -q "<h1>Book Display Impact</h1>" "$work/impact.html"
 ! grep -q "Template process failed" "$work/impact.html"
-printf 'kpz-install-smoke PASS version=0.4.0 tables=%s\n' "$tables"
+printf 'kpz-install-smoke PASS version=0.4.1 tables=%s\n' "$tables"
