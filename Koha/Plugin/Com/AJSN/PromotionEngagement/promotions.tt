@@ -102,13 +102,14 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                                     <thead>
                                         <tr>
                                             <th>Campaign</th>
-                                            <th>Type</th>
-                                            <th>Channel</th>
-                                            <th>Start</th>
-                                            <th>End</th>
-                                            <th>Audience</th>
+                                            <th>Type / channel</th>
+                                            <th>Period</th>
                                             <th>Location</th>
-                                            <th>Items</th>
+                                            <th>Promoted titles</th>
+                                            <th>Titles used</th>
+                                            <th>Checkouts</th>
+                                            <th>Utilization</th>
+                                            <th>Change vs baseline</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -120,13 +121,14 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                                                         [% campaign.name | html %]
                                                     </a>
                                                 </td>
-                                                <td>[% campaign.campaign_type_label | html %]</td>
-                                                <td>[% campaign.channel_label | html %]</td>
-                                                <td>[% campaign.start_date | html %]</td>
-                                                <td>[% campaign.end_date | html %]</td>
-                                                <td>[% campaign.target_audience | html %]</td>
+                                                <td>[% campaign.campaign_type_label | html %]<br><small class="text-muted">[% campaign.channel_label | html %]</small></td>
+                                                <td>[% campaign.start_date | html %][% IF campaign.end_date %] → [% campaign.end_date | html %][% ELSIF campaign.status == 'active' %] → today[% END %]</td>
                                                 <td>[% IF campaign.location_labels %][% campaign.location_labels | html %][% ELSE %][% campaign.display_location | html %][% END %]</td>
-                                                <td>[% campaign.linked_item_count || 0 %]</td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.promoted_title_count %][% ELSE %]—[% END %]<br><small class="text-muted">[% campaign.linked_item_count || 0 %] linked copies/items</small></td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.titles_used_display %][% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.campaign_checkout_display %][% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.title_utilization_display %][% campaign.title_utilization_display %]%[% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.uplift_display %][% campaign.uplift_display %]%[% ELSIF campaign.new_response %]New response[% ELSE %]—[% END %][% IF campaign.impact_provisional %] <small class="text-muted">(to date)</small>[% END %]</td>
                                                 <td><span class="label label-default">[% campaign.status | html %]</span></td>
                                             </tr>
                                         [% END %]
@@ -152,7 +154,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                         <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>

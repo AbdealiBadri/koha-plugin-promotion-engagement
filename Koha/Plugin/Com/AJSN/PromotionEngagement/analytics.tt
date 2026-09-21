@@ -86,7 +86,7 @@
                                 <i class="fa fa-bar-chart"></i> Calculate analytics
                             </button>
                             <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-table"></i> Compare all campaigns</a>
-                            <p class="help-block" style="margin-top:10px"><strong>Campaign Analytics</strong> explains one display in depth. Use Comparative Reports for an institution-wide view.</p>
+                            <p class="help-block" style="margin-top:10px"><strong>Campaign Analytics</strong> explains one promotion in depth. Active campaigns are measured automatically through today. Use Comparative Reports for an institution-wide view.</p>
                         </form>
                     </div>
                 </div>
@@ -95,34 +95,78 @@
                     <h2 class="analytics-title">[% analytics.campaign.name | html %]</h2>
                     <p>
                         Measurement specification [% analytics.spec_version | html %].
-                        Eligible promoted items: <strong>[% analytics.eligible_item_count %]</strong>.
+                        <strong>[% analytics.promoted_title_count %] distinct title(s)</strong>
+                        from <strong>[% analytics.eligible_item_count %] linked copy/item record(s)</strong>.
                     </p>
+                    [% IF analytics.analysis_period.live_to_date %]
+                        <div class="alert alert-info">
+                            <strong>Active campaign — live analytics through [% analytics.analysis_period.as_of_date | html %].</strong>
+                            The campaign does not need to be completed before results are calculated. Follow-up windows remain pending until their dates occur.
+                        </div>
+                    [% END %]
+                    [% IF analytics.data_quality_warnings.size %]
+                        [% FOREACH warning IN analytics.data_quality_warnings %]
+                            <div class="alert alert-warning">[% warning | html %]</div>
+                        [% END %]
+                    [% END %]
                     <div class="impact-card impact-[% analytics.impact_evidence.tone | html %]">
-                        <div class="promo-kicker" style="color:#526b78">Display impact finding</div>
+                        <div class="promo-kicker" style="color:#526b78">Promotion impact finding</div>
                         <h3>[% analytics.impact_evidence.label | html %][% IF analytics.impact_evidence.provisional %] <small>Provisional</small>[% END %]</h3>
                         <p>[% analytics.impact_evidence.finding | html %]</p>
+                        [% IF analytics.windows.during.state != 'pending' %]
+                            <p>
+                                <strong>[% analytics.campaign_checkout_display %]</strong> checkout(s) during promotion versus
+                                <strong>[% analytics.baseline_checkout_count %]</strong> in the equal baseline period;
+                                <strong>[% analytics.titles_used_display %] of [% analytics.promoted_title_count %]</strong> promoted title(s) were used
+                                [% IF analytics.title_utilization_display %](<strong>[% analytics.title_utilization_display %]%</strong> utilization)[% END %].
+                                [% IF analytics.uplift_display %]Circulation rate change: <strong>[% analytics.uplift_display %]%</strong>.[% ELSIF analytics.new_response %]<strong>New circulation response</strong> from a zero-checkout baseline.[% END %]
+                            </p>
+                        [% END %]
                         <div class="evidence-note">
                             <i class="fa fa-info-circle"></i>
-                            Evidence is based on Koha checkout behaviour. Increased circulation supports improved discovery and engagement, but does not directly count how many people physically saw the display.
+                            Evidence is based on Koha checkout behaviour. Increased circulation supports improved discovery and engagement, but does not prove that a promotion caused every loan.
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3"><div class="metric-card">
-                            <strong>During checkouts</strong><br>
-                            <span class="metric-number">[% analytics.metrics.during.checkout_count %]</span>
+                        <div class="col-md-2 col-sm-4"><div class="metric-card">
+                            <strong>Promoted titles</strong><br>
+                            <span class="metric-number">[% analytics.promoted_title_count %]</span>
+                            <small class="text-muted">[% analytics.eligible_item_count %] linked copies/items</small>
                         </div></div>
-                        <div class="col-md-3"><div class="metric-card teal">
-                            <strong>Conversion rate</strong><br>
-                            [% IF analytics.eligible_item_count %]<span class="metric-number">[% analytics.metrics.during.conversion_rate %]%</span>[% ELSE %]<span class="text-muted">Not available</span>[% END %]
+                        <div class="col-md-2 col-sm-4"><div class="metric-card teal">
+                            <strong>Titles used</strong><br>
+                            <span class="metric-number">[% analytics.titles_used_display %]</span>
+                            <small class="text-muted">Distinct promoted titles borrowed</small>
                         </div></div>
-                        <div class="col-md-3"><div class="metric-card blue">
-                            <strong>Uplift vs baseline</strong><br>
-                            [% IF analytics.uplift_available %]<span class="metric-number">[% analytics.uplift_percent %]%</span>[% ELSE %]<span class="text-muted">No baseline rate</span>[% END %]
+                        <div class="col-md-2 col-sm-4"><div class="metric-card blue">
+                            <strong>Title utilization</strong><br>
+                            [% IF analytics.title_utilization_display %]<span class="metric-number">[% analytics.title_utilization_display %]%</span>[% ELSE %]<span class="metric-number">—</span>[% END %]
+                            <small class="text-muted">Breadth of promoted collection used</small>
                         </div></div>
-                        <div class="col-md-3"><div class="metric-card">
-                            <strong>Days to first checkout</strong><br>
-                            [% IF analytics.days_to_first_available %]<span class="metric-number">[% analytics.days_to_first_checkout %]</span>[% ELSE %]<span class="text-muted">No response yet</span>[% END %]
+                        <div class="col-md-2 col-sm-4"><div class="metric-card">
+                            <strong>Campaign checkouts</strong><br>
+                            <span class="metric-number">[% analytics.campaign_checkout_display %]</span>
+                            <small class="text-muted">All checkout events in measured period</small>
                         </div></div>
+                        <div class="col-md-2 col-sm-4"><div class="metric-card teal">
+                            <strong>Baseline checkouts</strong><br>
+                            <span class="metric-number">[% analytics.baseline_checkout_count %]</span>
+                            <small class="text-muted">Equal period before promotion</small>
+                        </div></div>
+                        <div class="col-md-2 col-sm-4"><div class="metric-card blue">
+                            <strong>Change vs baseline</strong><br>
+                            [% IF analytics.uplift_display %]<span class="metric-number">[% analytics.uplift_display %]%</span>[% ELSIF analytics.new_response %]<span class="metric-number">New</span>[% ELSE %]<span class="metric-number">—</span>[% END %]
+                            <small class="text-muted">Daily circulation-rate change</small>
+                        </div></div>
+                    </div>
+                    <div class="panel panel-default analytics-panel">
+                        <div class="panel-heading"><strong>Response signals</strong></div>
+                        <div class="panel-body">
+                            <strong>[% analytics.titles_increased_display %]</strong> title(s) increased versus baseline ·
+                            <strong>[% analytics.zero_response_display %]</strong> zero-response title(s) ·
+                            <strong>[% analytics.repeat_demand_display %]</strong> title(s) borrowed at least twice
+                            [% IF analytics.days_to_first_available %] · first checkout after <strong>[% analytics.days_to_first_checkout %]</strong> day(s)[% END %]
+                        </div>
                     </div>
                     <div class="panel panel-default analytics-panel">
                         <div class="panel-heading"><strong>Measurement windows</strong></div>
@@ -143,19 +187,31 @@
                                     <tbody>
                                         [% FOREACH row IN window_rows %]
                                             <tr>
-                                                <td><strong>[% row.label | html %]</strong></td>
+                                                <td>
+                                                    <strong>[% row.label | html %]</strong><br>
+                                                    [% IF row.window.state == 'pending' %]<span class="label label-default">Pending</span>
+                                                    [% ELSIF row.window.state == 'partial' %]<span class="label label-info">To date</span>
+                                                    [% ELSE %]<span class="label label-success">Complete</span>[% END %]
+                                                </td>
                                                 <td>[% row.window.start | html %] to [% row.window.end | html %]</td>
                                                 <td>[% row.window.days %]</td>
-                                                <td>[% row.metrics.checkout_count %]</td>
-                                                <td>[% row.metrics.unique_items_checked_out %]</td>
-                                                <td>
-                                                    [% IF row.metrics.eligible_item_count %]
-                                                        [% row.metrics.conversion_rate %]%
-                                                    [% ELSE %]
-                                                        <span class="text-muted">—</span>
-                                                    [% END %]
-                                                </td>
-                                                <td>[% row.metrics.daily_checkout_rate %]</td>
+                                                [% IF row.window.state == 'pending' %]
+                                                    <td class="text-muted">—</td>
+                                                    <td class="text-muted">—</td>
+                                                    <td class="text-muted">—</td>
+                                                    <td class="text-muted">—</td>
+                                                [% ELSE %]
+                                                    <td>[% row.metrics.checkout_count %]</td>
+                                                    <td>[% row.metrics.unique_items_checked_out %]</td>
+                                                    <td>
+                                                        [% IF row.metrics.eligible_item_count %]
+                                                            [% row.metrics.conversion_rate %]%
+                                                        [% ELSE %]
+                                                            <span class="text-muted">—</span>
+                                                        [% END %]
+                                                    </td>
+                                                    <td>[% row.metrics.daily_checkout_rate %]</td>
+                                                [% END %]
                                             </tr>
                                         [% END %]
                                     </tbody>
@@ -164,22 +220,22 @@
                         </div>
                     </div>
                     <div class="panel panel-default analytics-panel">
-                        <div class="panel-heading"><strong>Displayed-title response</strong></div>
+                        <div class="panel-heading"><strong>Promoted-title response</strong></div>
                         <div class="panel-body">
-                            <p class="text-muted">See which promoted books changed circulation after being placed on display.</p>
-                            [% IF analytics.item_response_rows.size %]
+                            <p class="text-muted">Distinct bibliographic titles are shown here; multiple promoted copies of the same title are combined so title utilization is not overstated.</p>
+                            [% IF analytics.title_response_rows.size %]
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
-                                        <thead><tr><th>Displayed book</th><th>Barcode</th><th>Before display</th><th>During display</th><th>After display (60 days)</th><th>Response</th></tr></thead>
+                                        <thead><tr><th>Promoted title</th><th>Copies / barcodes</th><th>Before promotion</th><th>During promotion</th><th>After promotion (60 days)</th><th>Response</th></tr></thead>
                                         <tbody>
-                                            [% FOREACH item IN analytics.item_response_rows %]
+                                            [% FOREACH item IN analytics.title_response_rows %]
                                                 <tr>
                                                     <td><strong>[% item.title | html %]</strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]</td>
-                                                    <td>[% item.barcode | html %]</td>
+                                                    <td><strong>[% item.promoted_copies %]</strong><br><small class="text-muted">[% item.barcodes.join(', ') | html %]</small></td>
                                                     <td>[% item.baseline_count %]</td>
-                                                    <td>[% item.during_count %]</td>
-                                                    <td>[% item.after_60_count %]</td>
-                                                    <td><span class="response-badge[% IF item.response_label == 'Increased' %] positive[% END %]">[% item.response_label | html %]</span></td>
+                                                    <td>[% IF item.during_state == 'pending' %]<span class="text-muted">Pending</span>[% ELSE %][% item.during_count %][% END %]</td>
+                                                    <td>[% IF item.after_60_state == 'pending' %]<span class="text-muted">Pending</span>[% ELSIF item.after_60_state == 'partial' %][% item.after_60_count %] <small class="text-muted">(to date)</small>[% ELSE %][% item.after_60_count %][% END %]</td>
+                                                    <td>[% IF item.during_state == 'pending' %]<span class="response-badge">Pending</span>[% ELSE %]<span class="response-badge[% IF item.response_label == 'Increased' %] positive[% END %]">[% item.response_label | html %]</span>[% END %]</td>
                                                 </tr>
                                             [% END %]
                                         </tbody>
@@ -209,7 +265,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                         <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>

@@ -12,7 +12,7 @@ use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 use Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
-our $VERSION = '0.4.1';
+our $VERSION = '0.5.0';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
@@ -375,6 +375,37 @@ sub _dashboard {
         { Slice => {} }
     );
 
+    my %analytics_by_campaign;
+    if ( $portfolio && $portfolio->{campaign_results} ) {
+        for my $result ( @{ $portfolio->{campaign_results} } ) {
+            _prepare_analytics_for_display($result);
+            $analytics_by_campaign{ $result->{campaign}->{campaign_id} } = $result;
+        }
+    }
+    for my $campaign ( @{ $recent_campaigns || [] } ) {
+        my $analytics = $analytics_by_campaign{ $campaign->{campaign_id} };
+        next unless $analytics;
+        $campaign->{promoted_title_count} = $analytics->{promoted_title_count};
+        $campaign->{titles_used_count} = $analytics->{titles_used_count};
+        $campaign->{titles_used_display} = $analytics->{titles_used_display};
+        $campaign->{campaign_checkout_count} =
+          $analytics->{during_checkout_count};
+        $campaign->{campaign_checkout_display} =
+          $analytics->{campaign_checkout_display};
+        $campaign->{title_utilization_display} =
+          $analytics->{title_utilization_display};
+        $campaign->{uplift_display} = $analytics->{uplift_display};
+        $campaign->{new_response} = $analytics->{new_response};
+        $campaign->{impact_provisional} =
+          $analytics->{impact_evidence}->{provisional} ? 1 : 0;
+        $campaign->{analytics_available} = 1;
+    }
+
+    my $portfolio_utilization_display =
+      $portfolio && defined $portfolio->{title_utilization_rate}
+      ? sprintf( '%.1f', $portfolio->{title_utilization_rate} )
+      : undef;
+
     my $template = $self->get_template( { file => 'dashboard.tt' } );
     $template->param(
         plugin_version   => $VERSION,
@@ -384,6 +415,7 @@ sub _dashboard {
         completed_count  => $completed_count || 0,
         location_count   => $location_count || 0,
         portfolio        => $portfolio,
+        portfolio_utilization_display => $portfolio_utilization_display,
         channel_rows     => $channel_comparison ? $channel_comparison->{rows} : [],
         location_rows    => $location_comparison ? $location_comparison->{rows} : [],
         leading_location => _leading_location(
@@ -404,6 +436,55 @@ sub _analytics_campaign_id {
     return q{} unless $campaigns && @{$campaigns};
 
     return $campaigns->[0]->{campaign_id} || q{};
+}
+
+sub _prepare_analytics_for_display {
+    my ($analytics) = @_;
+    return $analytics unless $analytics;
+
+    my $utilization = $analytics->{title_utilization_rate};
+    my $uplift = $analytics->{uplift_percent};
+    my $baseline_rate = $analytics->{metrics}->{baseline}->{daily_checkout_rate};
+    my $during_rate = $analytics->{metrics}->{during}->{daily_checkout_rate};
+    my $baseline_checkouts =
+      $analytics->{metrics}->{baseline}->{checkout_count};
+    my $during_checkouts =
+      $analytics->{metrics}->{during}->{checkout_count};
+
+    $analytics->{title_utilization_display} =
+      defined $utilization ? sprintf( '%.1f', $utilization ) : undef;
+    $analytics->{uplift_display} =
+      defined $uplift ? sprintf( '%+.1f', $uplift ) : undef;
+    $analytics->{baseline_rate_display} =
+      defined $baseline_rate ? sprintf( '%.2f', $baseline_rate ) : undef;
+    $analytics->{during_rate_display} =
+      defined $during_rate ? sprintf( '%.2f', $during_rate ) : undef;
+    $analytics->{baseline_checkout_count} = $baseline_checkouts;
+    $analytics->{during_checkout_count} = $during_checkouts;
+    $analytics->{promoted_title_display} =
+      defined $analytics->{promoted_title_count}
+      ? q{} . $analytics->{promoted_title_count} : '—';
+    $analytics->{titles_used_display} =
+      defined $analytics->{titles_used_count}
+      ? q{} . $analytics->{titles_used_count} : '—';
+    $analytics->{campaign_checkout_display} =
+      defined $during_checkouts ? q{} . $during_checkouts : '—';
+    $analytics->{zero_response_display} =
+      defined $analytics->{zero_response_title_count}
+      ? q{} . $analytics->{zero_response_title_count} : '—';
+    $analytics->{titles_increased_display} =
+      defined $analytics->{titles_increased_count}
+      ? q{} . $analytics->{titles_increased_count} : '—';
+    $analytics->{repeat_demand_display} =
+      defined $analytics->{repeat_demand_title_count}
+      ? q{} . $analytics->{repeat_demand_title_count} : '—';
+    $analytics->{new_response} =
+      defined $baseline_checkouts
+      && defined $during_checkouts
+      && !$baseline_checkouts
+      && $during_checkouts > 0 ? 1 : 0;
+
+    return $analytics;
 }
 
 sub _analytics_screen {
@@ -436,7 +517,9 @@ sub _analytics_screen {
                   Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
                     { dbh => $dbh }
                   );
-                $analytics = $service->campaign_metrics($campaign_id);
+                $analytics = _prepare_analytics_for_display(
+                    $service->campaign_metrics($campaign_id)
+                );
                 1;
             };
             unless ($ok) {
@@ -730,10 +813,15 @@ sub _reports_screen {
 
     my $location_rows = $comparisons{location}
       ? $comparisons{location}->{rows} : [];
+    my $portfolio_utilization_display =
+      $portfolio && defined $portfolio->{title_utilization_rate}
+      ? sprintf( '%.1f', $portfolio->{title_utilization_rate} )
+      : undef;
     my $template = $self->get_template( { file => 'reports.tt' } );
     $template->param(
         campaign_count => scalar @{$campaign_ids},
         portfolio      => $portfolio,
+        portfolio_utilization_display => $portfolio_utilization_display,
         type_rows      => $comparisons{campaign_type}
           ? $comparisons{campaign_type}->{rows} : [],
         channel_rows   => $comparisons{channel}
@@ -808,7 +896,10 @@ sub _report_export {
         -charset    => 'UTF-8',
     );
     my @csv_columns = qw(
-      code label campaign_count eligible_item_count checkout_count
+      code label campaign_count eligible_item_count promoted_title_count
+      titles_used_count title_utilization_rate baseline_checkout_count
+      checkout_count checkout_change_percent zero_response_title_count
+      titles_increased_count
     );
     push @csv_columns, qw(exclusive_checkout_count exclusive_campaign_count)
       if $dimension eq 'location';
@@ -947,6 +1038,43 @@ sub _promotions_screen {
         $status_filter,
     );
 
+    my $analytics_service =
+      Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+        { dbh => $dbh }
+      );
+    for my $campaign ( @{ $campaigns || [] } ) {
+        next unless $campaign->{start_date};
+        if ( !( $campaign->{linked_item_count} || 0 ) ) {
+            $campaign->{promoted_title_count} = 0;
+            $campaign->{titles_used_count} = 0;
+            $campaign->{campaign_checkout_count} = 0;
+            $campaign->{analytics_available} = 1;
+            next;
+        }
+        my $analytics;
+        my $ok = eval {
+            $analytics = _prepare_analytics_for_display(
+                $analytics_service->campaign_metrics( $campaign->{campaign_id} )
+            );
+            1;
+        };
+        next unless $ok && $analytics;
+        $campaign->{promoted_title_count} = $analytics->{promoted_title_count};
+        $campaign->{titles_used_count} = $analytics->{titles_used_count};
+        $campaign->{titles_used_display} = $analytics->{titles_used_display};
+        $campaign->{campaign_checkout_count} =
+          $analytics->{during_checkout_count};
+        $campaign->{campaign_checkout_display} =
+          $analytics->{campaign_checkout_display};
+        $campaign->{title_utilization_display} =
+          $analytics->{title_utilization_display};
+        $campaign->{uplift_display} = $analytics->{uplift_display};
+        $campaign->{new_response} = $analytics->{new_response};
+        $campaign->{impact_provisional} =
+          $analytics->{impact_evidence}->{provisional} ? 1 : 0;
+        $campaign->{analytics_available} = 1;
+    }
+
     my $template = $self->get_template( { file => 'promotions.tt' } );
     $template->param(
         plugin_version  => $VERSION,
@@ -1057,10 +1185,26 @@ sub _promotion_detail_screen {
         $campaign_id,
     );
 
+    my $analytics;
+    if ( $campaign->{start_date} ) {
+        eval {
+            $analytics = _prepare_analytics_for_display(
+                Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
+                    { dbh => $dbh }
+                )->campaign_metrics($campaign_id)
+            );
+            1;
+        } or do {
+            warn "Promotion detail analytics failed for campaign $campaign_id: $@";
+            $analytics = undef;
+        };
+    }
+
     my $template = $self->get_template( { file => 'promotion_detail.tt' } );
     $template->param(
         plugin_version  => $VERSION,
         campaign        => $campaign,
+        analytics       => $analytics,
         linked_items       => $linked_items || [],
         campaign_locations => $campaign_locations || [],
         audit_rows         => $audit_rows || [],

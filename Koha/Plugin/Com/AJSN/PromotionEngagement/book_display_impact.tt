@@ -3,7 +3,7 @@
 [% PROCESS 'i18n.inc' %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Koha: Book Display Impact</title>
+<title>Koha: Promoted Resource Impact</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style>
 .impact-hero{background:linear-gradient(135deg,#17324d,#245b64 70%,#2d7372);color:#fff;border-radius:9px;padding:25px 29px;margin-bottom:20px;box-shadow:0 5px 18px rgba(23,50,77,.2)}
@@ -35,15 +35,15 @@
  [% WRAPPER breadcrumbs %]
   [% WRAPPER breadcrumb_item %]<a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>[% END %]
   [% WRAPPER breadcrumb_item %]<a href="?class=[% CLASS %]&method=[% METHOD %]">Promotion &amp; Engagement</a>[% END %]
-  [% WRAPPER breadcrumb_item bc_active=1 %]<span>Book Display Impact</span>[% END %]
+  [% WRAPPER breadcrumb_item bc_active=1 %]<span>Promoted Resource Impact</span>[% END %]
  [% END %]
 [% END %]
 <div class="container-fluid"><div class="row">
 <div class="col-sm-10 col-sm-push-2"><main>
  <div class="impact-hero">
-  <div class="impact-kicker">Evidence to collection action</div>
-  <h1>Book Display Impact</h1>
-  <p>Find displayed books with sustained borrowing and hold pressure, review the evidence, and send approved additional-copy requests to Koha Suggestions.</p>
+  <div class="impact-kicker">Promotion evidence to collection action</div>
+  <h1>Promoted Resource Impact</h1>
+  <p>See whether promoted titles are actually being borrowed, then review copy and hold pressure before sending approved additional-copy requests to Koha Suggestions.</p>
  </div>
  [% IF success_message %]<div class="alert alert-success">[% success_message | html %]</div>[% END %]
  [% IF error_message %]<div class="alert alert-danger">[% error_message | html %]</div>[% END %]
@@ -59,25 +59,41 @@
      [% END %]
     </select>
     <button class="btn btn-primary" type="submit"><i class="fa fa-refresh"></i> Calculate impact</button>
-    <p class="help-block" style="margin-top:10px"><strong>Select a campaign first.</strong> This screen reviews title-level demand, copy availability and acquisition evidence.</p>
+    <p class="help-block" style="margin-top:10px"><strong>Select a campaign first.</strong> This screen combines title utilization, circulation response, copy availability and acquisition evidence. Active campaigns are measured through today.</p>
    </form>
   </div>
  </div>
  [% IF impact %]
+ [% IF impact.analytics.analysis_period.live_to_date %]
+  <div class="alert alert-info"><strong>Active campaign — live analytics through [% impact.analytics.analysis_period.as_of_date | html %].</strong> Results update without completing the campaign; future follow-up windows are shown as pending.</div>
+ [% END %]
+ <h2 style="color:#17324d;margin:8px 0 14px">Engagement at a glance</h2>
  <div class="row">
-  <div class="col-md-3"><div class="impact-card"><div class="impact-label">Displayed titles</div><div class="impact-value">[% impact.summary.title_count %]</div></div></div>
-  <div class="col-md-3"><div class="impact-card gold"><div class="impact-label">High priority</div><div class="impact-value">[% impact.summary.high_priority_count %]</div></div></div>
-  <div class="col-md-2"><div class="impact-card blue"><div class="impact-label">Active holds</div><div class="impact-value">[% impact.summary.active_holds %]</div></div></div>
-  <div class="col-md-2"><div class="impact-card"><div class="impact-label">Approved</div><div class="impact-value">[% impact.summary.approved_count %]</div></div></div>
-  <div class="col-md-2"><div class="impact-card gold"><div class="impact-label">Sent to Koha</div><div class="impact-value">[% impact.summary.submitted_count %]</div></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card"><div class="impact-label">Promoted titles</div><div class="impact-value">[% impact.summary.title_count %]</div><small class="text-muted">Distinct bibliographic titles</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card gold"><div class="impact-label">Titles borrowed</div><div class="impact-value">[% impact.summary.titles_used_display %]</div><small class="text-muted">Promoted titles with checkout response</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card blue"><div class="impact-label">Title utilization</div><div class="impact-value">[% IF impact.summary.title_utilization_display %][% impact.summary.title_utilization_display %]%[% ELSE %]—[% END %]</div><small class="text-muted">Breadth of promoted collection used</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card"><div class="impact-label">Campaign checkouts</div><div class="impact-value">[% impact.summary.during_checkout_display %]</div><small class="text-muted">Baseline: [% impact.summary.baseline_checkout_count %]</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card gold"><div class="impact-label">Increased-use titles</div><div class="impact-value">[% impact.summary.titles_increased_display %]</div><small class="text-muted">Higher circulation than baseline</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card blue"><div class="impact-label">Zero-response titles</div><div class="impact-value">[% impact.summary.zero_response_display %]</div><small class="text-muted">No checkout in measured campaign period</small></div></div>
  </div>
- <div class="method-note"><strong>How recommendations work:</strong> circulation response and active holds are evidence, not automatic purchasing authority. The suggested quantity follows Koha's configured hold-ratio target per serviceable copy. A librarian must approve every request before Koha Suggestions receives it.</div>
- <div class="panel panel-default impact-panel"><div class="panel-heading"><strong>Displayed-title demand and additional-copy review</strong></div><div class="panel-body">
+ <div class="panel panel-default impact-panel" style="margin-bottom:18px">
+  <div class="panel-heading"><strong>Collection-development signals</strong></div>
+  <div class="panel-body">
+   <div class="row">
+    <div class="col-md-3"><strong>High priority</strong><br><span class="impact-value">[% impact.summary.high_priority_count %]</span></div>
+    <div class="col-md-3"><strong>Active holds</strong><br><span class="impact-value">[% impact.summary.active_holds %]</span></div>
+    <div class="col-md-3"><strong>Approved</strong><br><span class="impact-value">[% impact.summary.approved_count %]</span></div>
+    <div class="col-md-3"><strong>Sent to Koha</strong><br><span class="impact-value">[% impact.summary.submitted_count %]</span></div>
+   </div>
+  </div>
+ </div>
+ <div class="method-note"><strong>How recommendations work:</strong> promotion response and active holds are evidence, not automatic purchasing authority. The suggested quantity follows Koha's configured hold-ratio target per serviceable copy. A librarian must approve every request before Koha Suggestions receives it.</div>
+ <div class="panel panel-default impact-panel"><div class="panel-heading"><strong>Promoted-title demand and additional-copy review</strong></div><div class="panel-body">
  [% IF impact.rows.size %]<div class="table-responsive"><table class="table table-striped table-hover">
- <thead><tr><th>Displayed book</th><th>Response</th><th>Copies</th><th>Demand</th><th>Evidence</th><th>Recommendation</th><th>Decision</th></tr></thead>
+ <thead><tr><th>Promoted book</th><th>Response</th><th>Copies</th><th>Demand</th><th>Evidence</th><th>Recommendation</th><th>Decision</th></tr></thead>
  <tbody>[% FOREACH item IN impact.rows %]<tr>
-  <td><strong><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% item.biblionumber %]">[% item.title | html %]</a></strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]<br><small>Displayed barcode(s): [% item.barcodes.join(', ') | html %]</small></td>
-  <td>Before: <strong>[% item.baseline_count %]</strong><br>During: <strong>[% item.during_count %]</strong><br>After 60 days: <strong>[% item.after_60_count %]</strong></td>
+  <td><strong><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% item.biblionumber %]">[% item.title | html %]</a></strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]<br><small>Promoted barcode(s): [% item.barcodes.join(', ') | html %]</small></td>
+  <td>Before: <strong>[% item.baseline_count %]</strong><br>During: <strong>[% item.during_count %]</strong><br>After 60 days: [% IF item.followup_complete %]<strong>[% item.after_60_count %]</strong>[% ELSE %]<span class="text-muted">Pending</span>[% END %]</td>
   <td>Total: [% item.total_copies %]<br>Serviceable: [% item.serviceable_copies %]<br>Available now: [% item.available_copies %]</td>
   <td>Active holds: <strong>[% item.active_holds %]</strong><br>Holds/copy: [% item.hold_ratio %]</td>
   <td><span class="priority priority-[% item.priority %]">[% item.priority %]</span><br><span class="evidence-[% item.evidence_grade %]">[% item.evidence_grade %] evidence</span></td>
@@ -110,7 +126,7 @@
  </tr>[% END %]</tbody></table></div>
  [% ELSE %]<div class="alert alert-info">This campaign has no linked Koha books to assess.</div>[% END %]
  </div></div>
- <div class="alert alert-info"><strong>Responsible interpretation:</strong> checkout and hold data indicate demand and access pressure. They do not by themselves prove that the physical display caused every loan, and they do not replace professional collection-development judgment.</div>
+ <div class="alert alert-info"><strong>Responsible interpretation:</strong> checkout and hold data indicate demand and access pressure. They do not by themselves prove that the promotion caused every loan, and they do not replace professional collection-development judgment.</div>
  [% END %]
 </main></div>
 <div class="col-sm-2 col-sm-pull-10"><aside><div class="sidebar_menu"><ul>
@@ -118,8 +134,9 @@
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
- <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+ <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
+ <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
 </ul></div></aside></div>
 </div></div>
 [% INCLUDE 'intranet-bottom.inc' %]

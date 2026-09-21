@@ -85,9 +85,19 @@
  </div>
 </div>
 <div class="row">
- <div class="col-md-4"><div class="metric-card"><div class="metric-label">Campaigns measured</div><div class="metric-value">[% campaign_count %]</div></div></div>
- <div class="col-md-4"><div class="metric-card"><div class="metric-label">De-duplicated checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</div></div></div>
- <div class="col-md-4"><div class="metric-card"><div class="metric-label">Multi-attributed events</div><div class="metric-value">[% IF portfolio %][% portfolio.multi_attributed_issue_count %][% ELSE %]0[% END %]</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Campaigns measured</div><div class="metric-value">[% campaign_count %]</div><div class="text-muted">Current report scope</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Promoted titles</div><div class="metric-value">[% IF portfolio %][% portfolio.promoted_title_count %][% ELSE %]0[% END %]</div><div class="text-muted">[% IF portfolio %][% portfolio.promoted_item_count %][% ELSE %]0[% END %] linked copies/items</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Titles used</div><div class="metric-value">[% IF portfolio %][% portfolio.titles_used_count %][% ELSE %]0[% END %]</div><div class="text-muted">Borrowed during campaign periods</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Title utilization</div><div class="metric-value">[% IF portfolio_utilization_display %][% portfolio_utilization_display %]%[% ELSE %]—[% END %]</div><div class="text-muted">Breadth of promoted titles used</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Campaign checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_campaign_checkout_count %][% ELSE %]0[% END %]</div><div class="text-muted">De-duplicated issue events</div></div></div>
+ <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Baseline checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_baseline_checkout_count %][% ELSE %]0[% END %]</div><div class="text-muted">Equal pre-promotion periods</div></div></div>
+</div>
+<div class="panel panel-default report-panel">
+ <div class="panel-heading"><strong>Measurement quality</strong></div>
+ <div class="panel-body">
+  <strong>[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</strong> de-duplicated checkout event(s) fall within campaign-plus-follow-up attribution windows.
+  <strong>[% IF portfolio %][% portfolio.multi_attributed_issue_count %][% ELSE %]0[% END %]</strong> event(s) match more than one campaign and are flagged as multi-attributed rather than double-counted in portfolio totals.
+ </div>
 </div>
 <div class="export-bar">
  <strong>Download:</strong>
@@ -112,20 +122,26 @@
 <div class="panel report-panel">
  <div class="panel-heading"><strong>[% heading %]</strong></div>
  <div class="table-responsive"><table class="table table-striped table-hover">
-  <thead><tr><th>Configured value</th><th>Campaigns</th><th>Eligible resources</th><th>Checkouts</th>[% IF show_location %]<th>Single-location checkouts</th><th>Single-location campaigns</th>[% END %]<th>Multi-location</th></tr></thead>
+  <thead><tr><th>Configured value</th><th>Campaigns</th><th>Promoted titles</th><th>Titles used</th><th>Utilization</th><th>Baseline checkouts</th><th>Campaign checkouts</th><th>Change</th><th>Zero response</th><th>Increased titles</th>[% IF show_location %]<th>Single-location checkouts</th><th>Single-location campaigns</th>[% END %]<th>Multi-location</th></tr></thead>
   <tbody>
   [% IF rows.size %]
    [% FOREACH row IN rows %]
    <tr>
     <td><strong>[% row.label | html %]</strong><br><small class="text-muted">[% row.code | html %]</small></td>
     <td>[% row.campaign_count %]</td>
-    <td>[% row.eligible_item_count %]</td>
+    <td>[% row.promoted_title_count %]<br><small class="text-muted">[% row.eligible_item_count %] copy/item record(s)</small></td>
+    <td>[% row.titles_used_count %]</td>
+    <td>[% IF row.title_utilization_rate %][% row.title_utilization_rate %]%[% ELSE %]—[% END %]</td>
+    <td>[% row.baseline_checkout_count %]</td>
     <td>[% row.checkout_count %]</td>
+    <td>[% IF row.checkout_change_percent %][% row.checkout_change_percent %]%[% ELSIF row.baseline_checkout_count == 0 && row.checkout_count > 0 %]New response[% ELSE %]—[% END %]</td>
+    <td>[% row.zero_response_title_count %]</td>
+    <td>[% row.titles_increased_count %]</td>
     [% IF show_location %]<td>[% row.exclusive_checkout_count %]</td><td>[% row.exclusive_campaign_count %]</td>[% END %]
     <td>[% row.multi_location_campaign_count %]</td>
    </tr>
    [% END %]
-  [% ELSE %]<tr><td colspan="[% IF show_location %]7[% ELSE %]5[% END %]" class="text-muted">No measurable records for this dimension.</td></tr>[% END %]
+  [% ELSE %]<tr><td colspan="[% IF show_location %]13[% ELSE %]11[% END %]" class="text-muted">No measurable records for this dimension.</td></tr>[% END %]
   </tbody>
  </table></div>
 </div>
@@ -142,7 +158,7 @@
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
  <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
  <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
  <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
 </ul></div></aside></div>

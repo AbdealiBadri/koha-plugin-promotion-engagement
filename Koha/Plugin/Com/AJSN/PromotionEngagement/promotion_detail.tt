@@ -86,6 +86,32 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                     <div class="alert alert-success">[% success_message | html %]</div>
                 [% END %]
 
+                [% IF analytics %]
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Impact at a glance</strong></div>
+                        <div class="panel-body">
+                            [% IF analytics.analysis_period.live_to_date %]
+                                <div class="alert alert-info" style="margin-bottom:14px">
+                                    <strong>Active campaign — measured through [% analytics.analysis_period.as_of_date | html %].</strong>
+                                    Results update automatically without completing the campaign.
+                                </div>
+                            [% END %]
+                            <div class="row">
+                                <div class="col-md-2 col-sm-4"><strong>Promoted titles</strong><div style="font-size:1.8rem;color:#17324d">[% analytics.promoted_title_count %]</div><small class="text-muted">[% analytics.eligible_item_count %] copies/items</small></div>
+                                <div class="col-md-2 col-sm-4"><strong>Titles used</strong><div style="font-size:1.8rem;color:#17324d">[% analytics.titles_used_display %]</div></div>
+                                <div class="col-md-2 col-sm-4"><strong>Utilization</strong><div style="font-size:1.8rem;color:#17324d">[% IF analytics.title_utilization_display %][% analytics.title_utilization_display %]%[% ELSE %]—[% END %]</div></div>
+                                <div class="col-md-2 col-sm-4"><strong>Checkouts</strong><div style="font-size:1.8rem;color:#17324d">[% analytics.campaign_checkout_display %]</div><small class="text-muted">Baseline [% analytics.baseline_checkout_count %]</small></div>
+                                <div class="col-md-2 col-sm-4"><strong>Change</strong><div style="font-size:1.8rem;color:#17324d">[% IF analytics.uplift_display %][% analytics.uplift_display %]%[% ELSIF analytics.new_response %]New[% ELSE %]—[% END %]</div><small class="text-muted">Daily rate vs baseline</small></div>
+                                <div class="col-md-2 col-sm-4"><strong>Zero response</strong><div style="font-size:1.8rem;color:#17324d">[% analytics.zero_response_display %]</div></div>
+                            </div>
+                            <div style="margin-top:14px">
+                                <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics&campaign_id=[% campaign.campaign_id %]"><i class="fa fa-line-chart"></i> Full campaign analytics</a>
+                                <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact&campaign_id=[% campaign.campaign_id %]"><i class="fa fa-book"></i> Resource Impact</a>
+                            </div>
+                        </div>
+                    </div>
+                [% END %]
+
                 <div class="row">
                     <div class="col-md-7">
                         <div class="panel panel-default">
@@ -228,7 +254,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                         <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>

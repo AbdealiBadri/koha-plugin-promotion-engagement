@@ -76,27 +76,36 @@
                     <div class="alert alert-warning">[% warning_message | html %]</div>
                 [% END %]
 
-                <h2 class="section-title">Institutional overview</h2>
+                <h2 class="section-title">Promotion performance at a glance</h2>
                 <div class="row">
-                    <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Campaigns</div><div class="metric-value">[% campaign_count %]</div><div class="metric-help">All current records</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Active</div><div class="metric-value">[% active_count %]</div><div class="metric-help">Live activities</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Completed</div><div class="metric-value">[% completed_count %]</div><div class="metric-help">Finished campaigns</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Resources</div><div class="metric-value">[% item_count %]</div><div class="metric-help">Koha items linked</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Locations</div><div class="metric-value">[% location_count %]</div><div class="metric-help">Configured displays</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Measured checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_checkout_count %][% ELSE %]0[% END %]</div><div class="metric-help">Attributed after promotion</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Promoted titles</div><div class="metric-value">[% IF portfolio %][% portfolio.promoted_title_count %][% ELSE %]0[% END %]</div><div class="metric-help">[% IF portfolio %][% portfolio.promoted_item_count %][% ELSE %]0[% END %] linked copies/items</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Titles used</div><div class="metric-value">[% IF portfolio %][% portfolio.titles_used_count %][% ELSE %]0[% END %]</div><div class="metric-help">Borrowed during campaign periods</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Title utilization</div><div class="metric-value">[% IF portfolio_utilization_display %][% portfolio_utilization_display %]%[% ELSE %]—[% END %]</div><div class="metric-help">Share of promoted titles borrowed</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Campaign checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_campaign_checkout_count %][% ELSE %]0[% END %]</div><div class="metric-help">Baseline: [% IF portfolio %][% portfolio.portfolio_baseline_checkout_count %][% ELSE %]0[% END %] de-duplicated</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Zero-response titles</div><div class="metric-value">[% IF portfolio %][% portfolio.zero_response_title_count %][% ELSE %]0[% END %]</div><div class="metric-help">No checkout during campaign periods</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Active campaigns</div><div class="metric-value">[% active_count %]</div><div class="metric-help">Live activities measured to date</div></div></div>
+                </div>
+                <div class="panel panel-default academic-panel" style="margin-bottom:18px">
+                    <div class="panel-body">
+                        <strong>Portfolio administration:</strong>
+                        [% campaign_count %] campaign(s) ·
+                        [% completed_count %] completed ·
+                        [% item_count %] linked item record(s) ·
+                        [% location_count %] configured location(s)
+                    </div>
                 </div>
                 <div class="btn-group" style="margin-bottom:20px">
                     <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics"><i class="fa fa-bar-chart"></i> Campaign analytics</a>
-                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact"><i class="fa fa-book"></i> Book Display Impact</a>
+                    <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact"><i class="fa fa-book"></i> Resource Impact</a>
                     <a class="btn btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=reports"><i class="fa fa-file-text-o"></i> Comparative reports</a>
                 </div>
 
-                <h2 class="section-title">How a book display becomes evidence</h2>
+                <h2 class="section-title">How promotion becomes evidence</h2>
                 <div class="row">
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">1</span><h3>Record the display</h3><p>Capture dates, location, audience and every promoted Koha barcode.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>Measure the same books in an equal period immediately before the display.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>Track checkouts during the display and through the 60-day follow-up.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Show uplift and title-level response as evidence of circulation engagement.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">1</span><h3>Record the promotion</h3><p>Capture dates, channel, audience, locations where relevant, and every promoted Koha barcode.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>Measure the same resources in an equal period immediately before promotion.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>Track checkouts while the promotion is active and through the 60-day follow-up.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Show utilization, baseline change and title-level response as evidence of engagement.</p></div></div>
                 </div>
 
                 <div class="panel panel-default academic-panel">
@@ -128,11 +137,13 @@
                                     <thead>
                                         <tr>
                                             <th>Campaign</th>
-                                            <th>Type</th>
-                                            <th>Channel</th>
-                                            <th>Start</th>
-                                            <th>End</th>
-                                            <th>Audience</th>
+                                            <th>Type / channel</th>
+                                            <th>Period</th>
+                                            <th>Promoted</th>
+                                            <th>Used</th>
+                                            <th>Checkouts</th>
+                                            <th>Utilization</th>
+                                            <th>Change vs baseline</th>
                                             <th>Status</th>
                                             <th>Evidence</th>
                                         </tr>
@@ -145,11 +156,13 @@
                                                         [% campaign.name | html %]
                                                     </a>
                                                 </td>
-                                                <td>[% campaign.campaign_type_label | html %]</td>
-                                                <td>[% campaign.channel_label | html %]</td>
-                                                <td>[% campaign.start_date | html %]</td>
-                                                <td>[% campaign.end_date | html %]</td>
-                                                <td>[% campaign.target_audience | html %]</td>
+                                                <td>[% campaign.campaign_type_label | html %]<br><small class="text-muted">[% campaign.channel_label | html %]</small></td>
+                                                <td>[% campaign.start_date | html %][% IF campaign.end_date %] → [% campaign.end_date | html %][% ELSIF campaign.status == 'active' %] → today[% END %]</td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.promoted_title_count %][% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.titles_used_display %][% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.analytics_available %][% campaign.campaign_checkout_display %][% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.title_utilization_display %][% campaign.title_utilization_display %]%[% ELSE %]—[% END %]</td>
+                                                <td>[% IF campaign.uplift_display %][% campaign.uplift_display %]%[% ELSIF campaign.new_response %]New response[% ELSE %]—[% END %][% IF campaign.impact_provisional %] <small class="text-muted">(to date)</small>[% END %]</td>
                                                 <td><span class="label label-default">[% campaign.status | html %]</span></td>
                                                 <td><a class="btn btn-xs btn-default" href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics&campaign_id=[% campaign.campaign_id %]"><i class="fa fa-line-chart"></i> View impact</a></td>
                                             </tr>
@@ -183,7 +196,7 @@
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=book_display_impact">Resource Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=[% METHOD %]&action=reports">Reports</a></li>
                         <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>

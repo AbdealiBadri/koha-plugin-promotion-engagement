@@ -12,7 +12,7 @@ my @cases = (
     [ promotions => 'action=promotions', 'Promotion portfolio', 'Configuration' ],
     [ analytics => 'action=analytics&campaign_id=40', 'Promotion analytics', 'Compare all campaigns' ],
     [ reports => 'action=reports', 'Promotion impact reports', 'All campaigns' ],
-    [ impact => 'action=book_display_impact&campaign_id=40', 'Book Display Impact', 'Displayed-title demand and additional-copy review' ],
+    [ impact => 'action=book_display_impact&campaign_id=40', 'Promoted Resource Impact', 'Promoted-title demand and additional-copy review' ],
     [ detail => 'action=promotion_detail&campaign_id=40', 'MULTILOC-VISUAL-20260919', 'Edit promotion' ],
     [ edit => 'action=edit_promotion&campaign_id=40', 'Edit promotion', 'Validate and update campaign' ],
     [ new_promotion => 'action=new_promotion', 'New promotion', 'Validate and save campaign' ],

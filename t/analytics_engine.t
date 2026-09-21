@@ -45,9 +45,9 @@ $dbh->do(
 my $service = Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics->new(
     { dbh => $dbh }
 );
-my $result = $service->campaign_metrics(40);
+my $result = $service->campaign_metrics( 40, { as_of_date => '2026-10-08' } );
 
-is( $result->{spec_version}, '1.0.0', 'AN-00 spec version returned' );
+is( $result->{spec_version}, '1.1.0', 'AN-00 spec version returned' );
 is( $result->{eligible_item_count}, 1, 'AN-06 fixed eligible cohort resolved' );
 is( $result->{windows}->{baseline}->{days}, 12, 'AN-03 baseline matches During duration' );
 is( $result->{windows}->{during}->{days}, 12, 'AN-02 inclusive campaign dates resolve to 12 days' );
@@ -68,7 +68,7 @@ is( $result->{days_to_first_checkout}, 0, 'AN-10 first checkout at campaign star
 $dbh->do(
     q{DELETE FROM old_issues WHERE issue_id IN (990001, 990002)}
 );
-my $zero_baseline = $service->campaign_metrics(40);
+my $zero_baseline = $service->campaign_metrics( 40, { as_of_date => '2026-10-08' } );
 is( $zero_baseline->{metrics}->{baseline}->{checkout_count}, 0, 'AN-08 zero baseline fixture established' );
 ok( !defined $zero_baseline->{uplift_percent}, 'AN-08 zero baseline returns null uplift' );
 cmp_ok( $zero_baseline->{absolute_rate_delta}, '>', 0, 'AN-08 zero baseline retains absolute delta' );
@@ -82,7 +82,7 @@ $dbh->do(
              'recommendation', 'AN-ZERO-ITEMS', '2026-09-19', '2026-09-19', 'active')
     }
 );
-my $zero_items = $service->campaign_metrics(990040);
+my $zero_items = $service->campaign_metrics( 990040, { as_of_date => '2026-10-08' } );
 is( $zero_items->{eligible_item_count}, 0, 'AN-09 zero eligible-item campaign supported' );
 ok( !defined $zero_items->{metrics}->{during}->{conversion_rate}, 'AN-09 zero eligible items returns null conversion' );
 ok( !defined $zero_items->{days_to_first_checkout}, 'AN-10 no checkout returns null days-to-first' );

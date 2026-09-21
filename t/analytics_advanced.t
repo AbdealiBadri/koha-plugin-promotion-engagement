@@ -132,7 +132,7 @@ my $scheduled = Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics::_impact
     { checkout_count => 0, daily_checkout_rate => 0 },
     { checkout_count => 0, daily_checkout_rate => 0 },
     1,
-    { start_epoch => time + 86_400, end_epoch => time + 172_800 },
+    { state => 'pending', start_epoch => time + 86_400, end_epoch => time + 172_800 },
 );
 is( $scheduled->{code}, 'scheduled', 'AN-16 future display is not presented as failed impact' );
 

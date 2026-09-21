@@ -4,7 +4,14 @@ base_url="${PROMOENG_URL:-http://promoeng-intra.localhost}"
 user="${KTD_USER:?Set KTD_USER}"
 pass="${KTD_PASS:?Set KTD_PASS}"
 work_dir="$(mktemp -d)"
-trap 'rm -rf "$work_dir"' EXIT
+cleanup() {
+  if [[ "${KEEP_WORKDIR:-0}" == "1" ]]; then
+    printf 'browser-acceptance workdir retained: %s\n' "$work_dir"
+  else
+    rm -rf "$work_dir"
+  fi
+}
+trap cleanup EXIT
 cookie="$work_dir/cookie.txt"
 login="$work_dir/login.html"
 curl -fsS -c "$cookie" -b "$cookie" "$base_url/cgi-bin/koha/mainpage.pl" -o "$login"
@@ -15,12 +22,21 @@ grep -q "Koha staff interface" "$work_dir/home.html"
 
 plugin_base="$base_url/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement"
 
+require_marker() {
+  local file="$1" marker="$2"
+  if ! grep -q "$marker" "$work_dir/$file"; then
+    printf 'browser-acceptance FAIL %s missing marker: %s\n' "$file" "$marker" >&2
+    return 1
+  fi
+}
+
 fetch_check() {
   local url="$1" file="$2" marker="$3"
   curl -fsS -c "$cookie" -b "$cookie" "$url" -o "$work_dir/$file"
-  grep -q "$marker" "$work_dir/$file"
+  require_marker "$file" "$marker"
   ! grep -q "Template process failed" "$work_dir/$file"
   ! grep -q "Internal Server Error" "$work_dir/$file"
+  printf 'browser-render PASS %s\n' "$file"
 }
 fetch_check "$plugin_base&method=tool" "dashboard.html" "Promotion &amp; Engagement"
 grep -q "Configuration" "$work_dir/dashboard.html"
@@ -42,8 +58,8 @@ grep -q "Configuration" "$work_dir/reports.html"
 fetch_check "$plugin_base&method=configure" "configuration.html" "Promotion &amp; Engagement configuration"
 
 impact_url="$plugin_base&method=tool&action=book_display_impact&campaign_id=40"
-fetch_check "$impact_url" "impact.html" "Book Display Impact"
-grep -q "Displayed-title demand and additional-copy review" "$work_dir/impact.html"
+fetch_check "$impact_url" "impact.html" "Promoted Resource Impact"
+grep -q "Promoted-title demand and additional-copy review" "$work_dir/impact.html"
 grep -q "Configuration" "$work_dir/impact.html"
 
 if [[ -n "${OUTPUT_HTML:-}" ]]; then cp "$work_dir/impact.html" "$OUTPUT_HTML"; fi

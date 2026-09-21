@@ -179,7 +179,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                         <li><a href="?class=[% CLASS %]&method=tool&action=new_promotion">New promotion</a></li>
                         <li><a href="?class=[% CLASS %]&method=tool&action=promotions">Promotions</a></li>
                         <li><a href="?class=[% CLASS %]&method=tool&action=analytics">Analytics</a></li>
-                        <li><a href="?class=[% CLASS %]&method=tool&action=book_display_impact">Book Display Impact</a></li>
+                        <li><a href="?class=[% CLASS %]&method=tool&action=book_display_impact">Resource Impact</a></li>
                         <li><a href="?class=[% CLASS %]&method=tool&action=reports">Reports</a></li>
                         <li class="active"><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
                     </ul>
