@@ -12,13 +12,13 @@ use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 use Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
-our $VERSION = '0.5.0';
+our $VERSION = '0.6.0';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
     author          => 'Aljamea-tus-Saifiyah Nairobi',
     date_authored   => '2026-08-15',
-    date_updated    => '2026-09-21',
+    date_updated    => '2026-09-23',
     minimum_version => '25.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -129,6 +129,8 @@ sub configure {
             push @errors, 'Code may contain only lowercase letters, numbers, underscore and hyphen.'
               if length($value_code)
               && $value_code !~ /^[a-z0-9][a-z0-9_-]{0,79}$/;
+            push @errors, 'Language stable codes must be 30 characters or fewer because the campaign record stores language_code in a 30-character field.'
+              if $dimension eq 'language' && length($value_code) > 30;
             push @errors, 'Label is required.'
               unless length $label;
             push @errors, 'Label must be 255 characters or fewer.'
@@ -478,6 +480,19 @@ sub _prepare_analytics_for_display {
     $analytics->{repeat_demand_display} =
       defined $analytics->{repeat_demand_title_count}
       ? q{} . $analytics->{repeat_demand_title_count} : '—';
+
+    my $title_rows = $analytics->{title_response_rows} || [];
+    my $titles_lower_count = scalar grep {
+        ( $_->{response_label} || q{} ) eq 'Lower'
+    } @{$title_rows};
+    my $titles_unchanged_count = scalar grep {
+        ( $_->{response_label} || q{} ) eq 'Unchanged'
+    } @{$title_rows};
+    $analytics->{titles_lower_count} = $titles_lower_count;
+    $analytics->{titles_unchanged_count} = $titles_unchanged_count;
+    $analytics->{titles_lower_display} = q{} . $titles_lower_count;
+    $analytics->{titles_unchanged_display} = q{} . $titles_unchanged_count;
+
     $analytics->{new_response} =
       defined $baseline_checkouts
       && defined $during_checkouts
@@ -789,6 +804,12 @@ sub _reports_screen {
         { Slice => {} },
     ) || [];
     my $filters = _report_filters($cgi);
+    my %selected_report_campaigns =
+      map { 0 + $_ => 1 } @{ $filters->{campaign_ids} || [] };
+    for my $campaign ( @{$campaigns} ) {
+        $campaign->{selected} =
+          $selected_report_campaigns{ 0 + $campaign->{campaign_id} } ? 1 : 0;
+    }
     my $campaign_ids = _filtered_campaign_ids( $campaigns, $filters );
 
     my ( $portfolio, %comparisons, $error_message );
@@ -799,6 +820,9 @@ sub _reports_screen {
           );
         my $ok = eval {
             $portfolio = $service->portfolio_metrics($campaign_ids);
+            for my $result ( @{ $portfolio->{campaign_results} || [] } ) {
+                _prepare_analytics_for_display($result);
+            }
             for my $dimension (qw(campaign_type channel location language_code target_audience)) {
                 $comparisons{$dimension} =
                   $service->comparison_metrics( $dimension, $campaign_ids );
@@ -833,6 +857,7 @@ sub _reports_screen {
           ? $comparisons{target_audience}->{rows} : [],
         campaigns      => $campaigns,
         selected_campaign_id => $filters->{campaign_id},
+        selected_campaign_ids => $filters->{campaign_ids} || [],
         selected_status => $filters->{status},
         date_from      => $filters->{date_from},
         date_to        => $filters->{date_to},
@@ -917,29 +942,40 @@ sub _report_export {
 
 sub _report_filters {
     my ($cgi) = @_;
-    my $campaign_id = _trim( scalar $cgi->param('campaign_id') );
+    my @raw_campaign_ids = (
+        $cgi->multi_param('campaign_ids'),
+        $cgi->multi_param('campaign_id'),
+    );
+    my %seen_campaign_id;
+    my @campaign_ids = grep {
+        /^\d+$/ && $_ > 0 && !$seen_campaign_id{$_}++
+    } map { _trim($_) } @raw_campaign_ids;
+
     my $status = _trim( scalar $cgi->param('status') );
     my $date_from = _trim( scalar $cgi->param('date_from') );
     my $date_to = _trim( scalar $cgi->param('date_to') );
-    $campaign_id = q{} unless $campaign_id =~ /^\d+$/;
     $status = q{} unless $status =~ /^(?:draft|active|completed)$/;
     $date_from = q{} unless $date_from =~ /^\d{4}-\d{2}-\d{2}$/;
     $date_to = q{} unless $date_to =~ /^\d{4}-\d{2}-\d{2}$/;
     return {
-        campaign_id => $campaign_id,
-        status      => $status,
-        date_from   => $date_from,
-        date_to     => $date_to,
+        campaign_ids => \@campaign_ids,
+        campaign_id  => @campaign_ids == 1 ? $campaign_ids[0] : q{},
+        status       => $status,
+        date_from    => $date_from,
+        date_to      => $date_to,
     };
 }
 
 sub _filtered_campaign_ids {
     my ( $campaigns, $filters ) = @_;
+    my %selected_campaigns =
+      map { 0 + $_ => 1 } @{ $filters->{campaign_ids} || [] };
+
     return [
         map { 0 + $_->{campaign_id} }
         grep {
-            ( !$filters->{campaign_id}
-                || $_->{campaign_id} == $filters->{campaign_id} )
+            ( !%selected_campaigns
+                || $selected_campaigns{ 0 + $_->{campaign_id} } )
               && ( !$filters->{status}
                 || ( $_->{status} || q{} ) eq $filters->{status} )
               && ( !$filters->{date_from}
@@ -952,10 +988,14 @@ sub _filtered_campaign_ids {
 
 sub _report_filter_query {
     my ($filters) = @_;
-    return join q{&}, map {
-        my $value = $filters->{$_};
-        length $value ? $_ . q{=} . $value : ()
-    } qw(campaign_id status date_from date_to);
+    my @pairs;
+    push @pairs, map { 'campaign_ids=' . $_ }
+      @{ $filters->{campaign_ids} || [] };
+    for my $key (qw(status date_from date_to)) {
+        my $value = $filters->{$key} || q{};
+        push @pairs, $key . q{=} . $value if length $value;
+    }
+    return join q{&}, @pairs;
 }
 
 sub _leading_location {
@@ -990,8 +1030,34 @@ sub _promotions_screen {
     my %filter_statuses = map { $_ => 1 } qw(draft active completed);
     $status_filter = q{} unless $filter_statuses{$status_filter};
 
-    my $campaigns = $dbh->selectall_arrayref(
+    my %seen_selected;
+    my @selected_campaign_ids = grep {
+        /^\d+$/ && $_ > 0 && !$seen_selected{$_}++
+    } map { _trim($_) } $self->{cgi}->multi_param('campaign_ids');
+    my %selected_campaigns = map { 0 + $_ => 1 } @selected_campaign_ids;
+
+    my $campaign_choices = $dbh->selectall_arrayref(
         q{
+            SELECT campaign_id, name, start_date, status
+              FROM plugin_ajsn_promo_campaigns
+             WHERE deleted_at IS NULL
+             ORDER BY start_date DESC, campaign_id DESC
+             LIMIT 2000
+        },
+        { Slice => {} },
+    ) || [];
+    for my $choice ( @{$campaign_choices} ) {
+        $choice->{selected} =
+          $selected_campaigns{ 0 + $choice->{campaign_id} } ? 1 : 0;
+    }
+
+    my $selected_clause = @selected_campaign_ids
+      ? ' AND c.campaign_id IN (' .
+        join( q{,}, (q{?}) x @selected_campaign_ids ) . ')'
+      : q{};
+
+    my $campaigns = $dbh->selectall_arrayref(
+        qq{
             SELECT c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
                    c.name, c.start_date, c.end_date, c.branchcode,
                    c.target_audience, c.language_code, c.display_location,
@@ -1023,6 +1089,7 @@ sub _promotions_screen {
              WHERE c.deleted_at IS NULL
                AND (? = '' OR c.name LIKE ? OR c.notes LIKE ?)
                AND (? = '' OR c.status = ?)
+               $selected_clause
              GROUP BY c.campaign_id, c.campaign_uuid, c.campaign_type, c.channel,
                       c.name, c.start_date, c.end_date, c.branchcode,
                       c.target_audience, c.language_code, c.display_location,
@@ -1036,6 +1103,7 @@ sub _promotions_screen {
         '%' . $query . '%',
         $status_filter,
         $status_filter,
+        @selected_campaign_ids,
     );
 
     my $analytics_service =
@@ -1075,10 +1143,34 @@ sub _promotions_screen {
         $campaign->{analytics_available} = 1;
     }
 
+    my @visible_measurable_ids = map { 0 + $_->{campaign_id} }
+      grep { $_->{start_date} } @{ $campaigns || [] };
+    my $promotions_portfolio;
+    if (@visible_measurable_ids) {
+        eval {
+            $promotions_portfolio =
+              $analytics_service->portfolio_metrics(\@visible_measurable_ids);
+            1;
+        } or warn "Promotion portfolio summary failed: $@";
+    }
+    my $promotions_utilization_display =
+      $promotions_portfolio
+      && defined $promotions_portfolio->{title_utilization_rate}
+      ? sprintf( '%.1f', $promotions_portfolio->{title_utilization_rate} )
+      : undef;
+    my $filtered_active_count =
+      scalar grep { ( $_->{status} || q{} ) eq 'active' } @{ $campaigns || [] };
+
     my $template = $self->get_template( { file => 'promotions.tt' } );
     $template->param(
         plugin_version  => $VERSION,
         campaigns       => $campaigns || [],
+        campaign_choices => $campaign_choices || [],
+        selected_campaign_ids => \@selected_campaign_ids,
+        selected_campaign_count => scalar @selected_campaign_ids,
+        promotions_portfolio => $promotions_portfolio,
+        promotions_utilization_display => $promotions_utilization_display,
+        filtered_active_count => $filtered_active_count,
         search_query    => $query,
         status_filter   => $status_filter,
         error_message   => $args->{error_message},
@@ -1253,6 +1345,28 @@ sub _new_promotion_screen {
         },
         { Slice => {} },
     );
+    my $languages = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'language'
+               AND is_active = 1
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
+    my $audiences = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'audience'
+               AND is_active = 1
+               AND deleted_at IS NULL
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+    );
     my $locations = $dbh->selectall_arrayref(
         q{
             SELECT vocab_value_id, value_code, label, is_active
@@ -1276,6 +1390,8 @@ sub _new_promotion_screen {
         libraries          => \@libraries,
         campaign_types     => $campaign_types || [],
         channels           => $channels || [],
+        languages          => $languages || [],
+        audiences          => $audiences || [],
         locations          => $locations || [],
         form               => $form,
         errors             => $args->{errors} || [],
@@ -1661,6 +1777,53 @@ sub _edit_promotion_screen {
         { Slice => {} },
         $campaign->{channel},
     );
+    my $languages = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'language'
+               AND deleted_at IS NULL
+               AND (is_active = 1 OR value_code = ? OR label = ?)
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+        $campaign->{language_code},
+        $campaign->{language_code},
+    );
+    my $audiences = $dbh->selectall_arrayref(
+        q{
+            SELECT value_code, label, is_active
+              FROM plugin_ajsn_promo_vocab_values
+             WHERE dimension = 'audience'
+               AND deleted_at IS NULL
+               AND (is_active = 1 OR value_code = ? OR label = ?)
+             ORDER BY sort_order, label
+        },
+        { Slice => {} },
+        $campaign->{target_audience},
+        $campaign->{target_audience},
+    );
+
+    my ( $language_match, $audience_match ) = ( 0, 0 );
+    for my $language ( @{ $languages || [] } ) {
+        $language->{selected} =
+          length( $form->{language_code} || q{} )
+          && ( $form->{language_code} eq $language->{value_code}
+            || $form->{language_code} eq $language->{label} ) ? 1 : 0;
+        $language_match = 1 if $language->{selected};
+    }
+    for my $audience ( @{ $audiences || [] } ) {
+        $audience->{selected} =
+          length( $form->{target_audience} || q{} )
+          && ( $form->{target_audience} eq $audience->{value_code}
+            || $form->{target_audience} eq $audience->{label} ) ? 1 : 0;
+        $audience_match = 1 if $audience->{selected};
+    }
+    my $legacy_language =
+      !$language_match ? ( $form->{language_code} || q{} ) : q{};
+    my $legacy_audience =
+      !$audience_match ? ( $form->{target_audience} || q{} ) : q{};
+
     my $locations = $dbh->selectall_arrayref(
         q{
             SELECT vocab_value_id, value_code, label, is_active
@@ -1683,6 +1846,10 @@ sub _edit_promotion_screen {
         libraries          => \@libraries,
         campaign_types     => $campaign_types || [],
         channels           => $channels || [],
+        languages          => $languages || [],
+        audiences          => $audiences || [],
+        legacy_language    => $legacy_language,
+        legacy_audience    => $legacy_audience,
         locations          => $locations || [],
         form               => $form,
         errors             => $args->{errors} || [],

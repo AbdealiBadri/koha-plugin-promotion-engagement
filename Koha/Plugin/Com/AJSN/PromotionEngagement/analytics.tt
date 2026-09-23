@@ -34,6 +34,7 @@
 .form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
 .panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
+[% INCLUDE "$PLUGIN_DIR/promoeng_ui_css.inc" %]
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -57,6 +58,8 @@
     <div class="row">
         <div class="col-sm-10 col-sm-push-2">
             <main>
+                [% SET promo_help_page = 'analytics' %]
+                [% INCLUDE "$PLUGIN_DIR/how_to_use.tt" %]
                 <div class="promo-hero">
                     <h1>Promotion analytics</h1>
                     <p>Assess circulation response before, during and after each campaign using one transparent measurement framework.</p>
@@ -74,7 +77,7 @@
                             <input type="hidden" name="method" value="[% METHOD | html %]">
                             <input type="hidden" name="action" value="analytics">
                             <label for="campaign_id">Campaign</label>
-                            <select id="campaign_id" name="campaign_id" class="form-control">
+                            <select id="campaign_id" name="campaign_id" class="form-control promo-searchable-select" data-natural-sort="1" data-placeholder="Type a campaign name, e.g. Week 26">
                                 <option value="">Choose a campaign</option>
                                 [% FOREACH option IN campaigns %]
                                     <option value="[% option.campaign_id %]"[% IF selected_id == option.campaign_id %] selected="selected"[% END %]>
@@ -92,12 +95,22 @@
                 </div>
 
                 [% IF analytics %]
-                    <h2 class="analytics-title">[% analytics.campaign.name | html %]</h2>
-                    <p>
-                        Measurement specification [% analytics.spec_version | html %].
-                        <strong>[% analytics.promoted_title_count %] distinct title(s)</strong>
-                        from <strong>[% analytics.eligible_item_count %] linked copy/item record(s)</strong>.
-                    </p>
+                    <div class="promo-section-card">
+                        <div class="promo-section-body">
+                            <div class="promo-analytics-header">
+                                <div>
+                                    <div class="promo-kicker" style="color:#7b6226">Campaign under analysis</div>
+                                    <h2>[% analytics.campaign.name | html %]</h2>
+                                    <p class="promo-muted-academic">A structured comparison of circulation before, during, and after this promotion.</p>
+                                </div>
+                                <div class="promo-analytics-meta">
+                                    <span class="promo-meta-pill">Specification [% analytics.spec_version | html %]</span>
+                                    <span class="promo-meta-pill">[% analytics.promoted_title_count %] promoted title(s)</span>
+                                    <span class="promo-meta-pill">[% analytics.eligible_item_count %] linked copy/item record(s)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     [% IF analytics.analysis_period.live_to_date %]
                         <div class="alert alert-info">
                             <strong>Active campaign — live analytics through [% analytics.analysis_period.as_of_date | html %].</strong>
@@ -133,10 +146,11 @@
                             <span class="metric-number">[% analytics.promoted_title_count %]</span>
                             <small class="text-muted">[% analytics.eligible_item_count %] linked copies/items</small>
                         </div></div>
-                        <div class="col-md-2 col-sm-4"><div class="metric-card teal">
-                            <strong>Titles used</strong><br>
+                        <div class="col-md-2 col-sm-4"><div class="metric-card teal promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#analytics-title-response-table" data-promo-filter-term="Issued / Borrowed" data-promo-filter-label="Titles Issued / Borrowed">
+                            <strong>Titles Issued / Borrowed</strong><br>
                             <span class="metric-number">[% analytics.titles_used_display %]</span>
                             <small class="text-muted">Distinct promoted titles borrowed</small>
+                            <span class="promo-drilldown-hint">Click to show these titles</span>
                         </div></div>
                         <div class="col-md-2 col-sm-4"><div class="metric-card blue">
                             <strong>Title utilization</strong><br>
@@ -159,20 +173,88 @@
                             <small class="text-muted">Daily circulation-rate change</small>
                         </div></div>
                     </div>
-                    <div class="panel panel-default analytics-panel">
-                        <div class="panel-heading"><strong>Response signals</strong></div>
-                        <div class="panel-body">
-                            <strong>[% analytics.titles_increased_display %]</strong> title(s) increased versus baseline ·
-                            <strong>[% analytics.zero_response_display %]</strong> zero-response title(s) ·
-                            <strong>[% analytics.repeat_demand_display %]</strong> title(s) borrowed at least twice
-                            [% IF analytics.days_to_first_available %] · first checkout after <strong>[% analytics.days_to_first_checkout %]</strong> day(s)[% END %]
+                    <div class="promo-section-card">
+                        <div class="promo-section-head"><h3>Response signals</h3><span class="promo-muted-academic">Click a signal to open the matching title evidence.</span></div>
+                        <div class="promo-section-body">
+                            <div class="promo-signal-grid">
+                                <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#analytics-title-response-table" data-promo-filter-term="Titles with Increased Issues" data-promo-filter-label="Titles with Increased Issues">
+                                    <div class="signal-icon"><i class="fa fa-line-chart"></i></div>
+                                    <div class="signal-label">Titles with Increased Issues</div>
+                                    <div class="signal-value">[% analytics.titles_increased_display %]</div>
+                                    <div class="signal-help">Titles with more issues during promotion than in their baseline.</div>
+                                    <span class="promo-drilldown-hint">Click to show these titles</span>
+                                </div>
+                                <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#analytics-title-response-table" data-promo-filter-term="Zero-Response Title" data-promo-filter-label="Zero-Response Titles">
+                                    <div class="signal-icon"><i class="fa fa-circle-o"></i></div>
+                                    <div class="signal-label">Zero-Response Titles</div>
+                                    <div class="signal-value">[% analytics.zero_response_display %]</div>
+                                    <div class="signal-help">Promoted titles with no issue during the measured campaign period.</div>
+                                    <span class="promo-drilldown-hint">Click to show these titles</span>
+                                </div>
+                                <div class="promo-signal-card">
+                                    <div class="signal-icon"><i class="fa fa-repeat"></i></div>
+                                    <div class="signal-label">Repeat-Demand Titles</div>
+                                    <div class="signal-value">[% analytics.repeat_demand_display %]</div>
+                                    <div class="signal-help">Promoted titles issued at least twice during the campaign period.</div>
+                                </div>
+                                <div class="promo-signal-card">
+                                    <div class="signal-icon"><i class="fa fa-clock-o"></i></div>
+                                    <div class="signal-label">First Checkout Response</div>
+                                    <div class="signal-value">[% IF analytics.days_to_first_available %][% analytics.days_to_first_checkout %][% ELSE %]—[% END %]</div>
+                                    <div class="signal-help">[% IF analytics.days_to_first_available %]Day(s) from campaign start to the first qualifying issue.[% ELSE %]No qualifying checkout response yet.[% END %]</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div class="promo-section-card">
+                        <div class="promo-section-head">
+                            <div>
+                                <h3>Visual analysis</h3>
+                                <span class="promo-muted-academic">The charts summarize the same evidence shown in the detailed tables. Values are printed directly on the charts.</span>
+                            </div>
+                            <div class="promo-view-toggle">
+                                <button type="button" class="btn btn-default active" data-promo-view-group="analytics-evidence" data-promo-view-show="#analytics-chart-view"><i class="fa fa-bar-chart"></i> Chart View</button>
+                                <button type="button" class="btn btn-default" data-promo-view-group="analytics-evidence" data-promo-view-show="#analytics-table-view"><i class="fa fa-table"></i> Table View</button>
+                            </div>
+                        </div>
+                        <div class="promo-section-body">
+                            <div id="analytics-chart-view" class="promo-view-panel is-active" data-promo-view-panel="analytics-evidence">
+                                <div class="promo-chart-grid">
+                                    <div class="promo-chart-card">
+                                        <h3>Checkout volume: Baseline vs Campaign</h3>
+                                        <p>Are promoted resources being issued more often during the campaign than before it?</p>
+                                        <div id="analytics-checkout-chart" class="promo-chart"></div>
+                                        <div class="promo-chart-actions"><button type="button" class="btn btn-default btn-sm" onclick="promoDownloadChartJpeg('analytics-checkout-chart','campaign-checkout-comparison')"><i class="fa fa-download"></i> Download JPEG</button></div>
+                                    </div>
+                                    <div class="promo-chart-card">
+                                        <h3>Daily circulation rate</h3>
+                                        <p>Compares checkout activity per day so different measurement periods remain comparable.</p>
+                                        <div id="analytics-rate-chart" class="promo-chart"></div>
+                                        <div class="promo-chart-actions"><button type="button" class="btn btn-default btn-sm" onclick="promoDownloadChartJpeg('analytics-rate-chart','campaign-daily-rate-comparison')"><i class="fa fa-download"></i> Download JPEG</button></div>
+                                    </div>
+                                    <div class="promo-chart-card">
+                                        <h3>Title response distribution</h3>
+                                        <p>Shows how many promoted titles increased, stayed unchanged, declined, or received no issue.</p>
+                                        <div id="analytics-title-response-chart" class="promo-chart"></div>
+                                        <div class="promo-chart-actions"><button type="button" class="btn btn-default btn-sm" onclick="promoDownloadChartJpeg('analytics-title-response-chart','campaign-title-response')"><i class="fa fa-download"></i> Download JPEG</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="analytics-table-view" class="promo-view-panel" data-promo-view-panel="analytics-evidence">
+                                <p class="promo-muted-academic"><i class="fa fa-info-circle"></i> Use search, column sorting, and <strong>Export → Excel</strong> to work with the title-level evidence.</p>
+                                <div class="promo-table-wrap">
+                                    <div class="promo-table-active-filter"><span>Showing: <strong class="promo-filter-label"></strong></span><button type="button" class="btn btn-default btn-xs" data-promo-clear-filter="#analytics-title-response-table"><i class="fa fa-times"></i> Show all titles</button></div>
+                                    <div id="analytics-title-table-slot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="panel panel-default analytics-panel">
                         <div class="panel-heading"><strong>Measurement windows</strong></div>
                         <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover">
+                                <table id="analytics-windows-table" class="table table-striped table-hover promo-data-table" data-paging="false" data-order-column="0" data-order-direction="asc">
                                     <thead>
                                         <tr>
                                             <th>Window</th>
@@ -219,18 +301,23 @@
                             </div>
                         </div>
                     </div>
-                    <div class="panel panel-default analytics-panel">
+                    <div id="analytics-original-title-panel" class="panel panel-default analytics-panel">
                         <div class="panel-heading"><strong>Promoted-title response</strong></div>
                         <div class="panel-body">
                             <p class="text-muted">Distinct bibliographic titles are shown here; multiple promoted copies of the same title are combined so title utilization is not overstated.</p>
                             [% IF analytics.title_response_rows.size %]
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
+                                <div class="table-responsive" id="analytics-title-table-container">
+                                    <table id="analytics-title-response-table" class="table table-striped table-hover promo-data-table" data-page-length="25" data-order-column="3" data-order-direction="desc">
                                         <thead><tr><th>Promoted title</th><th>Copies / barcodes</th><th>Before promotion</th><th>During promotion</th><th>After promotion (60 days)</th><th>Response</th></tr></thead>
                                         <tbody>
                                             [% FOREACH item IN analytics.title_response_rows %]
                                                 <tr>
-                                                    <td><strong>[% item.title | html %]</strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]</td>
+                                                    <td>
+                                                        <strong>[% item.title | html %]</strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]
+                                                        [% IF item.during_state != 'pending' && item.during_count > 0 %]<span class="promo-filter-token no-export">Issued / Borrowed</span>[% END %]
+                                                        [% IF item.response_label == 'Increased' %]<span class="promo-filter-token no-export">Titles with Increased Issues</span>[% END %]
+                                                        [% IF item.during_state != 'pending' && item.during_count == 0 %]<span class="promo-filter-token no-export">Zero-Response Title</span>[% END %]
+                                                    </td>
                                                     <td><strong>[% item.promoted_copies %]</strong><br><small class="text-muted">[% item.barcodes.join(', ') | html %]</small></td>
                                                     <td>[% item.baseline_count %]</td>
                                                     <td>[% IF item.during_state == 'pending' %]<span class="text-muted">Pending</span>[% ELSE %][% item.during_count %][% END %]</td>
@@ -274,5 +361,39 @@
         </div>
     </div>
 </div>
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE "$PLUGIN_DIR/promoeng_ui_js.inc" %]
+    [% IF analytics %]
+    <script>
+        $(document).ready(function(){
+            var $titleContainer = $("#analytics-title-table-container");
+            if ($titleContainer.length) {
+                $("#analytics-title-table-slot").append($titleContainer);
+                $("#analytics-original-title-panel").hide();
+            }
+
+            promoMakeBarChart(
+                "analytics-checkout-chart",
+                ["Baseline", "Campaign"],
+                [["Checkouts", [% analytics.baseline_checkout_count || 0 %], [% analytics.during_checkout_count || 0 %]]],
+                {colors:["#245b64"]}
+            );
+            promoMakeBarChart(
+                "analytics-rate-chart",
+                ["Baseline", "Campaign"],
+                [["Checkouts per day", [% analytics.metrics.baseline.daily_checkout_rate || 0 %], [% analytics.metrics.during.daily_checkout_rate || 0 %]]],
+                {colors:["#3d6685"]}
+            );
+            promoMakeBarChart(
+                "analytics-title-response-chart",
+                ["Increased", "Unchanged", "Lower", "Zero response"],
+                [["Titles", [% analytics.titles_increased_count || 0 %], [% analytics.titles_unchanged_count || 0 %], [% analytics.titles_lower_count || 0 %], [% analytics.zero_response_title_count || 0 %]]],
+                {colors:["#2d7372"]}
+            );
+        });
+    </script>
+    [% END %]
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]
 

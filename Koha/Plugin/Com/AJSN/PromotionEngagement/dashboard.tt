@@ -34,6 +34,7 @@
 .form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
 .panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
+[% INCLUDE "$PLUGIN_DIR/promoeng_ui_css.inc" %]
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -54,6 +55,8 @@
     <div class="row">
         <div class="col-sm-10 col-sm-push-2">
             <main>
+                [% SET promo_help_page = 'dashboard' %]
+                [% INCLUDE "$PLUGIN_DIR/how_to_use.tt" %]
                 <div id="toolbar" class="btn-toolbar">
                     <a class="btn btn-primary" href="?class=[% CLASS %]&method=[% METHOD %]&action=new_promotion">
                         <i class="fa fa-plus"></i> New promotion
@@ -79,7 +82,7 @@
                 <h2 class="section-title">Promotion performance at a glance</h2>
                 <div class="row">
                     <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Promoted titles</div><div class="metric-value">[% IF portfolio %][% portfolio.promoted_title_count %][% ELSE %]0[% END %]</div><div class="metric-help">[% IF portfolio %][% portfolio.promoted_item_count %][% ELSE %]0[% END %] linked copies/items</div></div></div>
-                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Titles used</div><div class="metric-value">[% IF portfolio %][% portfolio.titles_used_count %][% ELSE %]0[% END %]</div><div class="metric-help">Borrowed during campaign periods</div></div></div>
+                    <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Titles Issued / Borrowed</div><div class="metric-value">[% IF portfolio %][% portfolio.titles_used_count %][% ELSE %]0[% END %]</div><div class="metric-help">Borrowed during campaign periods</div></div></div>
                     <div class="col-md-2 col-sm-4"><div class="metric-card blue"><div class="metric-label">Title utilization</div><div class="metric-value">[% IF portfolio_utilization_display %][% portfolio_utilization_display %]%[% ELSE %]—[% END %]</div><div class="metric-help">Share of promoted titles borrowed</div></div></div>
                     <div class="col-md-2 col-sm-4"><div class="metric-card"><div class="metric-label">Campaign checkouts</div><div class="metric-value">[% IF portfolio %][% portfolio.portfolio_campaign_checkout_count %][% ELSE %]0[% END %]</div><div class="metric-help">Baseline: [% IF portfolio %][% portfolio.portfolio_baseline_checkout_count %][% ELSE %]0[% END %] de-duplicated</div></div></div>
                     <div class="col-md-2 col-sm-4"><div class="metric-card teal"><div class="metric-label">Zero-response titles</div><div class="metric-value">[% IF portfolio %][% portfolio.zero_response_title_count %][% ELSE %]0[% END %]</div><div class="metric-help">No checkout during campaign periods</div></div></div>
@@ -102,10 +105,10 @@
 
                 <h2 class="section-title">How promotion becomes evidence</h2>
                 <div class="row">
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">1</span><h3>Record the promotion</h3><p>Capture dates, channel, audience, locations where relevant, and every promoted Koha barcode.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>Measure the same resources in an equal period immediately before promotion.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>Track checkouts while the promotion is active and through the 60-day follow-up.</p></div></div>
-                    <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Show utilization, baseline change and title-level response as evidence of engagement.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">1</span><h3>Record the promotion</h3><p>These are the books/resources we promoted, and this is how and when we promoted them.</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">2</span><h3>Establish the baseline</h3><p>How were these books/resources performing before we promoted them?</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step"><span class="step-number">3</span><h3>Observe response</h3><p>After we promoted them, did students/users actually start borrowing them more?</p></div></div>
+                    <div class="col-md-3"><div class="evidence-step highlight"><span class="step-number">4</span><h3>Present the finding</h3><p>Did the promotion work, by how much, and what can the librarian learn from it?</p></div></div>
                 </div>
 
                 <div class="panel panel-default academic-panel">
@@ -133,14 +136,14 @@
                     <div class="panel-body">
                         [% IF recent_campaigns && recent_campaigns.size %]
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover">
+                                <table id="dashboard-recent-campaigns" class="table table-striped table-hover promo-data-table" data-page-length="10" data-order-column="2" data-order-direction="desc">
                                     <thead>
                                         <tr>
                                             <th>Campaign</th>
                                             <th>Type / channel</th>
                                             <th>Period</th>
                                             <th>Promoted</th>
-                                            <th>Used</th>
+                                            <th>Issued / Borrowed</th>
                                             <th>Checkouts</th>
                                             <th>Utilization</th>
                                             <th>Change vs baseline</th>
@@ -205,4 +208,8 @@
         </div>
     </div>
 </div>
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE "$PLUGIN_DIR/promoeng_ui_js.inc" %]
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]

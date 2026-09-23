@@ -27,6 +27,7 @@
 .form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
 .panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
+[% INCLUDE "$PLUGIN_DIR/promoeng_ui_css.inc" %]
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -40,6 +41,8 @@
 [% END %]
 <div class="container-fluid"><div class="row">
 <div class="col-sm-10 col-sm-push-2"><main>
+                [% SET promo_help_page = 'resource_impact' %]
+                [% INCLUDE "$PLUGIN_DIR/how_to_use.tt" %]
  <div class="impact-hero">
   <div class="impact-kicker">Promotion evidence to collection action</div>
   <h1>Promoted Resource Impact</h1>
@@ -53,7 +56,7 @@
     <input type="hidden" name="class" value="[% CLASS %]"><input type="hidden" name="method" value="[% METHOD %]">
     <input type="hidden" name="action" value="book_display_impact">
     <label for="campaign_id">Campaign</label>
-    <select id="campaign_id" name="campaign_id" class="form-control" style="max-width:620px;display:inline-block">
+    <select id="campaign_id" name="campaign_id" class="form-control promo-searchable-select" data-natural-sort="1" data-placeholder="Type a campaign name, e.g. Week 26" style="max-width:620px;display:inline-block">
      [% FOREACH campaign IN campaigns %]
       <option value="[% campaign.campaign_id %]"[% IF selected_id == campaign.campaign_id %] selected[% END %]>[% campaign.name | html %] ([% campaign.start_date | html %])</option>
      [% END %]
@@ -70,35 +73,71 @@
  <h2 style="color:#17324d;margin:8px 0 14px">Engagement at a glance</h2>
  <div class="row">
   <div class="col-md-2 col-sm-4"><div class="impact-card"><div class="impact-label">Promoted titles</div><div class="impact-value">[% impact.summary.title_count %]</div><small class="text-muted">Distinct bibliographic titles</small></div></div>
-  <div class="col-md-2 col-sm-4"><div class="impact-card gold"><div class="impact-label">Titles borrowed</div><div class="impact-value">[% impact.summary.titles_used_display %]</div><small class="text-muted">Promoted titles with checkout response</small></div></div>
-  <div class="col-md-2 col-sm-4"><div class="impact-card blue"><div class="impact-label">Title utilization</div><div class="impact-value">[% IF impact.summary.title_utilization_display %][% impact.summary.title_utilization_display %]%[% ELSE %]—[% END %]</div><small class="text-muted">Breadth of promoted collection used</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card gold promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Issued / Borrowed" data-promo-filter-label="Titles Issued / Borrowed"><div class="impact-label">Titles Issued / Borrowed</div><div class="impact-value">[% impact.summary.titles_used_display %]</div><small class="text-muted">Promoted titles with checkout response</small><span class="promo-drilldown-hint">Click to show these titles</span></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card blue"><div class="impact-label">Title utilization</div><div class="impact-value">[% IF impact.summary.title_utilization_display %][% impact.summary.title_utilization_display %]%[% ELSE %]—[% END %]</div><small class="text-muted">Share of promoted titles borrowed</small></div></div>
   <div class="col-md-2 col-sm-4"><div class="impact-card"><div class="impact-label">Campaign checkouts</div><div class="impact-value">[% impact.summary.during_checkout_display %]</div><small class="text-muted">Baseline: [% impact.summary.baseline_checkout_count %]</small></div></div>
-  <div class="col-md-2 col-sm-4"><div class="impact-card gold"><div class="impact-label">Increased-use titles</div><div class="impact-value">[% impact.summary.titles_increased_display %]</div><small class="text-muted">Higher circulation than baseline</small></div></div>
-  <div class="col-md-2 col-sm-4"><div class="impact-card blue"><div class="impact-label">Zero-response titles</div><div class="impact-value">[% impact.summary.zero_response_display %]</div><small class="text-muted">No checkout in measured campaign period</small></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card gold promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Titles with Increased Issues" data-promo-filter-label="Titles with Increased Issues"><div class="impact-label">Titles with Increased Issues</div><div class="impact-value">[% impact.summary.titles_increased_display %]</div><small class="text-muted">Higher issue count than baseline</small><span class="promo-drilldown-hint">Click to show these titles</span></div></div>
+  <div class="col-md-2 col-sm-4"><div class="impact-card blue promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Zero-Response Title" data-promo-filter-label="Zero-Response Titles"><div class="impact-label">Zero-Response Titles</div><div class="impact-value">[% impact.summary.zero_response_display %]</div><small class="text-muted">No issue in measured campaign period</small><span class="promo-drilldown-hint">Click to show these titles</span></div></div>
  </div>
- <div class="panel panel-default impact-panel" style="margin-bottom:18px">
-  <div class="panel-heading"><strong>Collection-development signals</strong></div>
-  <div class="panel-body">
-   <div class="row">
-    <div class="col-md-3"><strong>High priority</strong><br><span class="impact-value">[% impact.summary.high_priority_count %]</span></div>
-    <div class="col-md-3"><strong>Active holds</strong><br><span class="impact-value">[% impact.summary.active_holds %]</span></div>
-    <div class="col-md-3"><strong>Approved</strong><br><span class="impact-value">[% impact.summary.approved_count %]</span></div>
-    <div class="col-md-3"><strong>Sent to Koha</strong><br><span class="impact-value">[% impact.summary.submitted_count %]</span></div>
+ <div class="promo-section-card">
+  <div class="promo-section-head">
+   <div><h3>Collection-development signals</h3><span class="promo-muted-academic">Operational signals for professional review. These are not promotion-success KPIs.</span></div>
+  </div>
+  <div class="promo-section-body">
+   <div class="promo-signal-grid">
+    <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="High priority" data-promo-filter-label="High Priority">
+     <div class="signal-icon"><i class="fa fa-exclamation-circle"></i></div><div class="signal-label">High Priority</div><div class="signal-value">[% impact.summary.high_priority_count %]</div><div class="signal-help">Titles with stronger additional-copy pressure.</div><span class="promo-drilldown-hint">Click to review</span>
+    </div>
+    <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Active holds" data-promo-filter-label="Active Holds">
+     <div class="signal-icon"><i class="fa fa-bookmark"></i></div><div class="signal-label">Active Holds</div><div class="signal-value">[% impact.summary.active_holds %]</div><div class="signal-help">Current Koha hold demand across promoted titles.</div><span class="promo-drilldown-hint">Click to review</span>
+    </div>
+    <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Approved recommendation" data-promo-filter-label="Approved Recommendations">
+     <div class="signal-icon"><i class="fa fa-check-circle"></i></div><div class="signal-label">Approved</div><div class="signal-value">[% impact.summary.approved_count %]</div><div class="signal-help">Recommendations approved by a librarian but not yet sent to Koha.</div><span class="promo-drilldown-hint">Click to review</span>
+    </div>
+    <div class="promo-signal-card promo-kpi-clickable" tabindex="0" role="button" data-promo-table-filter="#resource-impact-table" data-promo-filter-term="Sent to Koha" data-promo-filter-label="Sent to Koha">
+     <div class="signal-icon"><i class="fa fa-share-square-o"></i></div><div class="signal-label">Sent to Koha</div><div class="signal-value">[% impact.summary.submitted_count %]</div><div class="signal-help">Approved recommendations already handed to native Koha Suggestions.</div><span class="promo-drilldown-hint">Click to review</span>
+    </div>
    </div>
   </div>
  </div>
  <div class="method-note"><strong>How recommendations work:</strong> promotion response and active holds are evidence, not automatic purchasing authority. The suggested quantity follows Koha's configured hold-ratio target per serviceable copy. A librarian must approve every request before Koha Suggestions receives it.</div>
  <div class="panel panel-default impact-panel"><div class="panel-heading"><strong>Promoted-title demand and additional-copy review</strong></div><div class="panel-body">
- [% IF impact.rows.size %]<div class="table-responsive"><table class="table table-striped table-hover">
- <thead><tr><th>Promoted book</th><th>Response</th><th>Copies</th><th>Demand</th><th>Evidence</th><th>Recommendation</th><th>Decision</th></tr></thead>
- <tbody>[% FOREACH item IN impact.rows %]<tr>
-  <td><strong><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% item.biblionumber %]">[% item.title | html %]</a></strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]<br><small>Promoted barcode(s): [% item.barcodes.join(', ') | html %]</small></td>
-  <td>Before: <strong>[% item.baseline_count %]</strong><br>During: <strong>[% item.during_count %]</strong><br>After 60 days: [% IF item.followup_complete %]<strong>[% item.after_60_count %]</strong>[% ELSE %]<span class="text-muted">Pending</span>[% END %]</td>
-  <td>Total: [% item.total_copies %]<br>Serviceable: [% item.serviceable_copies %]<br>Available now: [% item.available_copies %]</td>
-  <td>Active holds: <strong>[% item.active_holds %]</strong><br>Holds/copy: [% item.hold_ratio %]</td>
+ [% IF impact.rows.size %]
+  <div class="promo-response-legend">
+   <span><span class="legend-swatch legend-top"></span><strong>Green:</strong> tied highest campaign-period issue count ([% impact.summary.max_during_count %])</span>
+   <span><span class="legend-swatch legend-zero"></span><strong>Red:</strong> zero issue during the measured campaign period</span>
+  </div>
+  <div class="promo-quick-filters">
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="">All titles</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Issued / Borrowed">Issued / Borrowed</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Titles with Increased Issues">Increased Issues</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Zero-Response Title">Zero Response</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="High priority">High Priority</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Active holds">Active Holds</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Approved recommendation">Approved</button>
+   <button type="button" class="btn btn-default btn-sm" data-promo-quick-target="#resource-impact-table" data-promo-quick-filter="Sent to Koha">Sent to Koha</button>
+  </div>
+  <div class="promo-table-wrap">
+   <div class="promo-table-active-filter"><span>Showing: <strong class="promo-filter-label"></strong></span><button type="button" class="btn btn-default btn-xs" data-promo-clear-filter="#resource-impact-table"><i class="fa fa-times"></i> Show all titles</button></div>
+   <div class="table-responsive"><table id="resource-impact-table" class="table table-striped table-hover promo-data-table" data-page-length="25" data-order-column="1" data-order-direction="desc">
+ <thead><tr><th>Promoted book</th><th>Response</th><th>Copies</th><th>Demand</th><th>Evidence</th><th>Recommendation</th><th class="no-export">Decision</th></tr></thead>
+ <tbody>[% FOREACH item IN impact.rows %]<tr[% IF item.is_top_issuing %] class="promo-row-top-issuing"[% ELSIF item.is_zero_response %] class="promo-row-zero-response"[% END %]>
+  <td>
+   <strong><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% item.biblionumber %]">[% item.title | html %]</a></strong>[% IF item.author %]<br><span class="text-muted">[% item.author | html %]</span>[% END %]<br><small>Promoted barcode(s): [% item.barcodes.join(', ') | html %]</small>
+   [% IF item.during_count > 0 %]<span class="promo-filter-token no-export">Issued / Borrowed</span>[% END %]
+   [% IF item.during_count > item.baseline_count %]<span class="promo-filter-token no-export">Titles with Increased Issues</span>[% END %]
+   [% IF item.is_zero_response %]<span class="promo-filter-token no-export">Zero-Response Title</span>[% END %]
+   [% IF item.priority == 'High' %]<span class="promo-filter-token no-export">High priority</span>[% END %]
+   [% IF item.active_holds > 0 %]<span class="promo-filter-token no-export">Active holds</span>[% END %]
+   [% IF item.decision && item.decision.decision_status == 'approved' %]<span class="promo-filter-token no-export">Approved recommendation</span>[% END %]
+   [% IF item.decision && item.decision.decision_status == 'submitted' %]<span class="promo-filter-token no-export">Sent to Koha</span>[% END %]
+  </td>
+  <td data-order="[% item.during_count %]">Before: <strong>[% item.baseline_count %]</strong><br>During: <strong>[% item.during_count %]</strong><br>After 60 days: [% IF item.followup_complete %]<strong>[% item.after_60_count %]</strong>[% ELSE %]<span class="text-muted">Pending</span>[% END %][% IF item.is_top_issuing %]<br><span class="promo-status-note success"><i class="fa fa-arrow-up"></i> Highest campaign issues</span>[% ELSIF item.is_zero_response %]<br><span class="promo-status-note danger"><i class="fa fa-ban"></i> Zero campaign issues</span>[% END %]</td>
+  <td data-order="[% item.total_copies %]">Total: [% item.total_copies %]<br>Serviceable: [% item.serviceable_copies %]<br>Available now: [% item.available_copies %]</td>
+  <td data-order="[% item.active_holds %]">Active holds: <strong>[% item.active_holds %]</strong><br>Holds/copy: [% item.hold_ratio %]</td>
   <td><span class="priority priority-[% item.priority %]">[% item.priority %]</span><br><span class="evidence-[% item.evidence_grade %]">[% item.evidence_grade %] evidence</span></td>
   <td>[% IF item.purchase_signal %]<strong>Consider [% item.suggested_quantity %] additional cop[% IF item.suggested_quantity == 1 %]y[% ELSE %]ies[% END %]</strong>[% ELSE %]<strong>Monitor; no purchase signal yet</strong>[% END %]<br><small>[% item.recommendation_reason | html %]</small></td>
-  <td class="decision-box">
+  <td class="decision-box no-export">
    [% IF item.decision && item.decision.decision_status == 'submitted' %]
     <span class="label label-success">Sent to Koha</span><br>Suggestion #[% item.decision.koha_suggestion_id %]<br>
     <a href="/cgi-bin/koha/suggestion/suggestion.pl?suggestionid=[% item.decision.koha_suggestion_id %]&op=edit_form">Open Koha suggestion</a>
@@ -123,7 +162,7 @@
     [% END %]
    [% END %]
   </td>
- </tr>[% END %]</tbody></table></div>
+ </tr>[% END %]</tbody></table></div></div>
  [% ELSE %]<div class="alert alert-info">This campaign has no linked Koha books to assess.</div>[% END %]
  </div></div>
  <div class="alert alert-info"><strong>Responsible interpretation:</strong> checkout and hold data indicate demand and access pressure. They do not by themselves prove that the promotion caused every loan, and they do not replace professional collection-development judgment.</div>
@@ -139,4 +178,8 @@
  <li><a href="?class=[% CLASS %]&method=configure">Configuration</a></li>
 </ul></div></aside></div>
 </div></div>
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE "$PLUGIN_DIR/promoeng_ui_js.inc" %]
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]

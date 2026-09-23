@@ -29,6 +29,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
 .form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
 .panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
+[% INCLUDE "$PLUGIN_DIR/promoeng_ui_css.inc" %]
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -52,6 +53,8 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
     <div class="row">
         <div class="col-sm-10 col-sm-push-2">
             <main>
+                [% SET promo_help_page = 'new_promotion' %]
+                [% INCLUDE "$PLUGIN_DIR/how_to_use.tt" %]
                 <h1>New promotion</h1>
                 <p class="lead">Create a campaign and link it to Koha items without duplicating catalogue data.</p>
 
@@ -116,7 +119,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                         <ol>
                             <li>
                                 <label for="campaign_type" class="required">Promotion type:</label>
-                                <select id="campaign_type" name="campaign_type" required>
+                                <select id="campaign_type" name="campaign_type" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search promotion type" required>
                                     <option value="">Select a type</option>
                                     [% FOREACH type IN campaign_types %]
                                         <option value="[% type.value_code | html %]" [% IF form.campaign_type == type.value_code %]selected[% END %]>[% type.label | html %]</option>
@@ -127,7 +130,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                             </li>
                             <li>
                                 <label for="channel" class="required">Channel:</label>
-                                <select id="channel" name="channel" required>
+                                <select id="channel" name="channel" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search channel" required>
                                     <option value="">Select a channel</option>
                                     [% FOREACH channel_item IN channels %]
                                         <option value="[% channel_item.value_code | html %]" [% IF form.channel == channel_item.value_code %]selected[% END %]>[% channel_item.label | html %]</option>
@@ -152,7 +155,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                             </li>
                             <li>
                                 <label for="status">Status:</label>
-                                <select id="status" name="status">
+                                <select id="status" name="status" class="promo-searchable-select" data-placeholder="Select status">
                                     <option value="draft" [% IF !form.status || form.status == 'draft' %]selected[% END %]>Draft</option>
                                     <option value="active" [% IF form.status == 'active' %]selected[% END %]>Active</option>
                                     <option value="completed" [% IF form.status == 'completed' %]selected[% END %]>Completed</option>
@@ -160,7 +163,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                             </li>
                             <li>
                                 <label for="branchcode">Koha library:</label>
-                                <select id="branchcode" name="branchcode">
+                                <select id="branchcode" name="branchcode" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search Koha library">
                                     <option value="">All / institution-wide</option>
                                     [% FOREACH library IN libraries %]
                                         <option value="[% library.branchcode | html %]" [% IF form.branchcode == library.branchcode %]selected[% END %]>[% library.branchname | html %] ([% library.branchcode | html %])</option>
@@ -169,21 +172,43 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                             </li>
                             <li>
                                 <label for="target_audience">Target audience:</label>
-                                <input id="target_audience" name="target_audience" type="text" size="60" maxlength="255" value="[% form.target_audience | html %]" placeholder="e.g. Darajah 5–7, faculty, all users">
+                                [% IF audiences.size %]
+                                    <select id="target_audience" name="target_audience" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search audience">
+                                        <option value="">No audience specified</option>
+                                        [% FOREACH audience IN audiences %]
+                                            <option value="[% audience.value_code | html %]"[% IF form.target_audience == audience.value_code %] selected[% END %]>[% audience.label | html %]</option>
+                                        [% END %]
+                                    </select>
+                                    <div class="hint">Reusable values come from plugin Configuration.</div>
+                                [% ELSE %]
+                                    <input id="target_audience" name="target_audience" type="text" size="60" maxlength="255" value="[% form.target_audience | html %]" placeholder="e.g. faculty, researchers, all users">
+                                    <div class="hint">No reusable audiences are configured yet. You can add them from Configuration.</div>
+                                [% END %]
                             </li>
                             <li>
-                                <label for="language_code">Language(s):</label>
-                                <input id="language_code" name="language_code" type="text" size="40" maxlength="30" value="[% form.language_code | html %]" placeholder="e.g. English, Arabic">
+                                <label for="language_code">Language:</label>
+                                [% IF languages.size %]
+                                    <select id="language_code" name="language_code" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search language">
+                                        <option value="">No language specified</option>
+                                        [% FOREACH language IN languages %]
+                                            <option value="[% language.value_code | html %]"[% IF form.language_code == language.value_code %] selected[% END %]>[% language.label | html %]</option>
+                                        [% END %]
+                                    </select>
+                                    <div class="hint">Reusable values come from plugin Configuration.</div>
+                                [% ELSE %]
+                                    <input id="language_code" name="language_code" type="text" size="40" maxlength="30" value="[% form.language_code | html %]" placeholder="e.g. English, Arabic">
+                                    <div class="hint">No reusable languages are configured yet. You can add them from Configuration.</div>
+                                [% END %]
                             </li>
                             <li>
                                 <label for="location_value_id">Location(s):</label>
                                 [% IF locations.size %]
-                                    <select id="location_value_id" name="location_value_id" multiple size="6">
+                                    <select id="location_value_id" name="location_value_id" multiple class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search and select promotion locations">
                                         [% FOREACH location IN locations %]
                                             <option value="[% location.vocab_value_id %]" [% IF location.selected %]selected[% END %]>[% location.label | html %][% IF !location.is_active %] (disabled)[% END %]</option>
                                         [% END %]
                                     </select>
-                                    <div class="hint">Choose one or more reusable promotion locations. Hold Ctrl/Command to select multiple values.</div>
+                                    <div class="hint">Start typing to find a location, then click one or more reusable promotion locations.</div>
                                 [% ELSE %]
                                     <div class="alert alert-warning">
                                         No reusable locations are configured yet. Add them from the plugin Configuration screen.
@@ -238,4 +263,8 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
         </div>
     </div>
 </div>
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE "$PLUGIN_DIR/promoeng_ui_js.inc" %]
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]

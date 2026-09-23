@@ -1,0 +1,269 @@
+<div class="promo-howto-control">
+    <button type="button" class="btn btn-default promo-help-button" data-promo-help-toggle="#promo-how-to-use" aria-expanded="false">
+        <i class="fa fa-question-circle"></i> How to Use
+    </button>
+</div>
+
+<div id="promo-how-to-use" class="promo-howto" aria-live="polite">
+    [% IF promo_help_page == 'dashboard' %]
+        <h2>How to Use the Dashboard</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> this page gives you the quickest answer to one question: <em>are the books/resources we promote actually being borrowed?</em></p>
+
+        <h3>Start with the KPI cards</h3>
+        <ul>
+            <li><strong>Promoted Titles</strong> — how many different book titles were included in the campaigns being measured.</li>
+            <li><strong>Titles Issued / Borrowed</strong> — how many of those promoted titles were actually borrowed.</li>
+            <li><strong>Title Utilization</strong> — out of all promoted titles, the percentage that were actually borrowed.</li>
+            <li><strong>Campaign Checkouts</strong> — how many checkout transactions happened during campaign periods. The baseline underneath tells you what happened before promotion.</li>
+            <li><strong>Zero-Response Titles</strong> — promoted titles that were not borrowed during the measured campaign period.</li>
+            <li><strong>Active Campaigns</strong> — campaigns that are still running. Their analytics update through today.</li>
+        </ul>
+
+        <h3>Then check Recent Promotions</h3>
+        <p>Use this table when you want to see which recent campaign is performing well. You can search, sort, and export the table to Excel.</p>
+
+        <h3>What the four evidence steps mean</h3>
+        <ol>
+            <li><strong>Record the promotion:</strong> these are the books/resources we promoted, and this is how and when we promoted them.</li>
+            <li><strong>Establish the baseline:</strong> how were these books/resources performing before we promoted them?</li>
+            <li><strong>Observe response:</strong> after we promoted them, did students/users actually start borrowing them more?</li>
+            <li><strong>Present the finding:</strong> did the promotion work, by how much, and what can the librarian learn from it?</li>
+        </ol>
+
+        <div class="promo-help-note"><strong>Simple rule:</strong> first look at utilization and checkouts, then open Analytics when you want the detailed explanation.</div>
+
+    [% ELSIF promo_help_page == 'new_promotion' %]
+        <h2>How to Use New Promotion</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> use this page when you want to record a new library promotion and connect the promoted books to their real Koha records.</p>
+
+        <h3>Step 1 — Describe the campaign</h3>
+        <ol>
+            <li>Choose a <strong>Campaign type</strong>. This tells the plugin what kind of promotion you are doing.</li>
+            <li>Choose a <strong>Channel</strong>. This tells the plugin how users encountered the promotion, for example physical display or email.</li>
+            <li>Give the campaign a clear <strong>Name</strong>.</li>
+            <li>Enter the correct <strong>Start date</strong>. Add an end date if you already know it.</li>
+            <li>Choose <strong>Active</strong> if the campaign is currently running. You do not need to complete an active campaign just to calculate analytics.</li>
+        </ol>
+
+        <h3>Step 2 — Add context</h3>
+        <p>Select a library, promotion location, audience, language, or other fields when they are relevant. These fields help the Reports page compare campaigns later.</p>
+
+        <h3>Step 3 — Add the promoted books</h3>
+        <p>Paste or scan the Koha barcodes. The plugin checks the barcodes against Koha. It does not create duplicate catalogue records.</p>
+
+        <h3>Step 4 — Save</h3>
+        <p>Click <strong>Create promotion</strong>. If something is wrong, the page will tell you what needs fixing. If it saves correctly, you can open the campaign and then Analytics.</p>
+
+        <div class="promo-help-warning"><strong>Important:</strong> use the real campaign dates and the real promoted barcodes. Incorrect dates or barcodes will make the analytics misleading.</div>
+
+    [% ELSIF promo_help_page == 'edit_promotion' %]
+        <h2>How to Use Edit Promotion</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> use this page to correct campaign information or change the books/resources linked to an existing campaign.</p>
+
+        <h3>What you can change</h3>
+        <ul>
+            <li>campaign type and channel;</li>
+            <li>campaign name and dates;</li>
+            <li>status;</li>
+            <li>library, locations, audience, language and other context;</li>
+            <li>linked Koha barcodes/items.</li>
+        </ul>
+
+        <h3>What happens after you save</h3>
+        <p>The plugin keeps the campaign history and records the update in the audit trail. Analytics will use the updated campaign information.</p>
+
+        <div class="promo-help-warning"><strong>Be careful with historical campaigns:</strong> changing old dates or barcodes changes what the analytics are measuring. Only change them when the original information was wrong.</div>
+
+    [% ELSIF promo_help_page == 'promotions' %]
+        <h2>How to Use Promotions</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> this is your campaign portfolio. Use it to find, compare, open, and review campaigns.</p>
+
+        <h3>Find campaigns</h3>
+        <ol>
+            <li>Use <strong>Search</strong> when you know part of the campaign name or notes.</li>
+            <li>Use <strong>Campaign selection</strong> when you want to choose one or several named campaigns. Start typing a word such as <em>Week 26</em> instead of scrolling through a long list.</li>
+            <li>Use <strong>Status</strong> to show Draft, Active, or Completed campaigns.</li>
+            <li>Click <strong>Apply filters</strong> to refresh the list.</li>
+            <li>If you selected several campaigns, use <strong>Compare selected campaigns</strong> to open them together in Reports.</li>
+        </ol>
+
+        <h3>Read the KPI cards</h3>
+        <p>The cards summarize the campaigns currently included by your filters. They show how much was promoted and how much was actually borrowed.</p>
+
+        <h3>Use the campaign table</h3>
+        <p>Click a campaign name to open it. Use the table search to find text quickly, click a column heading to sort it, and use <strong>Export → Excel</strong> when you need the data outside Koha.</p>
+
+        <div class="promo-help-note"><strong>Simple rule:</strong> find the campaign first, then open it for details or select several campaigns when you want comparison.</div>
+
+    [% ELSIF promo_help_page == 'promotion_detail' %]
+        <h2>How to Use Campaign Detail</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> this page is the complete record of one promotion.</p>
+
+        <h3>Impact at a glance</h3>
+        <p>This section tells you how many titles were promoted, how many were issued/borrowed, the utilization percentage, checkout volume, baseline comparison, and zero-response count.</p>
+
+        <h3>Campaign details</h3>
+        <p>This section shows what staff recorded: dates, type, channel, audience, location, status, and other campaign information.</p>
+
+        <h3>Linked Koha items</h3>
+        <p>This table shows the actual books/items connected to the promotion. Search or sort it if the campaign contains many items.</p>
+
+        <h3>Audit history</h3>
+        <p>This tells you when important campaign actions happened. It is useful when you need to understand who changed the campaign and when.</p>
+
+        <h3>Buttons</h3>
+        <ul>
+            <li><strong>Edit promotion</strong> changes this campaign.</li>
+            <li><strong>Full campaign analytics</strong> explains the circulation response in detail.</li>
+            <li><strong>Resource Impact</strong> helps you work with individual promoted titles and collection-development signals.</li>
+            <li><strong>Archive</strong> hides the campaign from normal active lists but keeps its historical evidence.</li>
+        </ul>
+
+    [% ELSIF promo_help_page == 'analytics' %]
+        <h2>How to Use Campaign Analytics</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> this page answers: <em>after we promoted these titles, were they borrowed more than before?</em></p>
+
+        <h3>Step 1 — Select a campaign</h3>
+        <p>Click the campaign box and start typing the campaign name. You do not need to scroll through the whole list. Then click <strong>Calculate analytics</strong>.</p>
+
+        <h3>Step 2 — Read the campaign status</h3>
+        <p>If the campaign is active, the plugin measures it through today. You do not need to mark it Completed just to see the results.</p>
+
+        <h3>Step 3 — Read the KPI cards</h3>
+        <ul>
+            <li><strong>Promoted Titles</strong> — how many different titles were promoted.</li>
+            <li><strong>Titles Issued / Borrowed</strong> — how many promoted titles were actually borrowed.</li>
+            <li><strong>Title Utilization</strong> — what percentage of promoted titles were borrowed.</li>
+            <li><strong>Campaign Checkouts</strong> — total checkout transactions during the campaign period.</li>
+            <li><strong>Baseline Checkouts</strong> — checkout transactions in the equal period immediately before the campaign.</li>
+            <li><strong>Change vs Baseline</strong> — whether the checkout rate rose or fell compared with before.</li>
+        </ul>
+
+        <h3>Step 4 — Read the finding</h3>
+        <p>The finding explains the calculation in normal language. It shows evidence of circulation response, but it does not claim that the promotion caused every loan.</p>
+
+        <h3>Step 5 — Use Charts and Table View</h3>
+        <p>Charts give you the quick visual story. Data labels show the actual values. Click <strong>Download JPEG</strong> if you need a chart for a report or presentation. Switch to <strong>Table View</strong> for the detailed title-by-title evidence.</p>
+
+        <h3>Step 6 — Drill down</h3>
+        <p>Click an interactive KPI such as <strong>Titles Issued / Borrowed</strong>, <strong>Titles with Increased Issues</strong>, or <strong>Zero-Response Titles</strong>. The page jumps to the title table and highlights the matching group.</p>
+
+        <h3>Measurement windows</h3>
+        <p><strong>Baseline</strong> means before promotion. <strong>During campaign</strong> means while it was running. Follow-up windows show what happened afterwards. If a future window has not started yet, it says <strong>Pending</strong> instead of showing a false zero.</p>
+
+    [% ELSIF promo_help_page == 'resource_impact' %]
+        <h2>How to Use Resource Impact</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> use this page when you want to move from promotion evidence to practical collection-development review.</p>
+
+        <h3>Step 1 — Select a campaign</h3>
+        <p>Search for the campaign by typing part of its name, then click <strong>Calculate impact</strong>.</p>
+
+        <h3>Step 2 — Read engagement first</h3>
+        <p>Start with Promoted Titles, Titles Issued / Borrowed, Title Utilization, Campaign Checkouts, Titles with Increased Issues, and Zero-Response Titles. These tell you whether users actually borrowed the promoted collection.</p>
+
+        <h3>Step 3 — Use the title table</h3>
+        <p>The table shows each title's response, copies, holds, evidence, and recommendation. Search, filter, sort, and export it to Excel when needed.</p>
+
+        <h3>Color guide</h3>
+        <ul>
+            <li><strong>Green row:</strong> this title is tied for the highest number of campaign-period issues among the titles in this campaign.</li>
+            <li><strong>Red row:</strong> this title had zero issues during the measured campaign period.</li>
+        </ul>
+        <p>Text labels remain visible, so the meaning does not depend on color alone.</p>
+
+        <h3>Step 4 — Review collection-development signals</h3>
+        <p><strong>High Priority</strong> and <strong>Active Holds</strong> show demand/access pressure. <strong>Approved</strong> and <strong>Sent to Koha</strong> show workflow progress. These are not measures of promotional success by themselves.</p>
+
+        <h3>Step 5 — Approve carefully</h3>
+        <p>If the evidence supports another copy, enter the quantity and review note, then click <strong>Approve</strong>. Only use <strong>Send to Koha Suggestions</strong> after a librarian has reviewed the evidence. Koha Acquisitions still controls vendor, fund, price, basket, and ordering.</p>
+
+        <div class="promo-help-warning"><strong>Do not treat the recommendation as an automatic purchase order.</strong> It is decision support for a librarian.</div>
+
+    [% ELSIF promo_help_page == 'reports' %]
+        <h2>How to Use Comparative Reports</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> use Reports when you want to compare several campaigns or compare campaign groups such as channels, campaign types, audiences, languages, and locations.</p>
+
+        <h3>Choose the report scope</h3>
+        <ol>
+            <li>Select one or more campaigns, or leave the campaign selector empty for all matching campaigns.</li>
+            <li>Use Status and date filters when you want a smaller period.</li>
+            <li>Click <strong>Apply filters</strong>.</li>
+        </ol>
+
+        <h3>Read the portfolio cards</h3>
+        <p>These cards summarize the selected report scope: campaigns measured, promoted titles, titles issued/borrowed, utilization, campaign checkouts, and baseline checkouts.</p>
+
+        <h3>Use comparative charts</h3>
+        <p>The charts compare baseline and campaign checkouts by each dimension. Data labels show the actual values. Use <strong>Download JPEG</strong> when you need a chart for a report or presentation.</p>
+
+        <h3>Use Table View</h3>
+        <p>The table gives the detailed numbers behind the chart. Search, sort, filter, and export to Excel. The chart and table are two views of the same analytical result.</p>
+
+        <h3>Location caution</h3>
+        <p>A campaign connected to several locations cannot prove which exact physical location caused a checkout. The report keeps this ambiguity visible instead of inventing a location result.</p>
+
+    [% ELSIF promo_help_page == 'configuration' %]
+        <h2>How to Use Configuration</h2>
+        <p class="promo-help-simple"><strong>What this page is for:</strong> this page lets each library define the words and choices it wants to use in the plugin. These values belong to the plugin and do <strong>not</strong> change Koha core data.</p>
+
+        <h3>First choose a Dimension</h3>
+        <p>A <strong>Dimension</strong> is simply a group of reusable choices. For example, Campaign types is one dimension and Channels is another.</p>
+
+        <h3>What each dimension means</h3>
+        <ul>
+            <li><strong>Campaign types (campaign_type)</strong> — what kind of promotion it is. Examples: Subject display, New arrivals, Recommendation campaign, Outreach.</li>
+            <li><strong>Channels (channel)</strong> — how the promotion reaches users. Examples: Physical display, Email, Digital signage, Web, Social.</li>
+            <li><strong>Locations (location)</strong> — promotion/display locations used for campaign evidence. Examples: Main entrance, First floor, Reading room, Digital screen. These are not Koha library branches unless your institution chooses the same wording.</li>
+            <li><strong>Languages (language)</strong> — language categories used to describe a promotion when that distinction matters.</li>
+            <li><strong>Audiences (audience)</strong> — the intended user group, such as students, faculty, researchers, or a locally defined group.</li>
+            <li><strong>Cadence / frequency (cadence)</strong> — reusable frequency terms such as weekly, monthly, or annual. <em>In v0.6 this vocabulary can be prepared and managed here, but cadence is not yet a required campaign field; adding a cadence value does not change existing campaigns.</em></li>
+        </ul>
+
+        <h3>How to add a value</h3>
+        <ol>
+            <li>Choose the <strong>Dimension</strong>.</li>
+            <li>Enter a <strong>Stable code</strong>. This is the technical identity. Use lowercase letters/numbers/underscore/hyphen. Example: <code>main_entrance</code>.</li>
+            <li>Enter the <strong>Display label</strong>. This is what staff see. Example: <em>Main Entrance</em>.</li>
+            <li>Enter the <strong>Sort order</strong>. Smaller numbers appear earlier when the plugin orders configured values.</li>
+            <li>Leave <strong>Active</strong> checked if staff should be able to choose this value now.</li>
+            <li>Click <strong>Save configuration value</strong>.</li>
+        </ol>
+
+        <h3>What “Stable code” means</h3>
+        <p>The stable code is the value saved behind the scenes. Do not casually change its meaning. If you use the same Dimension + Stable code again, the plugin updates that existing value instead of creating another one.</p>
+
+        <h3>What “Display label” means</h3>
+        <p>This is the human-readable wording. You can make it clear for your institution without changing Koha core.</p>
+
+        <h3>What “Sort order” means</h3>
+        <p>This controls where the value appears in normal configured lists. Example: 10 appears before 20.</p>
+
+        <h3>What “Active” and “Disable” mean</h3>
+        <p><strong>Active</strong> means staff can choose the value for new/edited campaigns. <strong>Disable</strong> removes it from normal future choices but keeps old campaigns that already used it. Historical evidence is not erased.</p>
+
+        <h3>Can I delete old values?</h3>
+        <p>For safety, the normal interface uses <strong>Disable</strong> rather than destructive deletion. This protects historical campaigns. If you made a wording mistake, update the same stable code with the corrected label.</p>
+
+        <h3>Global Koha use</h3>
+        <p>The defaults are examples, not fixed Nairobi rules. Another Koha library can add its own campaign types, channels, locations, languages, audiences, and cadence values without changing the plugin source code.</p>
+
+        <h3>Avoid these mistakes</h3>
+        <ul>
+            <li>Do not create two different stable codes for exactly the same meaning unless you truly need two separate categories.</li>
+            <li>Do not reuse an old stable code for a completely different meaning.</li>
+            <li>Do not disable a value just because one campaign has ended; disabling changes future choice availability.</li>
+        </ul>
+
+        <div class="promo-help-note"><strong>Simple rule:</strong> Configuration controls the choices the plugin offers. It does not edit Koha catalogue records, patron data, circulation rules, or branches.</div>
+
+    [% ELSE %]
+        <h2>How to Use This Page</h2>
+        <p>This page is part of Promotion &amp; Engagement. Follow the headings from top to bottom, use the search/sort controls when lists are long, and read any warning before saving or submitting data.</p>
+    [% END %]
+
+    <div style="margin-top:14px">
+        <button type="button" class="btn btn-default" data-promo-help-toggle="#promo-how-to-use">
+            <i class="fa fa-times"></i> Close How to Use
+        </button>
+    </div>
+</div>

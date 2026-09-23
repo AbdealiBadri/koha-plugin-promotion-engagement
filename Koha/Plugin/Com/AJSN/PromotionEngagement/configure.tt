@@ -28,6 +28,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
 .form-control:focus,input:focus,select:focus,textarea:focus{border-color:#2d7372!important;box-shadow:0 0 0 2px rgba(45,115,114,.15)!important}
 .panel-heading strong{letter-spacing:.01em}.required{color:#8a2f39!important;font-weight:700}
 </style>
+[% INCLUDE "$PLUGIN_DIR/promoeng_ui_css.inc" %]
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -37,6 +38,8 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
     <div class="row">
         <div class="col-sm-10 col-sm-push-2">
             <main>
+                [% SET promo_help_page = 'configuration' %]
+                [% INCLUDE "$PLUGIN_DIR/how_to_use.tt" %]
                 <h1>Promotion &amp; Engagement configuration</h1>
                 <p class="lead">Manage reusable promotion values without changing Koha core data.</p>
 
@@ -68,7 +71,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                                 <ol>
                                     <li>
                                         <label for="dimension">Dimension:</label>
-                                        <select name="dimension" id="dimension" required>
+                                        <select name="dimension" id="dimension" class="promo-searchable-select" data-natural-sort="1" data-placeholder="Search configuration dimension" required>
                                             <option value="">Select</option>
                                             [% FOREACH group IN vocabulary_groups %]
                                                 <option value="[% group.dimension | html %]">[% group.label | html %]</option>
@@ -111,14 +114,14 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                         </div>
                         <div class="panel-body">
                             [% IF group.values.size %]
-                                <table class="table table-striped table-bordered">
+                                <table id="config-[% group.dimension | html %]-table" class="table table-striped table-bordered promo-data-table" data-page-length="25" data-order-column="2" data-order-direction="asc">
                                     <thead>
                                         <tr>
                                             <th>Code</th>
                                             <th>Label</th>
                                             <th>Sort</th>
                                             <th>Status</th>
-                                            <th>Action</th>
+                                            <th class="no-export">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -134,7 +137,7 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
                                                         <span class="label label-default">Disabled</span>
                                                     [% END %]
                                                 </td>
-                                                <td>
+                                                <td class="no-export">
                                                     <form method="post" action="/cgi-bin/koha/plugins/run.pl" style="display:inline">
                                                         <input type="hidden" name="class" value="[% CLASS | html %]">
                                                         <input type="hidden" name="method" value="configure">
@@ -188,5 +191,9 @@ main>h1{font-family:Georgia,serif;color:#17324d}main>.lead{color:#58717c;max-wid
         </div>
     </div>
 </div>
+
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE "$PLUGIN_DIR/promoeng_ui_js.inc" %]
+[% END %]
 
 [% INCLUDE 'intranet-bottom.inc' %]

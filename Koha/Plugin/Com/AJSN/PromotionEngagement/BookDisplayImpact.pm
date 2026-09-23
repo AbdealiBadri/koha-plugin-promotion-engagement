@@ -66,11 +66,33 @@ sub campaign_rows {
         || $b->{active_holds} <=> $a->{active_holds}
         || lc($a->{title}) cmp lc($b->{title})
     } @rows;
+
+    my $during_available =
+      ( $analytics->{windows}->{during}->{state} || q{} ) ne 'pending' ? 1 : 0;
+    my $max_during_count = 0;
+    if ($during_available) {
+        for my $row (@rows) {
+            $max_during_count = $row->{during_count}
+              if ( $row->{during_count} || 0 ) > $max_during_count;
+        }
+    }
+    for my $row (@rows) {
+        $row->{is_zero_response} =
+          $during_available && !( $row->{during_count} || 0 ) ? 1 : 0;
+        $row->{is_top_issuing} =
+          $during_available
+          && $max_during_count > 0
+          && ( $row->{during_count} || 0 ) == $max_during_count ? 1 : 0;
+    }
+
+    my $summary = _summary( \@rows, $analytics );
+    $summary->{max_during_count} = $max_during_count;
+
     return {
         spec_version => $SPEC_VERSION,
         analytics => $analytics,
         rows => \@rows,
-        summary => _summary( \@rows, $analytics ),
+        summary => $summary,
     };
 }
 
