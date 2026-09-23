@@ -31,7 +31,7 @@ The plugin reports observed circulation response; it does not claim that a promo
 
 Koha remains authoritative for bibliographic records, items, barcodes, patrons, branches, holds and circulation. The plugin stores only promotion-specific operational data in seven namespaced plugin tables.
 
-The v0.5.0 candidate includes:
+The v0.6.0 candidate includes:
 
 - Campaign create/list/detail/edit/archive with audit history
 - Universal campaign types, channels and reusable multi-location configuration
@@ -40,12 +40,15 @@ The v0.5.0 candidate includes:
 - Equal-duration Baseline and During comparison
 - After 7/14/30/60 windows with Pending / To date / Complete states
 - Clear distinction between promoted titles and promoted copies/items
-- Titles Used and Title Utilization
+- Titles Issued / Borrowed and Title Utilization
 - Campaign checkouts, baseline checkouts and circulation-rate change
-- Increased-use, Zero-response and Repeat-demand title signals
+- Titles with Increased Issues, Zero-Response and Repeat-demand title signals
 - Portfolio de-duplication and overlap/multi-attribution handling
 - Privacy-aware channel, location, type, language and audience comparisons
 - Engagement-first Koha-native Dashboard, Promotions, Campaign Detail, Analytics and Reports
+- Searchable campaign/vocabulary selectors, multi-campaign comparison, sortable/filterable/exportable tables
+- Campaign Analytics and Comparative Report charts with data labels, Table View and JPEG download
+- Page-specific beginner-friendly **How to Use** guidance across the main workflow
 - CSV/JSON exports
 - Authenticated health and read-only campaign Analytics API
 - **Promoted Resource Impact** combining engagement evidence with holds/copy pressure
@@ -60,6 +63,7 @@ Documentation:
 - [Installation SOP](docs/INSTALLATION_SOP.md)
 - [Resource Impact / Book Display Impact user guide](docs/BOOK_DISPLAY_IMPACT_USER_GUIDE.md)
 - [v0.5 analytics definitions and page architecture](docs/brain/V0.5_ANALYTICS_INTELLIGENCE.md)
+- [v0.6 usability and visualization](docs/brain/V0.6_USABILITY_VISUALIZATION.md)
 - [Analytics Engine Specification](docs/brain/ANALYTICS_SPEC.md)
 - [KohaCon26 demo and video package](docs/KOHACON26_DEMO_AND_VIDEO.md)
 - [Public release and legal guidance](docs/PUBLIC_RELEASE_GUIDE.md)

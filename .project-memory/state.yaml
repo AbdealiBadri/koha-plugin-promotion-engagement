@@ -5,92 +5,37 @@ project:
   status: "development-candidate"
 
 current:
-  milestone: "v0.5 Analytics Intelligence"
-  implementation_branch: "feature/v0.5-analytics-intelligence"
-  implementation_commit: "dc39db3a1fa4e4ae2158056ea3ea6a282ccbefd0"
-  project_brain_branch: "docs/project-brain"
-  objective: "Make promotion analytics useful at a glance: live active campaigns, title utilization, baseline comparison, resource-impact and portfolio intelligence"
-  last_verified: "2026-09-21"
-  next_action: "Human visual review of final v0.5; then Koha 26.05 runtime matrix when 20-25 GB safe C: free space exists, followed by institutional staging"
+  milestone: "v0.6 Usability & Visualization"
+  implementation_branch: "feature/v0.6-usability-visualization"
+  implementation_commit: "1f0c993"
+  objective: "Professional searchable, visual, exportable and beginner-guided promotion analytics without changing the validated v0.5 analytical formulas"
+  last_verified: "2026-09-23"
+  next_action: "User visual/real-data acceptance of exact v0.6.0 KPZ"
 
 environment:
   local:
     platform: "Windows + WSL Debian + Docker/KTD"
     primary_ktd_instance: "promoeng"
-    legacy_ktd_instance: "kohadev"
     koha_target: "25.11.02"
-    state: "promoeng-healthy-v0.5"
+    state: "promoeng-healthy-v0.6"
     evidence:
-      - "promoeng-koha-1/db-1/memcached-1 up"
-      - "exact v0.5.0 KPZ authenticated upload/upgrade pass"
-      - "seven namespaced plugin tables present"
-      - "Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact authenticated browser matrix pass"
-      - "native Koha Suggestion synthetic workflow and cleanup pass"
-    isolation_rule: "Do not touch unrelated repositories/containers; no global Docker cleanup"
+      - "6 files / 163 assertions pass"
+      - "schema idempotence pass"
+      - "exact v0.6.0 KPZ authenticated upgrade pass"
+      - "seven plugin table row counts preserved"
+      - "nine-page authenticated browser matrix pass"
+      - "native Koha Suggestion synthetic workflow pass"
   forward_koha:
     target: "26.05.x"
     status: "runtime-blocked-host-disk"
-    evidence:
-      - "2026-09-21 pull retried from approximately 16 GB C: free"
-      - "free space fell to approximately 11 GB before image completion"
-      - "pull stopped safely; no promoeng2605 container and no completed 26.05 image"
     retry_requirement: "20-25 GB safe Windows C: free space"
-  staging:
-    status: "not-run"
   production:
-    status: "v0.5-not-formally-deployed"
-    note: "User reported v0.4.1 live Nairobi pilot installed/running normally; v0.5 remains separately gated"
-
-blockers:
-  - id: "ISSUE-013"
-    summary: "Koha 26.05 runtime matrix blocked by host disk capacity; institutional staging and formal production release gates remain external"
-
-resolved_recently:
-  - id: "ISSUE-014"
-    summary: "active campaigns now measure start through today without forced completion"
-  - id: "ISSUE-015"
-    summary: "analytics-bearing screens now lead with meaningful engagement/baseline KPIs"
-  - id: "ISSUE-016"
-    summary: "workflow smoke uses isolated synthetic campaign and preserves retained campaign 40 evidence"
-  - id: "ISSUE-006"
-    summary: "KPZ test plan is version-aware and current"
-
-critical_decisions:
-  - "DEC-001"
-  - "DEC-002"
-  - "DEC-003"
-  - "DEC-004"
-  - "DEC-005"
-  - "DEC-010"
-  - "DEC-011"
-  - "DEC-013"
-  - "DEC-017"
-  - "DEC-019"
-  - "DEC-020"
-  - "DEC-021"
-  - "DEC-022"
-  - "DEC-023"
-  - "DEC-024"
-  - "DEC-025"
-
-last_test:
-  id: "v0.5.0-analytics-intelligence-local-gate"
-  date: "2026-09-21"
-  command: "git diff --check; shell syntax; Perl syntax; schema idempotence; prove -v t/*.t; exact KPZ authenticated install; browser matrix; synthetic Suggestion workflow"
-  status: "PASS"
-  result: "5 files / 113 assertions pass; exact v0.5.0 KPZ install and six-page browser matrix pass; native Koha ASKED suggestion workflow and cleanup pass on Koha 25.11.02"
+    status: "user-testing-v0.6"
 
 runtime:
-  plugin_version: "0.5.0"
+  plugin_version: "0.6.0"
   analytics_spec_version: "1.1.0"
-  primary_environment: "promoeng"
-  primary_environment_ready: true
-  exact_kpz_sha256: "931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670"
-
-retained_fixtures:
-  campaign_40:
-    purpose: "multi-location visual/analytics development fixture"
-    preservation_rule: "tests must not delete or overwrite retained recommendation/evidence"
+  exact_kpz_sha256: "6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28"
 
 secrets:
   stored_in_project_memory: false

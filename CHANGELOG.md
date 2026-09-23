@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.6.0] - 2026-09-23
+
+### Added
+- Searchable campaign and reusable-vocabulary selectors, including multi-campaign comparison where appropriate.
+- Shared sortable/filterable/export-capable Koha table behavior.
+- KPI drill-downs from issued/borrowed, increased-issue and zero-response cards into supporting tables.
+- Resource Impact green/highest-issue and red/zero-response cues with an explanatory legend.
+- Campaign Analytics and Comparative Reports chart views with data labels, table toggles and JPEG download.
+- Page-specific beginner-friendly **How to Use** guidance across the main workflow and detailed Configuration guidance.
+- Dedicated v0.6 usability/visualization regression coverage.
+
+### Changed
+- User-facing “Titles Used” is now **Titles Issued / Borrowed**.
+- User-facing “Increased-Use Titles” is now **Titles with Increased Issues**.
+- Dashboard evidence-cycle explanations are simplified while academic headings remain.
+- Collection-development signals receive clearer visual hierarchy without changing acquisition authority.
+- Exact-KPZ upgrade smoke now verifies plugin table row counts remain unchanged.
+
+### Verified
+- Full suite: **6 files / 163 assertions PASS** on Koha 25.11.02.
+- Schema idempotence PASS.
+- Exact v0.6.0 KPZ authenticated upload/upgrade PASS with all seven plugin-table row counts preserved.
+- Authenticated browser rendering PASS for Dashboard, Promotions, Analytics, Reports, Configuration, Resource Impact, Campaign Detail, Edit Promotion and New Promotion.
+- Synthetic approve → native Koha ASKED Suggestion workflow PASS.
+- Exact tested KPZ SHA-256: `6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28`.
+
 ## [0.5.0] - 2026-09-21
 
 ### Added

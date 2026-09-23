@@ -433,3 +433,19 @@ Verification after stop:
 - no global Docker cleanup executed.
 
 Do not retry until at least 20–25 GB safe Windows C: free space is available.
+
+## v0.6.0 Usability & Visualization — 2026-09-23
+
+- Full automated regression: **6 files / 163 assertions / PASS**.
+- Schema idempotence: PASS.
+- Exact authenticated PromotionEngagement-v0.6.0.kpz upload/upgrade: PASS.
+- Seven plugin tables preserved.
+- Exact upgrade smoke preserved all observed plugin table row counts.
+- Authenticated browser render PASS: Dashboard, Promotions, Analytics, Reports, Configuration, Resource Impact, Campaign Detail, Edit Promotion, New Promotion.
+- Searchable/multi-select campaign controls verified by automated v0.6 tests.
+- Shared searchable dropdown and Koha DataTable behavior verified by automated v0.6 tests.
+- Analytics/Reports Chart View, Table View, data labels and JPEG download hooks verified.
+- Resource Impact green/highest-issue and red/zero-response legend/drill-down verified.
+- Page-specific How to Use coverage verified.
+- Synthetic approve → native Koha ASKED Suggestion workflow PASS; temporary fixture cleanup PASS.
+- Exact tested SHA-256: 6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28.
