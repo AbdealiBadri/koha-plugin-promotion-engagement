@@ -280,3 +280,71 @@ Run T-131 invalid-CSRF rejection, T-132 plugin tool-permission denial, and T-133
 - Uploaded the exact final v0.4 KPZ through Koha's authenticated upload handler.
 - Verified version 0.4.0, seven plugin tables and Book Display Impact rendering.
 - Removed the disposable containers, volumes and network; primary `promoeng` was untouched.
+
+
+## 2026-09-21 — v0.4.1 acceptance remediation and upgrade-survival audit
+
+- Resumed from the exact v0.4 checkpoint without resetting substantial uncommitted remediation work.
+- Standardized professional button/navigation/table/focus treatment across major staff screens.
+- Restored Configuration navigation consistently.
+- Added Reports campaign/status/date filtering with filter-preserving exports.
+- Added institution-wide comparison path while keeping Campaign Analytics campaign-specific.
+- Added conservative display-location intelligence using only unambiguous single-location campaigns; later excluded `unassigned` from the leading-location statement.
+- Corrected Koha Suggestion integration to use management `reason = Book Display Impact`, leave `patronreason` untouched and retain evidence in staff note/audit.
+- Corrected schema-idempotence helper to the actual `plugin_ajsn_promo_items` table.
+- Expanded automated coverage to 83 assertions and passed syntax/schema/runtime gates.
+- Added `docs/UPGRADE_SURVIVAL_AUDIT.md`.
+- Committed/pushed v0.4.1 acceptance/upgrade-survival checkpoint as `57a38bc`.
+
+## 2026-09-21 — Nairobi pilot analytics review
+
+- User installed v0.4.1 on live Nairobi Koha and reported normal installation/runtime behaviour.
+- Real campaign screenshots showed that useful baseline/during metrics existed but were not prominent enough on Dashboard/Resource Impact.
+- A long-running active email campaign exposed a logic defect: blank `end_date` resolved to campaign start, effectively creating a one-day During period until an end/completion was supplied.
+- User approved a management redesign centered on whether promoted resources were actually used, not merely whether campaign/workflow records existed.
+- Reviewed analytics/reporting patterns from the connected Maktabat-Al-Jamea Reporting System; reused the principle of headline number + context + trend/drill-down, not its implementation code.
+
+## 2026-09-21 — v0.5 Analytics Intelligence implementation
+
+- Created `feature/v0.5-analytics-intelligence`.
+- Advanced plugin version to 0.5.0 and Analytics spec version to 1.1.0.
+- Implemented live-to-date active-campaign resolution.
+- Implemented Pending / partial / complete window states so future follow-up is never displayed as zero.
+- Added distinct-title analytics by `biblionumber` alongside copy/item analytics by `itemnumber`.
+- Added promoted titles, titles used, title utilization, increased-use titles, zero-response titles and repeat-demand titles.
+- Added title-level response aggregation across multiple promoted copies.
+- Added portfolio promoted-title/item/use/baseline/campaign-checkout de-duplication.
+- Expanded comparison dimensions with title/use/baseline/change evidence.
+- Reworked Dashboard, Promotions, Campaign Detail and Campaign Analytics around Reach → Engagement → Impact → Action.
+- Generalized staff-facing Book Display Impact UI to **Promoted Resource Impact** while preserving the internal route and native Koha Suggestion reason for backward compatibility.
+- Moved High priority / Holds / Approved / Sent to Koha into a secondary Collection-development signals section.
+- Expanded Comparative Reports and CSV output.
+- Added 30 v0.5-specific assertions; final full suite = **113 assertions PASS**.
+- Final syntax, diff and schema-idempotence gates PASS.
+
+## 2026-09-21 — v0.5 exact-package/runtime closure
+
+- Built `PromotionEngagement-v0.5.0.kpz`.
+- Final tested SHA-256: `931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670`.
+- Python ZIP integrity: PASS.
+- Authenticated exact-KPZ upload/upgrade to isolated Koha 25.11.02 `promoeng`: PASS.
+- Version 0.5.0 and seven plugin tables after install: PASS.
+- Authenticated browser matrix PASS for Dashboard, Promotions, Analytics, Reports, Configuration and Promoted Resource Impact.
+- Browser smoke now reports the exact failed page/marker when a regression occurs.
+- The browser matrix exposed a missing Configuration sidebar entry on Resource Impact; it was fixed, package rebuilt and the full matrix rerun PASS.
+- Existing campaign 40 contained a legitimate submitted recommendation, exposing an unsafe old workflow-test assumption.
+- Rewrote the workflow smoke to create a dedicated temporary campaign, approval, native Suggestion and audit trail, then clean only its own fixtures.
+- Synthetic approve → Koha ASKED Suggestion workflow PASS.
+- Verified residual synthetic campaign/test patron/suggestion counts = 0.
+- Retained campaign 40 evidence remained untouched.
+
+## 2026-09-21 — Koha 26.05 retry stopped safely
+
+- Windows C: initially showed approximately 16 GB free, so the previously blocked forward-runtime pull was retried in a dedicated intended project `promoeng2605`.
+- During `koha/koha-testing:26.05` Docker layer expansion, free space fell through approximately 12 GB to 11 GB before the image completed.
+- Pull process was terminated deliberately to protect the workstation.
+- No completed 26.05 image and no `promoeng2605` containers were created.
+- Primary `promoeng` was not modified.
+- No global Docker pruning or unrelated cleanup was performed.
+- The former 12–15 GB free-space guidance is superseded; require 20–25 GB safe Windows C: free space before the next 26.05 attempt.
+- No Koha 26.05 runtime compatibility PASS is claimed.

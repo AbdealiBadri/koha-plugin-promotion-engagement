@@ -1,44 +1,71 @@
 # Koha Promotion & Engagement
 
-API-first Koha Tool Plugin for recording library promotion activity and measuring circulation impact while keeping Koha as the source of truth.
+Koha Tool Plugin for recording library promotion activity and measuring whether promoted resources are actually being used, while keeping Koha as the source of truth.
 
-> **Status: pre-alpha / development only. Do not install on a production Koha instance.**
+> **Status: development candidate. Koha 25.11.02 local runtime gates pass; Koha 26.05 and institutional staging remain release gates.**
+
+## Problem this plugin solves
+
+Libraries invest staff time in physical displays, email campaigns, recommendations and other promotion, but Koha normally records the resulting circulation without connecting it back to the promotional activity.
+
+This plugin answers:
+
+- What did we promote?
+- How many promoted titles were actually borrowed?
+- What percentage of the promoted collection was used?
+- How many checkout transactions occurred during the campaign?
+- Did circulation improve compared with an equal pre-campaign baseline?
+- Which promoted titles increased, generated no response or produced repeat demand?
+- Is there hold/copy pressure worth collection-development review?
+- Which channels/audiences/types/locations perform differently when attribution is defensible?
+
+The plugin reports observed circulation response; it does not claim that a promotion caused every loan.
 
 ## Target compatibility
 
-- Primary: Koha 25.11.x
+- Primary verified runtime: Koha 25.11.02
 - Forward test target: Koha 26.05.x
-- Initial production target: Aljamea-tus-Saifiyah Nairobi after KTD and staging validation
+- Initial institutional target: Aljamea-tus-Saifiyah Nairobi after the required staging/release gates
 
 ## Core architecture
 
-Koha remains authoritative for bibliographic records, items, barcodes, patrons, branches and circulation. The plugin stores only promotion-specific operational data in namespaced plugin tables.
+Koha remains authoritative for bibliographic records, items, barcodes, patrons, branches, holds and circulation. The plugin stores only promotion-specific operational data in seven namespaced plugin tables.
 
-The v0.4.1 development candidate includes:
+The v0.5.0 candidate includes:
 
 - Campaign create/list/detail/edit/archive with audit history
 - Universal campaign types, channels and reusable multi-location configuration
 - Bulk barcode scan/paste with live Koha validation
-- Baseline, During and After 7/14/30/60-day circulation analytics
-- Conversion, uplift, days-to-first-checkout and portfolio de-duplication
+- Active campaigns measured automatically through today without forced completion
+- Equal-duration Baseline and During comparison
+- After 7/14/30/60 windows with Pending / To date / Complete states
+- Clear distinction between promoted titles and promoted copies/items
+- Titles Used and Title Utilization
+- Campaign checkouts, baseline checkouts and circulation-rate change
+- Increased-use, Zero-response and Repeat-demand title signals
+- Portfolio de-duplication and overlap/multi-attribution handling
 - Privacy-aware channel, location, type, language and audience comparisons
-- Professional Koha-native dashboard and reports
+- Engagement-first Koha-native Dashboard, Promotions, Campaign Detail, Analytics and Reports
 - CSV/JSON exports
 - Authenticated health and read-only campaign Analytics API
-- **Book Display Impact** title ranking using circulation, holds and copy pressure
+- **Promoted Resource Impact** combining engagement evidence with holds/copy pressure
 - Audited librarian approval/rejection and native Koha Purchase Suggestions handoff
+
+The internal acquisition workflow continues to use the stable Koha Suggestion reason `Book Display Impact`.
 
 ![Book Display Impact](docs/images/book-display-impact.png)
 
-Beginner documentation:
+Documentation:
 
 - [Installation SOP](docs/INSTALLATION_SOP.md)
-- [Book Display Impact user guide and acceptance checklist](docs/BOOK_DISPLAY_IMPACT_USER_GUIDE.md)
+- [Resource Impact / Book Display Impact user guide](docs/BOOK_DISPLAY_IMPACT_USER_GUIDE.md)
+- [v0.5 analytics definitions and page architecture](docs/brain/V0.5_ANALYTICS_INTELLIGENCE.md)
+- [Analytics Engine Specification](docs/brain/ANALYTICS_SPEC.md)
 - [KohaCon26 demo and video package](docs/KOHACON26_DEMO_AND_VIDEO.md)
 - [Public release and legal guidance](docs/PUBLIC_RELEASE_GUIDE.md)
 - [Koha upgrade survival audit and SOP](docs/UPGRADE_SURVIVAL_AUDIT.md)
 
-Later milestones include recurring campaigns, non-barcode resources, historical import, Koha 26.05 validation and institutional staging.
+Later milestones include recurring campaigns, non-barcode resources, historical import, Koha 26.05 runtime validation and institutional staging.
 
 ## Safety rules
 

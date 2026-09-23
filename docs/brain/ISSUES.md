@@ -50,14 +50,14 @@
 - **Resolution:** WSL networking restart/recreation; Debian later returned HTTP 200 and `git pull` succeeded.
 - **Do not repeat:** do not diagnose this as a GitHub outage or plugin failure when Windows can reach GitHub. Compare host vs WSL connectivity.
 
-## ISSUE-006 — KPZ test plan text is v0.1-specific
+## ISSUE-006 — KPZ test plan text is version-specific/stale
 
-- **Status:** OPEN DOCUMENTATION DEBT
+- **Status:** RESOLVED 2026-09-21
 - **Severity:** Low
 - **Module:** release documentation
-- **Description:** `docs/KPZ_TEST_PLAN.md` examples and expected health version use `v0.1.0` while active development is `v0.2.0`.
-- **Expected:** release procedure should be version-aware or updated for the next artifact.
-- **Next action:** update when v0.2 packaging/release checkpoint begins; do not falsely claim v0.2 clean KPZ acceptance has already run.
+- **Description:** historical KPZ test instructions hard-coded old plugin versions/table expectations.
+- **Resolution:** `docs/KPZ_TEST_PLAN.md` is now version-aware, documents seven current tables, v0.5 analytics/resource-impact acceptance, synthetic Suggestion workflow safety, exact checksum evidence and the forward-Koha disk blocker.
+- **Evidence:** current v0.5.0 package/test record is embedded in the plan.
 
 ## TECHDEBT-007 — Generic vocabularies are still hard-coded
 
@@ -114,10 +114,40 @@
 
 ## ISSUE-013 — Compatibility/staging gates outstanding
 
-- **Status:** OPEN — external gates only
+- **Status:** OPEN — external/environmental gates only
 - **Severity:** Release blocker
 - **Module:** deployment
-- **Completed:** exact v0.3.0 KPZ build/checksum/extraction, authenticated clean Koha 25.11 upload/install, v0.2-to-v0.3 upgrade preservation, repeated migration idempotence and local database backup/restore rehearsal.
-- **Missing:** human visual acceptance, Koha 26.05.x validation, institutional staging and confirmation of production backup ownership/maintenance window.
-- **Constraint:** only Koha 25.11 is local; Windows C: had 6.6 GB free, so pulling another approximately 7.5 GB image was intentionally avoided.
-- **Production:** must remain blocked until the missing external gates pass.
+- **Completed:** v0.5.0 exact KPZ build/checksum/ZIP validation, authenticated Koha 25.11.02 upload/upgrade, seven-table verification, 113-assertion regression, authenticated browser render matrix, schema idempotence, synthetic native-Suggestion workflow and cleanup. Earlier v0.2→v0.3 upgrade preservation and local database backup/restore rehearsal also remain valid historical evidence.
+- **Missing:** final human visual acceptance of v0.5, Koha 26.05.x runtime validation, institutional staging and confirmation of production backup ownership/maintenance window.
+- **Constraint:** a 2026-09-21 Koha 26.05 image pull was retried with approximately 16 GB Windows C: free space; Docker layer expansion reduced free space to approximately 11 GB before completion, so the pull was stopped safely. No 26.05 container/image PASS exists.
+- **New safe threshold:** do not retry the forward-runtime matrix until 20–25 GB of safe Windows C: free space exists.
+- **Production:** must remain gated until the missing external requirements pass.
+
+## ISSUE-014 — Active campaigns required an artificial end/completion for useful analytics
+
+- **Status:** RESOLVED in v0.5.0
+- **Severity:** Product-critical
+- **Module:** Analytics
+- **Observed in Nairobi pilot:** a long-running active email campaign did not produce the expected full-period analytics until an end date/completion was supplied.
+- **Cause:** blank `end_date` resolved to `start_date`, collapsing an open active campaign to one measured day.
+- **Resolution:** a started active campaign now resolves through the current/as-of date when the end date is blank or still in the future. Equal-duration baseline is recalculated from the resolved live period.
+- **Follow-up correction:** future 7/14/30/60 windows are Pending/null rather than zero.
+- **Evidence:** V05-03 through V05-20 and full 113-assertion suite PASS.
+
+## ISSUE-015 — Analytics screens did not communicate impact at first glance
+
+- **Status:** RESOLVED in v0.5.0
+- **Severity:** High product/usability
+- **Module:** Dashboard / Promotions / Campaign Detail / Analytics / Resource Impact / Reports
+- **Observed:** staff could see counts such as promoted/displayed resources, holds, approved and sent-to-Koha, but could not immediately see how much of the promoted collection was actually used or how usage compared with baseline.
+- **Resolution:** primary KPI hierarchy now leads with Promoted Titles, Titles Used, Title Utilization, Campaign Checkouts, Baseline/Change and Zero-response/Increased-use signals. Holds/approval/Sent-to-Koha remain secondary collection-development workflow metrics.
+- **Evidence:** authenticated browser render matrix PASS for all major v0.5 screens; shared Analytics service supplies the KPI values.
+
+## ISSUE-016 — Workflow smoke assumed campaign 40 had no retained recommendation
+
+- **Status:** RESOLVED in v0.5.0
+- **Severity:** Medium test-safety
+- **Module:** release smoke tests
+- **Observed:** campaign 40 legitimately retained a submitted development recommendation, causing the old workflow smoke to abort and making its cleanup unsafe for preserved evidence.
+- **Resolution:** workflow smoke now creates its own temporary campaign linked to a known Koha item, runs approve → native Suggestion → audit verification, then removes only its own synthetic campaign/recommendation/audit/suggestion.
+- **Evidence:** synthetic workflow PASS; retained campaign 40 recommendation remains untouched; residual synthetic campaign/test patron/suggestion counts verified as zero.

@@ -2,123 +2,217 @@
 
 ## Project identity
 
-**Project:** Koha Promotion & Engagement  
-**Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`  
-**Product form:** Koha Tool Plugin / KPZ package  
-**Institutional origin:** Aljamea-tus-Saifiyah Nairobi library  
-**Current maturity:** Pre-alpha / development only
+**Project:** Koha Promotion & Engagement
+**Repository:** `AbdealiBadri/koha-plugin-promotion-engagement`
+**Product form:** Koha Tool Plugin / versioned KPZ package
+**Institutional origin:** Aljamea-tus-Saifiyah Nairobi library
+**Current candidate:** v0.5.0 Analytics Intelligence
+**Primary verified Koha runtime:** 25.11.02
 
-## Summary
+## Purpose
 
-Koha Promotion & Engagement is a Koha-native plugin for recording library promotion activities, linking promoted resources to live Koha records, and measuring whether those activities change circulation and reading behaviour. The plugin is intentionally designed so **Koha remains the authoritative library system** while the plugin stores only promotion-specific operational data and derives analytics from Koha circulation history.
+Koha Promotion & Engagement records library promotion activity, links promoted resources to live Koha records and measures whether those resources receive measurable circulation response.
 
-The long-term goal is not merely to count campaigns. It is to answer management questions such as which campaigns, channels, locations, subjects, languages, audiences, titles, classes/groups, and time windows create measurable engagement or circulation uplift.
+Koha remains the authoritative library system. The plugin stores promotion-specific operational/audit data in namespaced tables and derives engagement analytics from Koha circulation history.
 
-## Problem being solved
+The product is designed to answer a management question Koha does not normally answer directly:
 
-Library promotion is currently spread across physical displays, signage, email, featured resources/authors, review programmes, and other recurring activities. These activities can be operationally visible yet analytically disconnected from Koha. The project creates a durable record of **what was promoted, how, where, when, to whom, and with which resources**, then measures outcomes against Koha transaction data.
+**We promoted these resources — were they actually used, did borrowing change compared with before, and what should the library learn or do next?**
+
+## Core management questions
+
+The plugin aims to answer:
+
+1. What did the library promote?
+2. How many distinct titles and physical/item copies were involved?
+3. How many promoted titles were actually borrowed?
+4. What share of promoted titles was used?
+5. How many checkout events occurred during the promotion?
+6. How did the campaign compare with an immediately preceding equal-duration baseline?
+7. Which titles increased, produced no response or generated repeat demand?
+8. Which channels/audiences/campaign types/locations perform differently where attribution is defensible?
+9. Is current demand/copy pressure strong enough to justify collection-development review?
+10. What evidence should be handed to native Koha Suggestions/Acquisitions?
+
+## Evidence principle
+
+The plugin measures observed Koha circulation response.
+
+It may conclude that:
+
+- circulation increased during a promotion;
+- more promoted titles were used;
+- a campaign generated new borrowing response;
+- a title produced increased/repeat demand.
+
+It must not claim:
+
+- that promotion caused every checkout;
+- that a physical display was definitely seen by a particular borrower;
+- that a multi-location campaign proves which physical location generated the checkout.
 
 ## Primary users
 
-- Library administrators and managers.
-- Librarians/staff who create and maintain promotions.
-- Staff who review promotion impact and circulation analytics.
-- Future authorized external AJS applications consuming read-only promotion analytics through the plugin API.
+- Library managers and administrators.
+- Librarians creating/maintaining promotions.
+- Staff reviewing engagement and campaign evidence.
+- Collection-development/acquisitions staff reviewing approved recommendations.
+- Future authorized AJS applications consuming aggregate read-only analytics.
 
-## Stakeholders
+## Current functional scope
 
-- Aljamea-tus-Saifiyah Nairobi library management and staff.
-- Future Aljamea campus libraries and other Koha libraries that may use the plugin.
-- Koha administrators responsible for plugin installation, permissions, upgrades, backups, and compatibility.
-- Institutional decision-makers who need evidence of campaign effectiveness.
+### Campaign operations
 
-## Primary use cases
+- create/list/detail/edit/archive;
+- audit history;
+- plugin-managed campaign type/channel/location/language/audience/cadence vocabulary;
+- reusable multi-location campaigns;
+- barcode scan/paste and live Koha validation;
+- duplicate prevention;
+- transactional campaign/item/location/audit writes.
 
-1. Create a promotion/campaign with type, channel, dates, status, branch, audience, language, location, notes, and linked Koha items.
-2. Paste or scan barcodes and validate them against live Koha items before saving.
-3. Prevent duplicate item links and partial writes.
-4. Preserve an audit trail of promotion operations.
-5. Review campaign counts and linked-item counts.
-6. Measure before/during/after circulation behaviour and configurable 7/14/30/60-day impact windows.
-7. Compare campaign effectiveness by channel, location, subject/theme, language, audience, class/group/category, and other dimensions where the underlying data supports safe analysis.
-8. Identify promoted items that convert to checkout, do not convert, or convert after a measurable delay.
-9. Support recurring physical and digital promotion workflows without hard-coding one institution's vocabulary.
-10. Package the plugin as a normal versioned KPZ and install it through Koha's plugin administration workflow.
+### Analytics Intelligence
 
-## Major modules
+- active campaigns measured live through today without forced completion;
+- equal-duration pre-campaign Baseline;
+- During and After 7/14/30/60 windows;
+- Pending / To date / Complete window states;
+- checkout union from Koha `issues` + `old_issues`;
+- issue-ID de-duplication;
+- promoted item/copy count;
+- promoted-title count;
+- titles used;
+- title utilization;
+- campaign/baseline checkout totals and daily rates;
+- uplift / new response;
+- increased-use titles;
+- zero-response titles;
+- repeat-demand titles;
+- title-level before/during/follow-up response;
+- portfolio de-duplication and multi-attribution quality signals.
 
-### Implemented/partially implemented
+### Management surfaces
 
-- Koha plugin shell and metadata.
-- Plugin-owned namespaced schema.
-- Campaign creation workflow.
-- Barcode validation and campaign-to-item linking.
-- Duplicate-barcode prevention.
-- Transactional campaign/item/audit writes.
-- Dashboard shell with campaign and linked-item counts.
-- Health REST endpoint.
-- Koha-native CSRF and plugin permission integration.
-- KPZ build script and historical clean-install test procedure.
+- engagement-first Dashboard;
+- impact-aware Promotions list;
+- Campaign Detail Impact-at-a-glance;
+- Campaign Analytics;
+- Promoted Resource Impact;
+- Comparative Reports;
+- CSV/JSON exports;
+- authenticated read-only analytics API.
 
-### Planned
+### Promoted Resource Impact / acquisitions handoff
 
-- Campaign listing/detail/edit/soft-delete lifecycle.
-- Universal configurable types/channels/locations/languages/audiences/cadences.
-- Multi-location campaigns.
-- Analytics engine and baseline comparisons.
-- Professional management dashboard.
-- Reports and CSV/JSON exports.
-- Additional read-only REST analytics endpoints.
-- Historical spreadsheet import.
-- E-resource/non-barcode resource support.
-- Compatibility validation on Koha 26.05.x.
-- Staging and production deployment.
+- title-level circulation/copy/hold evidence;
+- serviceable/available copies;
+- active holds and holds-per-copy;
+- priority/evidence grade;
+- Koha HoldRatioDefault-aware quantity proposal;
+- librarian approval/rejection;
+- evidence snapshot/audit;
+- native Koha ASKED Suggestion submission;
+- duplicate/submission protection.
 
-## Real-world acceptance examples
+The plugin does not choose vendor, fund, price, currency, basket or order. Those remain in Koha Acquisitions.
 
-The plugin must be generic enough to represent Nairobi workflows without source-code customization, including weekly subject/new-arrival displays, weekly English/Arabic/e-book email campaigns, daily multilingual digital signage, weekly physical signage, monthly featured e-resources/authors, weekly newspaper/magazine promotion, and recommended-for-review displays. These are **acceptance examples, not hard-coded defaults**.
+## Data architecture
 
-## Scope boundaries and non-goals
+Koha is authoritative for:
 
-- The plugin does not replace Koha catalogue, item, patron, branch, or circulation modules.
-- It must not duplicate or rewrite Koha transaction history merely to calculate analytics.
-- It must not require Koha core patches for plugin functionality.
-- It is not currently an email-delivery, digital-signage publishing, social-media publishing, or marketing-automation platform; those are channels recorded by the campaign model unless a later integration is explicitly approved.
-- Nairobi-specific operational vocabulary must not become universal hard-coded logic.
-- Production deployment is not part of the current checkpoint.
+- biblios;
+- items/barcodes;
+- patrons;
+- branches/libraries;
+- issues/old_issues;
+- holds;
+- Suggestions/Acquisitions.
 
-## Core business constraints
+Plugin operational data remains in seven namespaced tables:
 
-- Koha is the source of truth for catalogue, items/barcodes, patrons, branches and circulation.
-- Plugin-specific data must remain namespaced and independently manageable.
-- Historical campaign data must not be silently destroyed on uninstall.
-- Patron-identifiable analytics require restricted/approved handling and must not be exposed casually to external/general dashboards.
-- Campaign measurements must use consistent business rules across Koha UI and future external applications.
-- The plugin must support growth beyond physical books; future promoted resources may not have item barcodes.
+- `plugin_ajsn_promo_campaigns`
+- `plugin_ajsn_promo_items`
+- `plugin_ajsn_promo_audit`
+- `plugin_ajsn_promo_settings`
+- `plugin_ajsn_promo_vocab_values`
+- `plugin_ajsn_promo_campaign_locations`
+- `plugin_ajsn_promo_recommendations`
 
-## Technology summary
+No Koha core table is altered with plugin-specific columns and no Koha core source patch is required.
 
-- Perl Koha plugin based on `Koha::Plugins::Base`.
-- Template Toolkit for Koha staff UI.
-- MariaDB/MySQL through Koha's database connection.
-- Koha ORM/APIs such as `Koha::Items` and `Koha::Libraries`.
-- Mojolicious/OpenAPI controller for plugin REST routes.
-- Koha Testing Docker (KTD) for local development and validation.
-- Python KPZ build helper under `scripts/`.
-- Git/GitHub branch-based development.
+## Privacy boundary
 
-## Compatibility and deployment targets
+General management analytics remain aggregate-only.
 
-- Primary development target: Koha 25.11.x; active KTD tests have used Koha 25.11.02.
-- Forward compatibility target: Koha 26.05.x.
-- Initial production target: Aljamea-tus-Saifiyah Nairobi only after KTD, compatibility, staging, backup/rollback, and exact-KPZ validation gates pass.
+Patron-identifiable rankings/history are outside the general plugin analytics boundary unless a later restricted privacy/permission design is separately approved.
 
-## Branch/repository status
+## Current local verification
 
-Repository default branch: `main`.  
-Active v0.2 implementation branch as last verified: `feature/v0.2-campaign-crud`.  
-The Project Brain is published on the default `main` branch for discoverability and is also present on the active v0.2 implementation branch. `docs/project-brain` is retained as the documentation construction/mirror branch.
+On isolated Koha 25.11.02 `promoeng`:
 
-## Project status
+- 5 automated test files / 113 assertions: PASS;
+- syntax/diff/schema-idempotence gates: PASS;
+- exact v0.5.0 KPZ authenticated upload/upgrade: PASS;
+- seven plugin tables: PASS;
+- Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact authenticated browser matrix: PASS;
+- native Koha Suggestion synthetic workflow and cleanup: PASS.
 
-The project has moved beyond the v0.1 foundation and is in the **v0.2 campaign data-entry checkpoint**. Core campaign creation behaviours have passed several manual tests. The immediate runtime blocker is a KTD environment restart failure caused by recreating the Koha application container against an already-populated retained database; this is an environment lifecycle problem, not a verified plugin-code failure. See `CURRENT_STATE.md`, `ISSUES.md`, and `SESSION_HANDOFF.md`.
+Exact locally verified v0.5.0 KPZ SHA-256:
+
+`931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670`
+
+## Current compatibility position
+
+- Koha 25.11.02: local runtime PASS.
+- Koha 26.05.x: code/dependency review favorable, runtime BLOCKED by host disk capacity.
+- Institutional staging: not yet executed.
+- v0.5 formal production deployment: not verified/authorized by this development gate.
+
+A 26.05 image pull retried on 2026-09-21 reduced Windows C: free space from about 16 GB to about 11 GB before completion, so it was stopped safely. Require 20–25 GB safe free C: space before retrying.
+
+## Nairobi pilot context
+
+The user installed v0.4.1 on the live Nairobi Koha and reported normal installation/runtime behavior. Real campaign screenshots then exposed the active-campaign and first-glance analytics deficiencies that v0.5 addresses.
+
+This pilot observation is useful product evidence but is not treated as formal v0.5 release acceptance.
+
+## Technology
+
+- Perl / `Koha::Plugins::Base`
+- Template Toolkit Koha staff UI
+- MariaDB/MySQL through Koha DB connection
+- Koha ORM/models and native Suggestions
+- Mojolicious/OpenAPI REST controller
+- Koha Testing Docker
+- Python KPZ build helper
+- Git/GitHub branch-based development
+
+## Branch status
+
+Repository default: `main`
+
+Active implementation branch:
+
+`feature/v0.5-analytics-intelligence`
+
+Base v0.4.1 acceptance/upgrade-survival checkpoint:
+
+`57a38bc`
+
+## Remaining external gates
+
+1. user visual review of final v0.5;
+2. Koha 26.05 runtime matrix after adequate host disk headroom;
+3. institutional non-production staging;
+4. explicit production backup/change-window/rollback ownership and release authorization.
+
+## Authoritative current references
+
+- `CURRENT_STATE.md`
+- `SESSION_HANDOFF.md`
+- `ANALYTICS_SPEC.md`
+- `V0.5_ANALYTICS_INTELLIGENCE.md`
+- `TESTING.md`
+- `ISSUES.md`
+- `DECISIONS.md`
+- `docs/UPGRADE_SURVIVAL_AUDIT.md`

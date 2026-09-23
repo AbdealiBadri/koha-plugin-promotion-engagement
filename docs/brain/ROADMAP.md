@@ -2,7 +2,7 @@
 
 ## Current milestone — v0.2 Checkpoint 1: campaign creation integrity/security
 
-**Status:** IN PROGRESS / runtime environment healthy  
+**Status:** IN PROGRESS / runtime environment healthy
 **Priority:** P0
 
 ### Completed in current checkpoint
@@ -35,7 +35,7 @@
 
 ## Current milestone — v0.2 universal configuration and multi-location
 
-**Priority:** P1  
+**Priority:** P1
 **Dependency:** checkpoint 1 closure
 
 ### Prepared remotely — read-only slice
@@ -92,7 +92,7 @@ Acceptance criteria must define formulas before UI implementation.
 
 ## v0.4 — Reporting and external API
 
-**Priority:** P2  
+**Priority:** P2
 **Dependency:** stable analytics rules
 
 - campaign/detail reports;
@@ -126,9 +126,11 @@ Acceptance criteria must define formulas before UI implementation.
 
 ## UI/UX modernization
 
-**Status:** PLANNED / deliberately deferred
+**Status:** IMPLEMENTED THROUGH v0.5; continue only from evidence-based review
 
-Modern professional dashboard, visual hierarchy and responsive refinement should occur after data model/workflows/analytics stabilize. Avoid double work by not finalizing visual KPI components before formulas and dimensions are approved.
+The professional Koha-native management UI was implemented after the core data model and formulas stabilized. v0.5 further reorganizes every analytics-bearing surface around meaningful management evidence: Reach → Engagement → Impact → Action.
+
+Future UI work should be driven by actual visual/usability findings rather than redesigning stable screens for novelty.
 
 ## Backlog / optional ideas
 
@@ -153,3 +155,42 @@ Later roadmap items remain recurrence/templates, non-barcode resources, restrict
 - Native Koha Suggestions handoff: implemented and runtime-tested.
 - Beginner SOP, Monday acceptance, KohaCon26/video and public release pack: implemented.
 - Remaining: human visual acceptance, Koha 26.05 and institutional staging.
+
+
+## v0.5 Analytics Intelligence — locally complete, external gates pending
+
+**Priority:** P1
+**Status:** IMPLEMENTED / VERIFIED on Koha 25.11.02
+
+- [x] Active campaigns measure from start through current/as-of date without forced completion.
+- [x] Active campaigns with future planned ends clamp analytics to today.
+- [x] Active campaigns with past configured ends return a status/data-quality warning.
+- [x] Future campaigns are Pending rather than failed.
+- [x] After 7/14/30/60 windows expose Pending / To date / Complete states.
+- [x] Pending follow-up metrics are null rather than misleading zeroes.
+- [x] Distinguish promoted copies/items (`itemnumber`) from promoted titles (`biblionumber`).
+- [x] Add Titles Used and Title Utilization.
+- [x] Add Increased-use, Zero-response and Repeat-demand title signals.
+- [x] Add portfolio promoted-title/item/use/checkouts with de-duplication.
+- [x] Rebuild Dashboard around engagement evidence.
+- [x] Add impact columns to Promotions.
+- [x] Add Impact at a glance to Campaign Detail.
+- [x] Rebuild Campaign Analytics KPI hierarchy and title-level response.
+- [x] Generalize Book Display Impact UI to Promoted Resource Impact while preserving stable internal route/Suggestion reason.
+- [x] Demote holds/approval/Sent-to-Koha to secondary collection-development workflow indicators.
+- [x] Expand Comparative Reports and CSV output with title/use/baseline/change evidence.
+- [x] Preserve conservative multi-location attribution.
+- [x] Make workflow smoke self-contained and non-destructive to retained campaign evidence.
+- [x] Full 113-assertion regression PASS.
+- [x] Exact v0.5.0 KPZ authenticated install/upgrade on Koha 25.11.02 PASS.
+- [x] Authenticated Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact browser matrix PASS.
+- [x] Native Koha Suggestion workflow and synthetic cleanup PASS.
+
+### External v0.5 release gates
+
+- [ ] Human visual review of final v0.5 screens.
+- [ ] Koha 26.05 runtime validation — blocked by host disk capacity; require 20–25 GB safe Windows C: free space before retry.
+- [ ] Institutional non-production staging.
+- [ ] Explicit production backup/change-window/release authorization.
+
+The exact analytical architecture and metric definitions are documented in `V0.5_ANALYTICS_INTELLIGENCE.md`.

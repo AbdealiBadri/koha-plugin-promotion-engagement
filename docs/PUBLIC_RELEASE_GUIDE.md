@@ -2,7 +2,7 @@
 
 ## Recommended release status
 
-Publish the first public package as **v0.4.0-beta / evaluation release** until
+Publish the first public package as an **evaluation/beta release** until
 Koha 26.05 and institutional staging gates pass. Do not label it production-ready.
 
 ## GitHub release contents
@@ -14,7 +14,7 @@ Koha 26.05 and institutional staging gates pass. Do not label it production-read
 5. Supported Koha-version matrix.
 6. Installation, upgrade, rollback and uninstall SOP.
 7. User guide and acceptance checklist.
-8. Dashboard and Book Display Impact screenshots.
+8. Dashboard, Campaign Analytics and Promoted Resource Impact screenshots.
 9. Demo dataset instructions without real patron information.
 10. Link to security-reporting instructions.
 

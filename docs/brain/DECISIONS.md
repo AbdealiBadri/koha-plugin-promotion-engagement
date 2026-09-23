@@ -193,3 +193,41 @@ explainable recommendation evidence, but it must not create acquisition orders o
 choose vendors/funds. After explicit librarian approval, an authorized user may
 create a native Koha ASKED suggestion transactionally. Acquisitions staff retain
 acceptance, vendor, fund, price, currency, basket and order authority.
+
+
+## DEC-024 — Active campaigns are measured live-to-date
+
+**Status:** Accepted — 2026-09-21
+
+A started campaign with `status = active` must not require artificial completion merely to produce analytics.
+
+- If `end_date` is blank, effective During end = current/as-of date.
+- If configured end is in the future, effective During end = current/as-of date.
+- If configured end is already in the past, the configured end remains authoritative and the service returns a warning that the campaign is still marked active.
+- If the campaign has not started, During is Pending.
+- Baseline duration always matches the resolved During duration.
+- Future follow-up windows return Pending/null metrics, never zero.
+
+This decision supersedes the v0.3 fallback that treated a missing `end_date` as the `start_date`.
+
+## DEC-025 — Management analytics are title-engagement first
+
+**Status:** Accepted — 2026-09-21
+
+The primary management question is not merely how many resources staff promoted; it is whether the promoted collection was actually used and whether use changed relative to a comparable baseline.
+
+Therefore the headline KPI hierarchy is:
+
+1. Promoted Titles;
+2. Titles Used;
+3. Title Utilization;
+4. Campaign Checkouts;
+5. Baseline / circulation-rate change;
+6. Increased-use / Zero-response / Repeat-demand signals;
+7. collection-development workflow signals such as holds, approval and Sent to Koha.
+
+Title metrics use distinct Koha `biblionumber` values. Copy/item metrics continue to use `itemnumber`. Multiple promoted copies must not inflate title-utilization breadth.
+
+The staff-facing Book Display Impact page is generalized to **Promoted Resource Impact** so physical, email, recommendation and digital campaigns can use the same engagement evidence. The existing `book_display_impact` internal route and native Koha Suggestion reason `Book Display Impact` remain stable for backward compatibility and audit continuity.
+
+This decision does not weaken DEC-022: circulation response is evidence of engagement, not proof that a promotion caused every checkout.

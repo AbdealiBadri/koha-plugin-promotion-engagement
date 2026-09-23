@@ -2,47 +2,58 @@ project:
   name: "Koha Promotion & Engagement"
   repository: "AbdealiBadri/koha-plugin-promotion-engagement"
   default_branch: "main"
-  status: "pre-alpha-development"
+  status: "development-candidate"
 
 current:
-  milestone: "v0.4 Book Display Impact"
-  implementation_branch: "feature/v0.4-book-display-impact"
-  implementation_commit: "1e53813"
+  milestone: "v0.5 Analytics Intelligence"
+  implementation_branch: "feature/v0.5-analytics-intelligence"
+  implementation_commit: "dc39db3a1fa4e4ae2158056ea3ea6a282ccbefd0"
   project_brain_branch: "docs/project-brain"
-  objective: "Complete Book Display Impact, Koha Suggestions handoff, SOPs and public/conference release package"
-  last_verified: "2026-09-20"
-  next_action: "Human visual acceptance of Book Display Impact; then Koha 26.05 and institutional staging validation before production authorization"
+  objective: "Make promotion analytics useful at a glance: live active campaigns, title utilization, baseline comparison, resource-impact and portfolio intelligence"
+  last_verified: "2026-09-21"
+  next_action: "Human visual review of final v0.5; then Koha 26.05 runtime matrix when 20-25 GB safe C: free space exists, followed by institutional staging"
 
 environment:
   local:
     platform: "Windows + WSL Debian + Docker/KTD"
     primary_ktd_instance: "promoeng"
     legacy_ktd_instance: "kohadev"
-    koha_target: "25.11.x"
-    state: "promoeng-healthy"
+    koha_target: "25.11.02"
+    state: "promoeng-healthy-v0.5"
     evidence:
       - "promoeng-koha-1/db-1/memcached-1 up"
-      - "promoeng-intra.localhost HTTP 200"
-      - "KTD startup log says ready to be enjoyed"
-      - "Promotion & Engagement 0.3.0 mounted in primary development runtime"
+      - "exact v0.5.0 KPZ authenticated upload/upgrade pass"
+      - "seven namespaced plugin tables present"
+      - "Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact authenticated browser matrix pass"
+      - "native Koha Suggestion synthetic workflow and cleanup pass"
     isolation_rule: "Do not touch unrelated repositories/containers; no global Docker cleanup"
-  clean_kpz_test:
-    instance: "promoengclean"
-    state: "v0.3-pass-and-removed"
-    evidence: "authenticated KPZ upload, six tables, primary pages, API auth and disable/re-enable preservation passed"
+  forward_koha:
+    target: "26.05.x"
+    status: "runtime-blocked-host-disk"
+    evidence:
+      - "2026-09-21 pull retried from approximately 16 GB C: free"
+      - "free space fell to approximately 11 GB before image completion"
+      - "pull stopped safely; no promoeng2605 container and no completed 26.05 image"
+    retry_requirement: "20-25 GB safe Windows C: free space"
   staging:
     status: "not-run"
   production:
-    status: "not-deployed"
-    target: "Aljamea-tus-Saifiyah Nairobi"
+    status: "v0.5-not-formally-deployed"
+    note: "User reported v0.4.1 live Nairobi pilot installed/running normally; v0.5 remains separately gated"
 
-blockers: []
+blockers:
+  - id: "ISSUE-013"
+    summary: "Koha 26.05 runtime matrix blocked by host disk capacity; institutional staging and formal production release gates remain external"
 
 resolved_recently:
-  - id: "ISSUE-004"
-    summary: "old KTD database lifecycle blocker resolved previously; new work isolated to promoeng"
-  - id: "BUG-003"
-    summary: "runtime health returns plugin version 0.2.0; unauthenticated request denied"
+  - id: "ISSUE-014"
+    summary: "active campaigns now measure start through today without forced completion"
+  - id: "ISSUE-015"
+    summary: "analytics-bearing screens now lead with meaningful engagement/baseline KPIs"
+  - id: "ISSUE-016"
+    summary: "workflow smoke uses isolated synthetic campaign and preserves retained campaign 40 evidence"
+  - id: "ISSUE-006"
+    summary: "KPZ test plan is version-aware and current"
 
 critical_decisions:
   - "DEC-001"
@@ -58,23 +69,28 @@ critical_decisions:
   - "DEC-020"
   - "DEC-021"
   - "DEC-022"
+  - "DEC-023"
+  - "DEC-024"
+  - "DEC-025"
 
 last_test:
-  id: "v0.4.0-book-display-impact-gate"
-  date: "2026-09-20"
-  command: "prove -v t/*.t; authenticated render; approve/submit Suggestions workflow; KPZ/checksum gates"
+  id: "v0.5.0-analytics-intelligence-local-gate"
+  date: "2026-09-21"
+  command: "git diff --check; shell syntax; Perl syntax; schema idempotence; prove -v t/*.t; exact KPZ authenticated install; browser matrix; synthetic Suggestion workflow"
   status: "PASS"
-  result: "72 assertions pass; native Koha ASKED suggestion handoff and cleanup pass; v0.4 KPZ structure/checksum pass on Koha 25.11"
+  result: "5 files / 113 assertions pass; exact v0.5.0 KPZ install and six-page browser matrix pass; native Koha ASKED suggestion workflow and cleanup pass on Koha 25.11.02"
 
 runtime:
-  plugin_version: "0.4.0"
+  plugin_version: "0.5.0"
+  analytics_spec_version: "1.1.0"
   primary_environment: "promoeng"
   primary_environment_ready: true
+  exact_kpz_sha256: "931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670"
 
-checkpoint_counts_before_environment_reset:
-  promotions: 3
-  linked_items: 2
-  note: "historical local test data; plugin tables backed up before clean reset"
+retained_fixtures:
+  campaign_40:
+    purpose: "multi-location visual/analytics development fixture"
+    preservation_rule: "tests must not delete or overwrite retained recommendation/evidence"
 
 secrets:
   stored_in_project_memory: false

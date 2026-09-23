@@ -291,3 +291,145 @@ PASS in disposable `promoengpkg` Koha 25.11: authenticated KPZ upload,
 version 0.4.0, seven tables and Book Display Impact render. The exact installed
 artifact checksum is `f71eeb9a1d12df8d0e051ee13b1fb4c342b74a7a912ea30f42ce0b838eb70dbf`.
 Disposable runtime removed after verification.
+
+
+## v0.4.1 acceptance-remediation closure — 2026-09-21
+
+- Professional interaction/contrast/navigation remediation across major staff screens: PASS.
+- Configuration navigation consistency: PASS.
+- Reports all-campaign/campaign/status/date filtering: PASS.
+- Filter-preserving exports: PASS.
+- Single-location location-intelligence safeguard: PASS.
+- `unassigned` excluded from leading physical-location statement: PASS.
+- Native Suggestion `reason = Book Display Impact`; patron-reason authorized-value field left untouched: PASS.
+- Schema idempotence helper corrected to real `plugin_ajsn_promo_items` table name: PASS.
+- Full pre-v0.5 regression reached 83 assertions PASS.
+- v0.4.1 checkpoint committed/pushed as `57a38bc`.
+
+## v0.5.0 Analytics Intelligence — 2026-09-21
+
+### Automated correctness
+
+Final combined command in isolated Koha 25.11.02 `promoeng`:
+
+`prove -v t/*.t`
+
+Result:
+
+- files: **5**;
+- assertions: **113**;
+- result: **PASS**.
+
+Dedicated `t/analytics_v05_intelligence.t` coverage:
+
+- V05-01/02 fixture title with two copies;
+- V05-03 active open-ended campaign uses as-of date;
+- V05-04 live-to-date flag;
+- V05-05 During grows through as-of date;
+- V05-06 equal-duration Baseline;
+- V05-07 future follow-up Pending;
+- V05-08 Pending checkout metric remains null;
+- V05-09 item/copy count remains item-level;
+- V05-10 promoted title de-duplicates by `biblionumber`;
+- V05-11 title usage at distinct-title level;
+- V05-12 title-utilization formula;
+- V05-13 used title excluded from zero-response count;
+- V05-14 active campaign captures current-to-date checkout evidence;
+- V05-15 future planned end clamped to as-of date;
+- V05-16 active future-ended campaign remains live/provisional;
+- V05-17 scheduled campaign During state Pending;
+- V05-18 scheduled campaign does not report zero used titles;
+- V05-19 scheduled campaign does not falsely create zero-response titles;
+- V05-20 scheduled campaign remains Awaiting/Scheduled rather than failed;
+- V05-21 portfolio promoted-item count;
+- V05-22 portfolio title de-duplication;
+- V05-23 portfolio titles used;
+- V05-24 portfolio title utilization;
+- V05-25 portfolio campaign-period checkout count;
+- V05-26 Resource Impact distinct-title summary;
+- V05-27 Resource Impact title-use summary;
+- V05-28 Resource Impact title utilization;
+- V05-29 incomplete 60-day follow-up cannot become sustained evidence;
+- V05-30 transaction-scoped fixture rollback.
+
+### Static and schema gates
+
+- `git diff --check`: PASS.
+- Browser/workflow/KPZ shell syntax: PASS.
+- `PromotionEngagement.pm` Perl syntax: PASS.
+- `Analytics.pm` Perl syntax: PASS.
+- `BookDisplayImpact.pm` Perl syntax: PASS.
+- schema idempotence: PASS.
+- observed plugin table counts remained stable after repeated schema run:
+  - campaigns 6;
+  - items 5;
+  - audit 16;
+  - settings 0;
+  - vocabulary 23;
+  - campaign locations 3;
+  - recommendations 1.
+
+These counts describe the retained local development fixture state only; they are not production expectations.
+
+### Exact package gate — Koha 25.11.02
+
+Artifact: `PromotionEngagement-v0.5.0.kpz`
+
+SHA-256:
+
+`931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670`
+
+- package build: PASS;
+- Python ZIP integrity test: PASS;
+- archive files: 16 under `Koha/`;
+- authenticated Koha upload/upgrade into isolated `promoeng`: PASS;
+- Koha plugin page version 0.5.0: PASS;
+- seven plugin tables after install/upgrade: PASS;
+- Plack restart after install: PASS.
+
+### Authenticated browser matrix
+
+Using a temporary synthetic superlibrarian in the isolated KTD runtime:
+
+- Dashboard: PASS;
+- Promotions: PASS;
+- Campaign Analytics: PASS;
+- Comparative Reports: PASS;
+- Configuration: PASS;
+- Promoted Resource Impact: PASS;
+- no Template process failure: PASS;
+- no Internal Server Error: PASS.
+
+Temporary test patron was deleted after the run.
+
+### Native Suggestion workflow smoke
+
+The smoke test now creates a dedicated temporary campaign rather than modifying campaign 40.
+
+- temporary campaign creation: PASS;
+- Resource Impact decision approval: PASS;
+- audit row: PASS;
+- native Koha Suggestion created in ASKED state: PASS;
+- quantity and biblionumber retained: PASS;
+- management reason = `Book Display Impact`: PASS;
+- `patronreason` remains blank/unforged: PASS;
+- evidence staff note present: PASS;
+- synthetic Koha Suggestion cleanup: PASS;
+- synthetic campaign/recommendation/audit/item cleanup: PASS;
+- temporary test patron cleanup: PASS;
+- retained campaign 40 submitted recommendation preserved.
+
+### Koha 26.05 runtime gate
+
+**BLOCKED — host disk capacity, no PASS claimed.**
+
+On 2026-09-21 a dedicated `promoeng2605` pull was retried with approximately 16 GB Windows C: free space. During Docker layer expansion free space fell to approximately 12 GB and then 11 GB before completion. The pull was stopped deliberately.
+
+Verification after stop:
+
+- no completed `koha/koha-testing:26.05` image;
+- no `promoeng2605` container;
+- primary `promoeng` untouched;
+- no global Docker cleanup executed.
+
+Do not retry until at least 20–25 GB safe Windows C: free space is available.

@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.5.0] - 2026-09-21
+
+### Added
+- Live-to-date analytics for started active campaigns without requiring artificial completion.
+- Explicit Pending / To date / Complete states for During and follow-up windows.
+- Distinct promoted-title metrics alongside promoted copy/item metrics.
+- Titles Used, Title Utilization, Increased-use, Zero-response and Repeat-demand title signals.
+- Portfolio promoted-title/item/use/baseline/campaign-checkout de-duplication.
+- Engagement-first KPI summaries on Dashboard, Promotions, Campaign Detail, Campaign Analytics and Reports.
+- Generalized **Promoted Resource Impact** staff UI with engagement evidence before collection-development workflow counters.
+- 30 dedicated v0.5 analytics-intelligence assertions.
+
+### Changed
+- Campaign Analytics now leads with title reach/use/utilization and baseline comparison rather than secondary timing indicators.
+- Future follow-up periods display Pending rather than misleading zero values.
+- Multiple promoted copies of one bibliographic record are combined for title-utilization breadth.
+- Comparative Reports now include title use, utilization, baseline/campaign checkouts, change, zero-response and increased-title counts.
+- Workflow smoke uses an isolated temporary campaign and preserves retained campaign 40 evidence.
+
+### Verified
+- Full suite: 5 files / 113 assertions PASS on Koha 25.11.02.
+- Exact v0.5.0 KPZ authenticated upload/upgrade PASS.
+- Dashboard, Promotions, Analytics, Reports, Configuration and Promoted Resource Impact authenticated render PASS.
+- Native Koha ASKED Suggestion workflow and synthetic cleanup PASS.
+- Exact tested KPZ SHA-256: `931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670`.
+- Koha 26.05 runtime validation remains blocked by host disk capacity; no PASS claimed.
+
 ## [0.4.1] - 2026-09-21
 
 ### Changed

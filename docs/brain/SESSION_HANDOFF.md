@@ -1,156 +1,114 @@
 # Session Handoff
 
-**Last updated:** 2026-09-20
-**Active runtime branch:** `feature/v0.3-analytics-engine`
-**Runtime environment:** isolated KTD `promoeng`
-**Current milestone:** v0.3.0 Release Candidate — local technical gates complete; external acceptance pending
+**Last updated:** 2026-09-21
+**Active branch:** `feature/v0.5-analytics-intelligence`
+**Plugin version:** 0.5.0
+**Primary runtime:** isolated KTD `promoeng`, Koha 25.11.02
+**Milestone:** v0.5 Analytics Intelligence — local implementation/runtime closure complete; external visual/forward-compatibility/staging gates remain.
 
-## Verified completed today
+## Why v0.5 exists
 
-- v0.2 Checkpoint 1 security gate is closed:
-  - T-131 invalid CSRF: PASS — HTTP 403, no campaign write.
-  - T-132 catalogue-only staff without plugin tool permission: PASS — normal staff session valid, plugin write denied, no campaign write, original flags restored.
-  - T-133 authenticated API identity without `catalogue`: PASS — HTTP 403 with required permission detail.
-  - T-134 authorized campaign-create smoke: PASS — campaign + audit created, then test data cleaned.
-- Switched local mounted plugin to `feature/v0.2-campaign-read`.
-- Restarted Plack.
-- Created read-view fixtures through the real plugin create workflow.
-- CR-01 through CR-07 all PASS in `promoeng`.
-- No new Plack/intranet template/database errors observed after the suite.
+Real Nairobi pilot screenshots proved two product problems:
 
-## Test fixtures retained for visual review
+1. an active campaign with no end date effectively measured only its start day, making staff think they had to complete the campaign before analytics became useful;
+2. useful evidence existed underneath the plugin, but Dashboard and Resource Impact foregrounded administrative/workflow counters rather than immediately answering whether promoted titles were actually used.
 
-- `READ-ZERO-20260919`
-- `READ-LINKED-20260919`
-- `READ-REGRESSION-20260919`
+The approved v0.5 redesign makes every major analytical surface answer: Reach → Engagement → Impact → Action.
 
-## Human visual result
+## Built
 
-- Promotions list: PASS.
-- Linked-item campaign detail: PASS.
-- Zero-item campaign detail: PASS.
-- Browser logout issue: isolated to a stale/deep plugin login path. User confirmed that logging in through the normal Koha staff homepage prevents logout during navigation. T-131 remains PASS and this is not treated as a CSRF regression.
+- Active campaigns calculate from campaign start through the current/as-of date without forced completion.
+- Future planned end dates are clamped to today while a campaign remains active.
+- Past configured end dates are respected and inconsistent active status produces a warning.
+- Future campaigns are Pending rather than failed.
+- Follow-up windows expose Pending / To date / Complete state and never show future zeroes.
+- Distinct promoted titles (`biblionumber`) are separated from promoted copies/items (`itemnumber`).
+- Added Titles Used, Title Utilization, Increased-use, Zero-response and Repeat-demand title metrics.
+- Added portfolio title/item/event de-duplication.
+- Dashboard, Promotions, Campaign Detail, Campaign Analytics, Promoted Resource Impact and Comparative Reports were redesigned around meaningful promotion-use evidence.
+- Multi-location attribution safeguard remains intact.
+- Promoted Resource Impact keeps acquisitions/workflow counters in a secondary Collection-development signals section.
+- Native Koha Suggestion integration keeps `reason = Book Display Impact`, leaves `patronreason` untouched, and keeps evidence in staff note/audit.
+- Resource Impact sidebar now includes Configuration consistently.
+- Browser smoke diagnostics now identify the exact failed page/marker.
+- Book Display workflow smoke now creates its own temporary campaign and no longer assumes campaign 40 is free of retained recommendations.
 
-## Edit / Update / Archive runtime result
+## Final local verification — PASS
 
-- EA-01 through EA-13: PASS.
-- Edit form prefill: PASS.
-- Transactional update and item reconciliation: PASS.
-- Update/status/archive audit: PASS.
-- Campaign/item soft-delete archive: PASS.
-- Update/archive CSRF rejection: PASS.
-- Dashboard count after archive: PASS.
-- CR-01 through CR-07 regression: PASS.
-- Perl syntax / diff check / runtime logs: PASS.
+On Koha 25.11.02 `promoeng`:
 
-## Human visual acceptance
+- diff check: PASS;
+- shell syntax: PASS;
+- plugin/Analytics/Resource Impact Perl syntax: PASS;
+- schema idempotence: PASS;
+- **5 files / 113 automated assertions: PASS**;
+- exact v0.5.0 KPZ build and ZIP integrity: PASS;
+- exact authenticated KPZ upload/upgrade: PASS;
+- installed plugin version 0.5.0: PASS;
+- seven plugin tables: PASS;
+- authenticated browser render:
+  - Dashboard PASS;
+  - Promotions PASS;
+  - Analytics PASS;
+  - Reports PASS;
+  - Configuration PASS;
+  - Promoted Resource Impact PASS;
+- synthetic decision → native Koha ASKED Suggestion → audit workflow: PASS;
+- synthetic fixture/temp patron/suggestion cleanup: PASS.
 
-PASS. The supplied screenshots confirm:
-- Edit promotion and Archive actions render on detail.
-- linked item and audit history render.
-- Edit form is correctly pre-filled, including linked barcode.
-- normal staff login path keeps the session stable.
+Current exact KPZ checksum:
 
-Final post-visual EA/CR regression also passed.
+`931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670`
 
-## Edit / Update / Archive closure
+## 26.05 forward compatibility
 
-- Human visual acceptance: PASS.
-- Final EA/CR regression: PASS.
-- PR #2 merged into feature/v0.2-campaign-crud as commit 82a69d4.
+Code/dependency review remains favorable, but **do not claim a Koha 26.05 runtime PASS**.
 
-## Universal Configuration + Multi-location closure
+A fresh isolated `promoeng2605` image pull was attempted after C: had about 16 GB free. Docker layer expansion reduced free space to about 12 GB and then 11 GB before completion. The pull was stopped to protect the workstation.
 
-- CFG-01..CFG-07, ML-01..ML-08, CR-01..CR-07 and EA lifecycle/security/archive-count suites: PASS.
-- Campaign Detail visual acceptance for campaign 40: PASS.
-- Edit Promotion visual acceptance: PASS; Main Entrance, First Floor and Digital Screen are all pre-selected.
-- Post-readability-change ML/CR regression: PASS.
-- Current runtime sanity: plugin Perl syntax OK; isolated `promoeng` containers Up; intranet HTTP 200.
-- Runtime DB evidence: campaign 40 active with exactly three active normalized location links.
-- Draft PR #3 is cleared for merge.
+- no completed 26.05 image;
+- no `promoeng2605` containers;
+- primary `promoeng` untouched;
+- no global Docker cleanup performed.
 
-## Analytics Engine checkpoint
+The previous 12–15 GB recommendation is superseded. Require **20–25 GB safe Windows C: free space** before retrying 26.05.
 
-- PR #3 merged into `feature/v0.2-campaign-crud` as `17915cd`.
-- Active branch: `feature/v0.3-analytics-engine`.
-- DEC-020 and `ANALYTICS_SPEC.md` define the authoritative checkout source, formulas, windows, attribution and privacy rules.
-- Shared `Analytics.pm` service implemented.
-- Koha-native Analytics page and navigation implemented.
-- Campaign 40 no-circulation smoke: PASS.
-- Synthetic transaction suite: 23 assertions PASS for AN-01..AN-10 coverage; all fixtures rolled back and database cleanup verified.
-- Main plugin and Analytics module syntax: PASS.
-- Plack restarted successfully.
+## External gates still open
 
-## Analytics navigation visual finding and fix
+- User human visual review of v0.5.
+- Koha 26.05 runtime matrix after safe disk headroom exists.
+- Institutional non-production staging.
+- Explicit production backup/change-window/release authorization.
 
-- Direct campaign 40 Analytics page: visual layout and calculated zero-circulation state PASS.
-- Dashboard > Analytics initially opened a blank campaign state; Calculate appeared ineffective while no campaign was selected.
-- Fixed server-side default selection so a missing campaign ID automatically selects and calculates the newest active campaign.
-- Added `t/analytics_navigation.t`; five default/manual/empty-list assertions PASS.
-- Combined Analytics suite: 28 assertions PASS; plugin syntax and Plack restart PASS.
+These are external/environmental release gates, not unfinished v0.5 local coding tasks.
 
-## v0.3.0 weekend release-candidate result
+## Important preserved development data
 
-- AN-01..AN-16 are implemented and runtime-tested.
-- Combined Analytics suite: 55 assertions PASS.
-- Professional academic Dashboard, Analytics, Promotions, Detail, Create, Edit, Configuration and Reports styling is implemented.
-- Comparative Reports and CSV/JSON exports are implemented.
-- Read-only authenticated campaign Analytics API is implemented through the shared service.
-- Promotions search/status filtering is implemented.
-- Version is 0.3.0.
-- KPZ release candidate, checksum and extracted-artifact validation: PASS.
-- Detailed user review path: `docs/brain/MONDAY_ACCEPTANCE.md`.
+Campaign 40 remains a retained multi-location visual/analytics fixture. It already had a submitted recommendation. The revised workflow smoke deliberately uses a synthetic campaign so it does not delete or overwrite this retained evidence.
+
+## Project Brain references
+
+Read in this order before further work:
+
+1. `AGENTS.md`
+2. `docs/brain/PROJECT_OVERVIEW.md`
+3. `docs/brain/CURRENT_STATE.md`
+4. `docs/brain/SESSION_HANDOFF.md`
+5. `docs/brain/ISSUES.md`
+6. `docs/brain/ROADMAP.md`
+7. `docs/brain/DECISIONS.md`
+8. `docs/brain/ANALYTICS_SPEC.md`
+9. `docs/brain/V0.5_ANALYTICS_INTELLIGENCE.md`
+10. `docs/brain/TESTING.md`
+11. `.project-memory/state.yaml`
+12. current Git/runtime state
 
 ## Exact next action
 
-Perform human visual acceptance of Dashboard, filtered Promotions, campaign 40 Analytics, Reports and downloads. Then test the exact KPZ on Koha 26.05 and an institutional non-production staging copy before PR merge or any production authorization. Local clean-install, upgrade and database rollback rehearsals are complete; production backup ownership and maintenance window remain institutional decisions.
+The software is ready for the user's visual review. Do not make additional metric changes merely for novelty. Address only evidence-based visual/logic findings from the review, then retest the affected surface plus full regression before any package replacement.
 
-## Visual URL
+After sufficient disk headroom is available, create a **dedicated disposable** Koha 26.05 project and run the matrix in `docs/UPGRADE_SURVIVAL_AUDIT.md`; do not modify `promoeng`.
 
-`http://promoeng-intra.localhost/cgi-bin/koha/plugins/run.pl?class=Koha%3A%3APlugin%3A%3ACom%3A%3AAJSN%3A%3APromotionEngagement&method=tool&action=analytics&campaign_id=40`
+## Continuation prompt
 
-Log in through the normal Koha staff homepage first if required.
-
-## Post-release-candidate technical gates
-
-- Clean Koha 25.11 KPZ upload/install through the authenticated Koha handler: PASS.
-- Six plugin tables and version 0.3.0 listing without ERRORS: PASS.
-- Primary clean-install staff pages: PASS.
-- REST authentication boundary: anonymous HTTP 401; authenticated HTTP 200: PASS.
-- Disable/re-enable data preservation: PASS.
-- Approved v0.2 commit `a3e2fe4` to exact v0.3 KPZ upgrade: PASS.
-- Repeated migration idempotence and v0.2 data preservation: PASS.
-- Koha database dump/delete/restore rehearsal: PASS.
-- Disposable `promoengclean` and `promoengupgrade` projects removed; primary `promoeng` untouched.
-- Full evidence: `docs/brain/V0.3_RELEASE_GATE_REPORT.md`.
-
-## Display-impact refinement before final visual check
-
-- AN-16 display-impact interpretation: implemented.
-- Displayed-title before/during/after response table: implemented.
-- Dashboard evidence pathway and per-campaign View impact actions: implemented.
-- Full Analytics suite: 55 assertions PASS.
-- Campaign 40 service and server-side UI render smoke: PASS.
-- Human visual confirmation of the refined Dashboard and Campaign 40 Analytics remains the immediate next action.
-
-## 2026-09-20 — Book Display Impact implementation
-
-- User approved all ten implementation/documentation points and fixed the product name as **Book Display Impact**.
-- Active branch: `feature/v0.4-book-display-impact`.
-- Plugin version: 0.4.0.
-- Module remains inside Koha Promotion & Engagement.
-- Added title aggregation, circulation/copy/hold evidence, priority, evidence grade and Koha HoldRatioDefault-aware quantity.
-- Added audited approval/rejection, immutable submitted state and evidence snapshots.
-- Added permission-checked transactional handoff to native Koha ASKED Suggestions.
-- BDI-01..BDI-17 and complete 72 assertions: PASS.
-- Authenticated render smoke and full approve → submit → verify → cleanup workflow: PASS.
-- Added installation/user SOPs, Monday checklist, conference/video plan, public-release/legal guide and verified screenshot.
-- v0.4 KPZ structure and checksum: PASS.
-- Immediate gate: user visual acceptance, followed by Koha 26.05 and institutional staging.
-
-## v0.4 checkpoint commit
-
-Implementation, tests, screenshot and documentation were committed as `1e53813`
-and pushed to `origin/feature/v0.4-book-display-impact`. The working tree must
-remain clean after the state-only follow-up commit. Human visual acceptance is
-the only immediate user gate; Koha 26.05 and institutional staging remain external.
+> Continue Koha Promotion & Engagement from the repository Project Brain. Read `AGENTS.md`, `SESSION_HANDOFF.md`, `SESSION_LOG.md`, current state/YAML, inspect Git/KTD runtime, and continue from the exact verified next action without relying on old chat history.

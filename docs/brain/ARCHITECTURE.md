@@ -182,26 +182,29 @@ A future campaign may promote an electronic resource, author, collection, theme,
 flowchart LR
     WSL[Windows WSL Debian] --> Git[Local Git repo]
     WSL --> Docker[Docker/KTD]
-    Docker --> Koha[kohadev-koha-1]
-    Docker --> DB[kohadev-db-1]
-    Docker --> Cache[kohadev-memcached-1]
-    Browser --> Host[kohadev-intra.localhost]
+    Docker --> Koha[promoeng-koha-1]
+    Docker --> DB[promoeng-db-1]
+    Docker --> Cache[promoeng-memcached-1]
+    Browser --> Host[promoeng-intra.localhost]
     Host --> Koha
     Git -. single-plugin bind mount .-> Koha
 ```
 
-- Active local instance: `kohadev`.
-- Primary image selector used: `KOHA_IMAGE=25.11`.
+- Primary active local instance: `promoeng`.
+- Legacy/shared `kohadev` is not used for current feature verification.
+- Primary verified Koha runtime: 25.11.02.
 - Plugin source is mounted using KTD `--single-plugin` during feature development.
-- A separate disposable `kpztest` instance was historically used for clean KPZ acceptance testing and was later removed.
+- Exact candidate KPZ packages are also uploaded through Koha's normal plugin uploader for release-gate testing.
+- Historical disposable instances proved clean install/upgrade/rollback for earlier milestones.
+- Koha 26.05 runtime remains blocked by host disk capacity; a 2026-09-21 pull was stopped safely before a container/image was completed.
 
 ### Staging/production
 
-Planned lifecycle:
+Required lifecycle:
 
-`source -> static checks -> KTD 25.11 -> KTD 26.05 -> AJSN staging -> versioned KPZ + checksum -> production`
+`source -> static checks -> isolated KTD 25.11 -> exact KPZ -> KTD 26.05 -> institutional staging -> approved package/checksum + backup/rollback -> production`
 
-No staging or production deployment is currently verified.
+v0.5 is locally verified on Koha 25.11.02. Institutional staging and formal v0.5 production deployment are not yet verified.
 
 ## 11. Legacy/superseded architecture
 
@@ -219,9 +222,20 @@ No staging or production deployment is currently verified.
 6. Keep analytics logic shared across interfaces.
 7. Keep institution-specific vocabulary configurable.
 8. Treat patron-level analytics as restricted data, not a public dashboard feature.
-## Book Display Impact boundary
+## Promoted Resource Impact / Book Display Impact boundary
 
-The module reads campaign links from plugin tables and live catalogue, circulation,
-item and hold evidence from Koha. It persists only review state and an evidence
-snapshot. Approved handoff uses `Koha::Suggestion`; it never writes acquisition
-orders or patches Koha core. UI and runtime tests use the same calculation service.
+The staff-facing v0.5 page is **Promoted Resource Impact**. It can analyse any
+item-linked promotion, not only a physical display.
+
+The module reads campaign links from plugin tables and catalogue/circulation/item/
+hold evidence from Koha. Engagement calculations come from the shared Analytics
+service; the module does not maintain separate KPI SQL.
+
+It persists only plugin review state/evidence snapshots. Approved handoff uses
+`Koha::Suggestion`; it never creates acquisition orders or patches Koha core.
+
+The internal route `book_display_impact` and native Suggestion management reason
+`Book Display Impact` remain stable for backward compatibility.
+
+Primary staff-facing evidence is title engagement/utilization. Holds, priority,
+approval and Sent-to-Koha are secondary collection-development workflow signals.

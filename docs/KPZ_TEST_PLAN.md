@@ -1,96 +1,177 @@
-# KPZ Packaging and Clean-Install Test Plan
+# KPZ Packaging and Installation Test Plan
 
-This document defines the acceptance test for distributing Promotion & Engagement as a normal Koha plugin package rather than as a development bind mount.
+This document defines the acceptance test for distributing Promotion & Engagement as a normal Koha Plugin Zip rather than as a development source bind mount.
 
 ## Goal
 
-Prove that a user can obtain a versioned `.kpz` file, upload it through Koha Administration, and use the plugin without Git, Docker bind mounts, or manual source copying on the Koha server.
+Prove that an exact versioned .kpz file can be uploaded through Koha Administration, installed/upgraded normally, preserve plugin data, and render the major plugin surfaces without Git/manual file copying on the Koha server.
 
-Koha calls these archives **Koha Plugin Zip (KPZ)** packages. The archive root must contain the `Koha/` namespace tree used by the plugin.
+Koha Plugin Zip archives must have the Koha/ namespace at archive root.
 
-## Build
+## Version-aware build
 
-From the repository root on the release-candidate branch:
+From the repository root:
 
-```bash
-python3 scripts/build_kpz.py
-```
+    python3 scripts/build_kpz.py
 
-Expected outputs:
+The builder reads the authoritative plugin $VERSION and creates:
 
-```text
-dist/PromotionEngagement-v0.3.0.kpz
-dist/PromotionEngagement-v0.3.0.kpz.sha256
-```
+    dist/PromotionEngagement-v<VERSION>.kpz
+    dist/PromotionEngagement-v<VERSION>.kpz.sha256
 
-The builder packages only Git-tracked files under `Koha/` and verifies the required plugin module, templates, OpenAPI definition, and API controller are present.
+Do not hard-code a historical version in this procedure.
 
-Inspect the archive before testing:
+The builder packages only Git-tracked files below Koha/. New plugin source/template files must therefore be tracked before the final release build.
 
-```bash
-python3 -m zipfile -l dist/PromotionEngagement-v0.3.0.kpz
-cat dist/PromotionEngagement-v0.3.0.kpz.sha256
-```
+## Archive integrity
 
-The listing must begin with paths under `Koha/Plugin/Com/AJSN/...`; there must be no repository wrapper directory, `.git`, `.env`, logs, editor files, or documentation-only source files.
+Run:
 
-## Clean-install environment
+    python3 -m zipfile -t dist/PromotionEngagement-v<VERSION>.kpz
+    python3 -m zipfile -l dist/PromotionEngagement-v<VERSION>.kpz
+    sha256sum dist/PromotionEngagement-v<VERSION>.kpz
 
-The acceptance test must use a clean Koha test instance that is **not** started with `--single-plugin` for this repository. The purpose is to exercise Koha's normal plugin upload and installation path.
+Requirements:
 
-Before uploading, confirm the Koha instance has:
+- ZIP test returns success;
+- paths begin under Koha/Plugin/Com/AJSN/;
+- no repository wrapper directory;
+- no .git, .env, logs, temporary scripts or credentials;
+- main plugin module, templates, OpenAPI file and API/service modules are present;
+- checksum is recorded with the release/deployment evidence.
+
+## Test environments
+
+### Development upgrade smoke
+
+An isolated KTD instance may already have an earlier plugin candidate installed. Upload the exact candidate KPZ through Koha and verify normal upgrade behavior.
+
+### Clean-install gate
+
+Before release, the exact artifact should also be tested in a clean Koha instance that is not source-mounted with --single-plugin.
+
+The clean environment must have:
 
 - plugin support enabled;
-- staff-interface plugin upload allowed for the test instance;
-- a writable plugin directory;
-- a staff user with permission to administer plugins.
+- plugin upload allowed;
+- writable plugin directory;
+- authorized staff user.
 
-## Installation acceptance test
+## Installation/upgrade acceptance
 
-1. Open **Koha Administration > Plugins**.
-2. Click **Upload plugin**.
-3. Select the versioned `.kpz` file.
-4. Upload/install it.
-5. Restart/refresh Plack if required by the test environment.
-6. Confirm **Promotion & Engagement** is listed as version `0.3.0`, enabled, and exposes Run tool / Configure / Disable / Uninstall actions.
+1. Open Koha Administration → Manage plugins.
+2. Click Upload plugin.
+3. Select the exact versioned KPZ.
+4. Upload/confirm installation.
+5. Restart Plack if required.
+6. Confirm Promotion & Engagement displays the candidate version with no load error.
+7. Confirm all expected plugin tables exist.
+8. Run schema/install a second time where the test plan permits; historical data/counts must remain stable.
 
-## Functional smoke test after KPZ install
+## v0.5 functional smoke
 
-The clean KPZ installation passes only when all of these succeed:
+For v0.5.0 the package passes only when these surfaces render through an authenticated normal Koha staff session:
 
-- Plugin loads without an ERRORS badge.
-- Dashboard renders.
-- Configure page renders.
-- New Promotion foundation screen renders.
-- Six plugin tables are created:
-  - `plugin_ajsn_promo_campaigns`
-  - `plugin_ajsn_promo_campaign_locations`
-  - `plugin_ajsn_promo_items`
-  - `plugin_ajsn_promo_audit`
-  - `plugin_ajsn_promo_settings`
-  - `plugin_ajsn_promo_vocab_values`
-- Authenticated `GET /api/v1/contrib/ajsn_promotion/health` returns status `ok`, plugin name, and version `0.3.0`.
-- The same endpoint fails authentication when requested without a valid Koha login/API authentication.
-- Disable and re-enable preserve plugin data.
+- Dashboard
+- Promotions
+- Campaign Analytics
+- Comparative Reports
+- Configuration
+- Promoted Resource Impact
 
-## Upgrade and uninstall safety
+The browser response must not contain Template process failure or Internal Server Error.
 
-Uninstall remains intentionally non-destructive to plugin-owned historical tables. Upgrade testing must cover migration from the preceding approved version and run migrations repeatedly to confirm idempotence. An explicit data-purge path remains separately gated if one is introduced.
+Also verify:
+
+- active campaign calculates through current date without forced completion;
+- future follow-up windows display Pending;
+- Promoted Titles differs correctly from linked copies/items where multiple copies share a biblio;
+- title utilization is present;
+- Resource Impact shows engagement KPIs before collection-development workflow counters.
+
+## Database expectations
+
+Current schema consists of seven namespaced plugin tables:
+
+- plugin_ajsn_promo_campaigns
+- plugin_ajsn_promo_campaign_locations
+- plugin_ajsn_promo_items
+- plugin_ajsn_promo_audit
+- plugin_ajsn_promo_settings
+- plugin_ajsn_promo_vocab_values
+- plugin_ajsn_promo_recommendations
+
+Upgrade/install must not drop retained historical data.
+
+## Native Suggestion workflow smoke
+
+Use only synthetic test data.
+
+1. Create a temporary campaign linked to a known Koha item.
+2. Open Promoted Resource Impact.
+3. Approve a recommendation.
+4. Submit it to native Koha Suggestions.
+5. Verify:
+   - ASKED/Pending state;
+   - quantity;
+   - biblionumber;
+   - Management reason Book Display Impact;
+   - patronreason is not forged/overwritten;
+   - evidence staff note;
+   - plugin audit record.
+6. Delete only the synthetic Koha Suggestion and temporary plugin fixture.
+7. Verify no residual temporary campaign/patron/suggestion remains.
+
+Do not assume a retained visual campaign has no recommendation and do not clean up real/retained evidence as part of a smoke test.
+
+## API/authentication gate
+
+Where REST is included in the release matrix:
+
+- authorized authenticated health request returns 200/status ok/current version;
+- anonymous request is rejected;
+- authenticated under-permission identity is rejected appropriately.
+
+## Disable/re-enable and rollback
+
+- Disable/re-enable must preserve plugin data.
+- Uninstall remains intentionally non-destructive in current design.
+- Upgrade from the preceding approved package must preserve historical rows.
+- Schema routines must be idempotent.
+- Keep the previous approved KPZ/checksum and database backup for rollback.
+- Do not use blind schema downgrade or manual table deletion.
+
+## Current v0.5.0 execution record — 2026-09-21
+
+Candidate:
+
+    PromotionEngagement-v0.5.0.kpz
+
+SHA-256:
+
+    931e79ec2a9bf210f6a35f8cdd0f858cf76c9d4f77ccf121cf692f92dc86d670
+
+Koha 25.11.02 isolated promoeng:
+
+- build: PASS;
+- ZIP integrity: PASS;
+- 16 packaged Koha files: PASS;
+- authenticated exact-KPZ upload/upgrade: PASS;
+- version 0.5.0: PASS;
+- seven tables: PASS;
+- authenticated Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact browser matrix: PASS;
+- native Suggestion synthetic workflow: PASS;
+- synthetic cleanup: PASS;
+- full automated suite: 5 files / 113 assertions PASS.
+
+A historical clean-install exact-package PASS also exists for v0.4.0, and v0.3.0 had clean-install/upgrade/rollback rehearsal. The v0.5.0 exact package has passed authenticated installation/upgrade on the isolated primary runtime; a separate institutional staging gate remains required.
+
+## Forward Koha gate
+
+Koha 26.05 runtime validation is still blocked by host disk capacity. A 2026-09-21 image pull was stopped when Windows C: free space fell to about 11 GB before completion.
+
+Do not retry until at least 20–25 GB safe C: free space is available. Do not perform global Docker pruning or delete unrelated project resources merely to force the test.
 
 ## Production gate
 
-A KPZ must not be promoted to an AJSN production Koha instance until the exact built artifact has passed this clean-install test and its SHA-256 checksum has been recorded with the release.
-## v0.3.0 execution record — 2026-09-20
-
-- Clean Koha 25.11 project without `--single-plugin`: PASS.
-- Authenticated Koha KPZ upload: PASS.
-- Version 0.3.0 listing without ERRORS badge: PASS.
-- Six plugin tables: PASS.
-- Dashboard, Promotions, Analytics, Reports, Configuration and New Promotion rendering: PASS.
-- Authenticated health HTTP 200 / anonymous health HTTP 401: PASS.
-- Disable/re-enable data preservation: PASS.
-- v0.2.0 to v0.3.0 upgrade preservation: PASS.
-- Repeated migration idempotence: PASS.
-- Koha database dump/delete/restore rollback: PASS.
-
-Full evidence and remaining external gates are recorded in `docs/brain/V0.3_RELEASE_GATE_REPORT.md`.
+An exact package must not be declared production-ready solely because local KTD passes. Institutional staging, supported target-Koha validation, restorable backup/rollback ownership and explicit change authorization remain required.

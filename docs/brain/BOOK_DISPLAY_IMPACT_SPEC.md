@@ -1,55 +1,182 @@
-# Book Display Impact Specification
+# Book Display Impact / Promoted Resource Impact Specification
 
-**Status:** implemented on `feature/v0.4-book-display-impact`  
-**Module:** part of Koha Promotion & Engagement; not a separate plugin  
-**Specification version:** 1.0.0
+**Status:** implemented and expanded in v0.5.0
+**Module:** part of Koha Promotion & Engagement; not a separate plugin
+**Specification version:** 1.1.0
 
-## Decision
+## Naming
 
-The user-approved product name is **Book Display Impact**. The module derives
-title-level evidence from existing campaign links, Koha checkout history, current
-hold queues and serviceable copy counts. It never creates an acquisition order.
+The v0.4 acquisition-support workflow was approved as **Book Display Impact**.
+
+v0.5 generalizes the staff-facing analytical page to **Promoted Resource Impact** because the same Koha title evidence can apply to:
+
+- physical displays;
+- email campaigns;
+- recommendations;
+- digital promotion;
+- other item-linked promotion types.
+
+For backward compatibility and audit continuity:
+
+- internal action/route remains `book_display_impact`;
+- native Koha Suggestion management reason remains `Book Display Impact`.
+
+## Purpose
+
+The module now answers two separate questions in the correct order.
+
+### Engagement
+
+Did users actually borrow the promoted titles?
+
+Primary evidence:
+
+- Promoted titles;
+- Titles borrowed;
+- Title utilization;
+- Campaign checkouts;
+- Baseline checkouts;
+- Increased-use titles;
+- Zero-response titles.
+
+### Collection development
+
+Does current demand/access pressure justify professional additional-copy review?
+
+Secondary evidence:
+
+- serviceable/currently available copies;
+- active holds;
+- holds per serviceable copy;
+- priority/evidence grade;
+- suggested quantity aligned to Koha HoldRatioDefault;
+- librarian approval/rejection;
+- native Koha Suggestion submission.
+
+The module never creates an acquisition order.
 
 ## Ownership and boundaries
 
-Koha remains authoritative for biblios, items, issues, holds, patrons, branches
-and Suggestions. The plugin owns one recommendation/decision table and its audit
-records. No Koha core schema or source file is modified.
+Koha remains authoritative for:
+
+- biblios;
+- items;
+- issues/old_issues;
+- holds;
+- patrons;
+- branches;
+- Suggestions.
+
+The plugin owns recommendation/decision and audit records in namespaced plugin tables. No Koha core source/schema is modified.
+
+## Analytics source
+
+Promoted Resource Impact reuses the shared Analytics 1.1 service rather than implementing separate circulation formulas.
+
+Title rows aggregate linked item barcodes by distinct `biblionumber`.
+
+The campaign-period semantics are therefore identical to Campaign Analytics:
+
+- active started campaign can measure through today;
+- Baseline has equal duration;
+- future follow-up windows are Pending;
+- incomplete 60-day follow-up cannot be treated as final sustained evidence.
+
+## Summary KPIs
+
+The first row must show engagement before acquisitions workflow:
+
+1. Promoted titles;
+2. Titles borrowed;
+3. Title utilization;
+4. Campaign checkouts, with baseline context;
+5. Increased-use titles;
+6. Zero-response titles.
+
+High Priority / Active Holds / Approved / Sent to Koha appear in a secondary Collection-development signals section.
+
+## Title evidence row
+
+Each title row may include:
+
+- bibliographic identity;
+- promoted barcodes/copies;
+- baseline checkout count;
+- during-promotion checkout count;
+- 60-day follow-up count/state;
+- total/serviceable/available copies;
+- active holds;
+- holds per serviceable copy;
+- priority/evidence grade;
+- recommendation reason;
+- suggested additional-copy quantity;
+- current librarian decision.
 
 ## Workflow
 
-Candidate → librarian review → approved/rejected → explicit submission →
-native Koha ASKED suggestion → normal Koha acquisitions review and basket order.
+Candidate → librarian review → approved/rejected → explicit submission → native Koha ASKED suggestion → normal Koha acquisitions review/order workflow.
 
-Submission requires Koha `suggestions_create` or `suggestions_manage`.
-Vendor, budget, fund, price, currency and final order remain native Koha decisions.
-## Evidence model
+Submission requires the applicable Koha Suggestions permission.
 
-Rows aggregate displayed item barcodes by biblionumber. Each row includes:
+Vendor, budget/fund, price, currency, basket and final order remain native Koha decisions.
 
-- baseline, during-display and 60-day follow-up checkouts;
-- displayed barcodes and bibliographic identity;
-- total, serviceable and currently available copies;
-- current active holds and holds per serviceable copy;
-- priority and evidence grade;
-- a quantity proposal aligned to Koha `HoldRatioDefault`.
+## Koha Suggestion field policy
 
-The interface states that this evidence supports judgment but does not prove
-physical views or sole causation.
+The plugin creates:
+
+- STATUS = ASKED;
+- biblionumber/title/author/quantity/branch;
+- management `reason = Book Display Impact`;
+- evidence context in staff note.
+
+It does **not** fabricate or overwrite Koha's patron-facing `patronreason` authorised-value field.
 
 ## Persistence and safety
 
-`plugin_ajsn_promo_recommendations` has one row per campaign/biblionumber.
-It stores decision, quantity, note, evidence snapshot, reviewer, timestamps and
-the native Koha suggestion identifier. Submitted rows cannot be overwritten
-through the normal workflow. Suggestion creation, plugin state update and audit
-write are transactional.
+`plugin_ajsn_promo_recommendations` keeps one decision row per campaign/biblionumber.
 
-## Verified tests
+It stores:
 
-- BDI-01..BDI-17: calculation, aggregation, holds, copies, priority,
-  decision persistence and native Koha Suggestion integration.
-- Complete Perl suite: 72 assertions PASS.
-- Authenticated browser render smoke: PASS.
-- End-to-end approve → submit → Koha ASKED suggestion → audit → cleanup: PASS.
-- Existing analytics regressions remain green.
+- decision status;
+- recommended quantity;
+- reviewer note;
+- evidence snapshot;
+- reviewer;
+- timestamps;
+- native Koha suggestion ID.
+
+Submitted rows cannot be overwritten through the normal workflow.
+
+Suggestion creation, plugin state update and audit write remain transactional.
+
+## Test-safety rule
+
+Workflow smoke tests must never assume a retained development campaign is empty.
+
+The v0.5 runtime smoke creates a synthetic campaign, runs approval → Suggestion → audit verification, then deletes only the synthetic:
+
+- suggestion;
+- recommendation;
+- audit;
+- item link;
+- campaign;
+- temporary test patron.
+
+Retained campaign 40 evidence remains untouched.
+
+## Responsible interpretation
+
+Checkout/hold evidence indicates borrowing response and access pressure.
+
+The plugin may say circulation increased during a promotion. It must not say the promotion definitely caused every loan or that a physical display was seen by a particular borrower.
+
+## Current verified tests
+
+On Koha 25.11.02:
+
+- BDI-01..BDI-19: PASS;
+- v0.5 Resource Impact title/use/utilization tests: PASS;
+- full suite: 5 files / 113 assertions PASS;
+- authenticated Resource Impact render: PASS;
+- exact v0.5.0 KPZ install/upgrade: PASS;
+- synthetic approve → native ASKED Suggestion → audit → cleanup: PASS.
