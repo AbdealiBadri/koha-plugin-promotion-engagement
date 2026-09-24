@@ -5,37 +5,39 @@ project:
   status: "development-candidate"
 
 current:
-  milestone: "v0.6 Usability & Visualization"
-  implementation_branch: "feature/v0.6-usability-visualization"
-  implementation_commit: "1f0c993"
-  objective: "Professional searchable, visual, exportable and beginner-guided promotion analytics without changing the validated v0.5 analytical formulas"
-  last_verified: "2026-09-23"
-  next_action: "User visual/real-data acceptance of exact v0.6.0 KPZ"
+  milestone: "v0.6.1 Reliability Bug-Fix Audit"
+  implementation_branch: "feature/v0.6.1-bugfix-audit"
+  implementation_commit: "1931d25"
+  objective: "Preserve v0.6 behavior while eliminating reliability, analytics, concurrency, validation and export defects"
+  last_verified: "2026-09-24"
+  next_action: "User upgrade/testing of exact v0.6.1 KPZ"
 
 environment:
   local:
     platform: "Windows + WSL Debian + Docker/KTD"
     primary_ktd_instance: "promoeng"
     koha_target: "25.11.02"
-    state: "promoeng-healthy-v0.6"
+    state: "promoeng-healthy-v0.6.1"
     evidence:
-      - "6 files / 163 assertions pass"
+      - "7 files / 213 assertions pass"
+      - "50 dedicated bug-audit assertions pass"
       - "schema idempotence pass"
-      - "exact v0.6.0 KPZ authenticated upgrade pass"
-      - "seven plugin table row counts preserved"
+      - "exact v0.6.1 KPZ authenticated upgrade pass"
+      - "seven plugin tables and observed row counts preserved"
       - "nine-page authenticated browser matrix pass"
+      - "server render smoke pass"
       - "native Koha Suggestion synthetic workflow pass"
   forward_koha:
     target: "26.05.x"
     status: "runtime-blocked-host-disk"
     retry_requirement: "20-25 GB safe Windows C: free space"
   production:
-    status: "user-testing-v0.6"
+    status: "user-testing-v0.6.1"
 
 runtime:
-  plugin_version: "0.6.0"
+  plugin_version: "0.6.1"
   analytics_spec_version: "1.1.0"
-  exact_kpz_sha256: "6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28"
+  exact_kpz_sha256: "da4a68cb125bb22ee9806718561eafb4d368495f40e5063cc2fd3a406a117afc"
 
 secrets:
   stored_in_project_memory: false

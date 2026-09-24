@@ -1,51 +1,43 @@
 # Session Handoff
 
-**Last updated:** 2026-09-23
-**Branch:** `feature/v0.6-usability-visualization`
-**Implementation commit:** `1f0c993`
-**Plugin version:** 0.6.0
+**Last updated:** 2026-09-24
+**Branch:** `feature/v0.6.1-bugfix-audit`
+**Implementation commit:** `1931d25`
+**Plugin version:** 0.6.1
 **Primary runtime:** `promoeng` / Koha 25.11.02
-**Status:** READY FOR USER TESTING
+**Status:** CLEAN BUG-FIX CANDIDATE / READY FOR USER TESTING
 
-## Verified v0.6 package
+## Exact package
 
-`PromotionEngagement-v0.6.0.kpz`
+`PromotionEngagement-v0.6.1.kpz`
 
 SHA-256:
 
-`6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28`
+`da4a68cb125bb22ee9806718561eafb4d368495f40e5063cc2fd3a406a117afc`
 
-## Verification summary
+## Verification
 
-- 6 test files / 163 assertions PASS.
-- Schema idempotence PASS.
-- Exact authenticated KPZ upload/upgrade PASS.
-- Seven plugin-table row counts preserved by upgrade smoke.
-- Authenticated browser rendering PASS on all major workflow pages.
-- Native Koha Suggestion synthetic workflow PASS and cleaned up.
+- 7 files / 213 assertions PASS.
+- 50 dedicated v0.6.1 bug-audit assertions PASS.
+- Syntax/diff/schema idempotence PASS.
+- Exact authenticated KPZ upgrade PASS.
+- Seven plugin tables and observed row counts preserved.
+- Authenticated Dashboard/Promotions/Analytics/Reports/Configuration/Resource Impact/Detail/Edit/New browser matrix PASS.
+- Server-side render smoke PASS.
+- Native Koha Suggestion workflow and cleanup PASS.
 
-## v0.6 scope
+## Important scope note
 
-- searchable/multi-select campaign discovery;
-- searchable reusable-vocabulary dropdowns;
-- global table search/filter/sort/export behavior;
-- Titles Issued / Borrowed terminology;
-- Titles with Increased Issues terminology;
-- KPI drill-downs;
-- Resource Impact green/red evidence cues and improved collection-development presentation;
-- Campaign Analytics and Reports charts, data labels, Table View and JPEG download;
-- simple page-specific How to Use guidance;
-- detailed Configuration guidance for global Koha users;
-- simple dashboard evidence-cycle explanations.
+No new UI/product feature was added in v0.6.1. It is a reliability/data-integrity correction release for the already-reviewed v0.6 interface.
 
-## External limitation
+## Forward compatibility
 
-Koha 26.05 runtime has not passed because the local Windows/WSL Docker host needs 20–25 GB safe free C: space before another image pull. Do not infer 26.05 compatibility from the 25.11 PASS.
+Koha 26.05 runtime remains unverified due host disk capacity. Do not state 26.05 runtime compatibility.
 
 ## Exact next action
 
-User visual/real-data testing of v0.6.0. Address only evidence-based findings, rerun affected tests plus full regression, then issue a replacement package only if required.
+User upgrades from v0.6.0 to exact v0.6.1 KPZ and checks existing live data. Existing plugin tables/history are designed to remain in place.
 
 ## Continuation prompt
 
-> Continue Koha Promotion & Engagement from the repository Project Brain. Read `AGENTS.md`, `CURRENT_STATE.md`, `SESSION_HANDOFF.md`, `V0.6_USABILITY_VISUALIZATION.md`, `TESTING.md`, state YAML, then inspect Git/runtime and continue from the exact verified next action.
+> Continue Koha Promotion & Engagement from the Project Brain. Read AGENTS.md, CURRENT_STATE.md, SESSION_HANDOFF.md, V0.6.1_BUGFIX_AUDIT.md, TESTING.md and state YAML, inspect Git/runtime, then continue from the exact verified next action.

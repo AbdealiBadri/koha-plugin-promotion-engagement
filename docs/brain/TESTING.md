@@ -449,3 +449,25 @@ Do not retry until at least 20–25 GB safe Windows C: free space is available.
 - Page-specific How to Use coverage verified.
 - Synthetic approve → native Koha ASKED Suggestion workflow PASS; temporary fixture cleanup PASS.
 - Exact tested SHA-256: 6ca98215bcce431f7877633e3af45aa0aff8024e87c4411bd55769862c25ed28.
+
+
+## v0.6.1 Reliability Bug-Fix Audit — 2026-09-24
+
+- Static diff check: PASS.
+- Shell syntax: PASS.
+- PromotionEngagement.pm syntax: PASS.
+- Analytics.pm syntax: PASS.
+- BookDisplayImpact.pm syntax: PASS.
+- Schema idempotence: PASS.
+- Full regression: **7 files / 213 assertions / PASS**.
+- Dedicated v0.6.1 bug audit: **50 assertions / PASS**.
+- Exact `PromotionEngagement-v0.6.1.kpz` build: PASS.
+- ZIP integrity: PASS.
+- Exact authenticated KPZ upgrade: PASS.
+- Seven plugin tables preserved.
+- Observed plugin row counts before/after exact upgrade: `6|5|16|0|23|3|1` unchanged.
+- Authenticated browser matrix: nine major pages PASS.
+- Server-side render smoke: PASS.
+- Native Koha ASKED Suggestion workflow: PASS.
+- Synthetic workflow campaign/suggestion cleanup: PASS.
+- Exact SHA-256: `da4a68cb125bb22ee9806718561eafb4d368495f40e5063cc2fd3a406a117afc`.

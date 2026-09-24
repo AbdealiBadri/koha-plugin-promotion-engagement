@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.6.1] - 2026-09-24
+
+### Fixed
+- Scheduled/future campaigns no longer distort measured portfolio title-utilization and zero-response KPIs.
+- Recommendation decision/audit and native Koha Suggestion submission are concurrency-safe and transactional.
+- CSV exports neutralize spreadsheet formulas.
+- Campaign/report dates use real calendar validation.
+- Open active campaigns overlap report date filters through today, matching Analytics semantics.
+- Historical language/audience values remain editable without silent rewriting; forged new values are rejected.
+- Analytics and Resource Impact campaign selectors are no longer silently capped at 200 campaigns.
+- KPI table highlighting works across all filtered DataTable pages.
+- Decimal hold-ratio copy recommendations use mathematical ceiling correctly.
+- Comparative report circulation queries reuse request-local evidence.
+- Temporary debug logging removed.
+- KPZ smoke waits for Plack readiness after upgrade.
+
+### Verified
+- **7 files / 213 assertions PASS** on Koha 25.11.02.
+- 50 dedicated bug-audit assertions PASS.
+- Schema idempotence PASS.
+- Exact authenticated v0.6.1 KPZ upgrade PASS with seven plugin tables and observed row counts preserved.
+- Nine-page authenticated browser matrix PASS.
+- Server render and native Koha Suggestion workflow smoke PASS.
+- SHA-256: `da4a68cb125bb22ee9806718561eafb4d368495f40e5063cc2fd3a406a117afc`.
+
 ## [0.6.0] - 2026-09-23
 
 ### Added
