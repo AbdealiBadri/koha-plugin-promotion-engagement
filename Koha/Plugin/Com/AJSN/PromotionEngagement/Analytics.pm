@@ -2,6 +2,7 @@ package Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 
 use Modern::Perl;
 use DateTime;
+use Koha::DateUtils qw(dt_from_string);
 
 our $SPEC_VERSION = '1.1.0';
 our @AFTER_WINDOWS = ( 7, 14, 30, 60 );
@@ -9,7 +10,15 @@ our @AFTER_WINDOWS = ( 7, 14, 30, 60 );
 sub new {
     my ( $class, $args ) = @_;
     die 'dbh is required' unless $args && $args->{dbh};
-    return bless { dbh => $args->{dbh} }, $class;
+    return bless { dbh => $args->{dbh}, _event_cache => {} }, $class;
+}
+
+sub _campaign_cache_key {
+    my ( $campaign_id, $include_archived, $as_of_date ) = @_;
+    return join q{|},
+      0 + $campaign_id,
+      $include_archived ? 1 : 0,
+      $as_of_date || q{};
 }
 
 sub campaign_metrics {
@@ -18,6 +27,10 @@ sub campaign_metrics {
     die 'campaign_id must be a positive integer'
       unless defined $campaign_id && $campaign_id =~ /^\d+$/ && $campaign_id > 0;
 
+    my $as_of_date =
+      $args->{as_of_date} && $args->{as_of_date} =~ /^\d{4}-\d{2}-\d{2}$/
+      ? $args->{as_of_date}
+      : dt_from_string()->strftime('%F');
     my $campaign = $self->{dbh}->selectrow_hashref(
         q{
             SELECT campaign_id, campaign_uuid, name, start_date, end_date,
@@ -34,10 +47,6 @@ sub campaign_metrics {
       if $campaign->{deleted_at} && !$args->{include_archived};
     die 'Campaign start date is required' unless $campaign->{start_date};
 
-    my $as_of_date =
-      $args->{as_of_date} && $args->{as_of_date} =~ /^\d{4}-\d{2}-\d{2}$/
-      ? $args->{as_of_date}
-      : DateTime->now( time_zone => 'floating' )->strftime('%F');
     my $analysis_period = _analysis_period( $campaign, $as_of_date );
     my $windows = _resolve_windows(
         $campaign->{start_date},
@@ -47,13 +56,26 @@ sub campaign_metrics {
 
     my $items = $self->_eligible_items( $campaign_id, $windows->{during} );
     my @itemnumbers = sort { $a <=> $b } keys %{$items};
-    my $events = @itemnumbers
-      ? $self->_checkout_events(
-        \@itemnumbers,
-        $windows->{baseline}->{start},
-        $windows->{after_60}->{end},
-      )
-      : [];
+    my $cache_key = _campaign_cache_key(
+        $campaign_id,
+        $args->{include_archived} ? 1 : 0,
+        $as_of_date,
+    );
+    my $events;
+    if ( $args->{cache_events} ) {
+        $events = $self->{_event_cache}->{$cache_key};
+    }
+    unless (defined $events) {
+        $events = @itemnumbers
+          ? $self->_checkout_events(
+                \@itemnumbers,
+                $windows->{baseline}->{start},
+                $windows->{after_60}->{end},
+            )
+          : [];
+        $self->{_event_cache}->{$cache_key} = $events
+          if $args->{cache_events};
+    }
 
     my %metrics;
     for my $window_name (qw(baseline during after_7 after_14 after_30 after_60)) {
@@ -92,6 +114,8 @@ sub campaign_metrics {
         scalar @itemnumbers,
         $windows->{during},
     );
+    $impact_evidence->{provisional} = 1
+      if $analysis_period->{live_to_date};
     my $item_response_rows = $self->_item_response_rows(
         \@itemnumbers,
         $events,
@@ -108,7 +132,7 @@ sub campaign_metrics {
     push @warnings, $analysis_period->{warning}
       if $analysis_period->{warning};
 
-    return {
+    my $result = {
         spec_version           => $SPEC_VERSION,
         campaign               => $campaign,
         analysis_period        => $analysis_period,
@@ -130,8 +154,9 @@ sub campaign_metrics {
         title_response_rows    => $title_response_rows,
         multi_attributed_issue_count => 0,
         data_quality_warnings  => \@warnings,
-        calculated_at          => DateTime->now( time_zone => 'floating' )->strftime('%F %T'),
+        calculated_at          => dt_from_string()->strftime('%F %T'),
     };
+    return $result;
 }
 
 sub _analysis_period {
@@ -466,6 +491,7 @@ sub portfolio_metrics {
             $_,
             {
                 include_archived => $args->{include_archived} ? 1 : 0,
+                cache_events => $args->{cache_events} ? 1 : 0,
                 ( $args->{as_of_date} ? ( as_of_date => $args->{as_of_date} ) : () ),
             }
         )
@@ -473,6 +499,7 @@ sub portfolio_metrics {
 
     my ( %all_items, %all_titles, %increased_titles, @definitions );
     for my $result (@campaigns) {
+        next if ( $result->{windows}->{during}->{state} || q{} ) eq 'pending';
         my %eligible = map { $_ => 1 } @{ $result->{eligible_itemnumbers} };
         $all_items{$_} = 1 for keys %eligible;
         for my $title ( @{ $result->{title_response_rows} || [] } ) {
@@ -509,7 +536,7 @@ sub portfolio_metrics {
       map { $_->{baseline_start_epoch} } @definitions;
     my @ends = sort { $a <=> $b }
       map { $_->{followup_end_epoch} } @definitions;
-    my $events = @itemnumbers
+    my $events = @itemnumbers && @definitions
       ? $self->_checkout_events(
             \@itemnumbers,
             _epoch_datetime( $starts[0] ),
@@ -569,6 +596,10 @@ sub portfolio_metrics {
         my $count = 0;
         my ($definition) =
           grep { $_->{campaign_id} == $campaign_id } @definitions;
+        unless ($definition) {
+            $result->{multi_attributed_issue_count} = 0;
+            next;
+        }
         for my $event ( @{$events} ) {
             next unless $attribution_count{ $event->{issue_id} }
               && $attribution_count{ $event->{issue_id} } > 1;
@@ -590,7 +621,8 @@ sub portfolio_metrics {
 
     return {
         spec_version                    => $SPEC_VERSION,
-        campaign_count                 => scalar @campaigns,
+        campaign_count                 => scalar @definitions,
+        campaign_scope_count           => scalar @campaigns,
         campaign_results               => \@campaigns,
         promoted_item_count            => scalar @itemnumbers,
         promoted_title_count           => $promoted_title_count,
@@ -606,12 +638,13 @@ sub portfolio_metrics {
         portfolio_unique_borrower_count   => scalar keys %campaign_borrowers,
         portfolio_checkout_count       => scalar keys %portfolio_issues,
         multi_attributed_issue_count   => $multi_count,
-        calculated_at                  => DateTime->now( time_zone => 'floating' )->strftime('%F %T'),
+        calculated_at                  => dt_from_string()->strftime('%F %T'),
     };
 }
 
 sub comparison_metrics {
-    my ( $self, $dimension, $campaign_ids ) = @_;
+    my ( $self, $dimension, $campaign_ids, $args ) = @_;
+    $args ||= {};
     my %allowed = map { $_ => 1 }
       qw(campaign_type channel language_code target_audience location);
     die 'Unsupported comparison dimension' unless $allowed{$dimension};
@@ -620,7 +653,17 @@ sub comparison_metrics {
 
     my %groups;
     for my $campaign_id ( @{$campaign_ids} ) {
-        my $result = $self->campaign_metrics($campaign_id);
+        my $result = $self->campaign_metrics(
+            $campaign_id,
+            {
+                cache_events => $args->{cache_events} ? 1 : 0,
+                ( $args->{as_of_date}
+                    ? ( as_of_date => $args->{as_of_date} )
+                    : () ),
+            }
+        );
+        next if ( $result->{windows}->{during}->{state} || q{} ) eq 'pending';
+
         my @values;
         if ( $dimension eq 'location' ) {
             @values = @{ $self->{dbh}->selectall_arrayref(
@@ -661,21 +704,34 @@ sub comparison_metrics {
             @values = ( { code => $code, label => $label || $code } );
         }
 
-        my $events = $result->{eligible_item_count}
-          && ( $result->{windows}->{during}->{state} || q{} ) ne 'pending'
-          ? $self->_checkout_events(
-                $result->{eligible_itemnumbers},
-                $result->{windows}->{during}->{start},
-                $result->{windows}->{during}->{end},
-            )
-          : [];
-        my $baseline_events = $result->{eligible_item_count}
-          ? $self->_checkout_events(
-                $result->{eligible_itemnumbers},
-                $result->{windows}->{baseline}->{start},
-                $result->{windows}->{baseline}->{end},
-            )
-          : [];
+        my $cache_key = _campaign_cache_key(
+            $campaign_id,
+            0,
+            $result->{analysis_period}->{as_of_date},
+        );
+        my $all_events = $args->{cache_events}
+          ? ( $self->{_event_cache}->{$cache_key} || [] )
+          : (
+                $result->{eligible_item_count}
+                ? $self->_checkout_events(
+                    $result->{eligible_itemnumbers},
+                    $result->{windows}->{baseline}->{start},
+                    $result->{windows}->{after_60}->{end},
+                  )
+                : []
+            );
+        my $events = [
+            grep {
+                   $_->{issuedate_epoch} >= $result->{windows}->{during}->{start_epoch}
+                && $_->{issuedate_epoch} <  $result->{windows}->{during}->{end_epoch}
+            } @{$all_events}
+        ];
+        my $baseline_events = [
+            grep {
+                   $_->{issuedate_epoch} >= $result->{windows}->{baseline}->{start_epoch}
+                && $_->{issuedate_epoch} <  $result->{windows}->{baseline}->{end_epoch}
+            } @{$all_events}
+        ];
         for my $value (@values) {
             my $group = $groups{ $value->{code} } ||= {
                 code             => $value->{code},

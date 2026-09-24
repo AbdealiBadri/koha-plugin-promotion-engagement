@@ -70,9 +70,9 @@
         if (!dt) return;
         dt.search(term || "").draw();
         var $table = $(target);
-        $table.find("tbody tr").removeClass("promo-filter-highlight");
+        $(dt.rows().nodes()).removeClass("promo-filter-highlight");
         if (term) {
-            $(dt.rows({search:"applied", page:"current"}).nodes()).addClass("promo-filter-highlight");
+            $(dt.rows({search:"applied"}).nodes()).addClass("promo-filter-highlight");
         }
         var $notice = $table.closest(".promo-table-wrap").find(".promo-table-active-filter");
         if ($notice.length) {

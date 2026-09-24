@@ -14,7 +14,7 @@ sub slurp {
 }
 
 my $plugin_pm = slurp("$FindBin::Bin/../Koha/Plugin/Com/AJSN/PromotionEngagement.pm");
-like( $plugin_pm, qr/our \$VERSION = '0\.6\.0'/, 'V06-01 plugin version is 0.6.0' );
+like( $plugin_pm, qr/our \$VERSION = '0\.6\.1'/, 'V06-01 plugin version is 0.6.1' );
 
 my $cgi = CGI->new(
     'campaign_ids=40&campaign_ids=39&campaign_ids=40&status=active&date_from=2026-01-01&date_to=2026-12-31'

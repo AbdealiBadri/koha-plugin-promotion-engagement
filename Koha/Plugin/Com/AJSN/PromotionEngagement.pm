@@ -8,17 +8,18 @@ use Koha::Items;
 use Koha::Libraries;
 use Koha::Patrons;
 use Koha::Suggestion;
+use Koha::DateUtils qw(dt_from_string);
 use Mojo::JSON qw(decode_json encode_json);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 use Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
-our $VERSION = '0.6.0';
+our $VERSION = '0.6.1';
 
 our $metadata = {
     name            => 'Promotion & Engagement',
     author          => 'Aljamea-tus-Saifiyah Nairobi',
     date_authored   => '2026-08-15',
-    date_updated    => '2026-09-23',
+    date_updated    => '2026-09-24',
     minimum_version => '25.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -514,7 +515,6 @@ sub _analytics_screen {
               FROM plugin_ajsn_promo_campaigns
              WHERE deleted_at IS NULL
              ORDER BY campaign_id DESC
-             LIMIT 200
         },
         { Slice => {} },
     ) || [];
@@ -593,7 +593,7 @@ sub _book_display_impact_screen {
             SELECT campaign_id, name, start_date, end_date, status
               FROM plugin_ajsn_promo_campaigns
              WHERE deleted_at IS NULL
-             ORDER BY campaign_id DESC LIMIT 200
+             ORDER BY campaign_id DESC
         }, { Slice => {} },
     ) || [];
     my $campaign_id = _analytics_campaign_id(
@@ -656,20 +656,16 @@ sub _save_impact_decision {
     return $self->_book_display_impact_screen(
         { error_message => 'The selected title is not linked to this campaign.' }
     ) unless $valid;
-    my ($already_submitted) = $dbh->selectrow_array(
-        q{SELECT koha_suggestion_id FROM plugin_ajsn_promo_recommendations
-          WHERE campaign_id=? AND biblionumber=?},
-        undef, $campaign_id, $biblionumber,
-    );
-    return $self->_book_display_impact_screen( {
-        error_message => 'A submitted Koha suggestion cannot be overwritten.'
-    } ) if $already_submitted;
 
     my $impact =
       Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact
       ->new( { dbh => $dbh } )->campaign_rows($campaign_id);
     my ($evidence_row) =
       grep { $_->{biblionumber} == $biblionumber } @{ $impact->{rows} };
+    return $self->_book_display_impact_screen(
+        { error_message => 'The selected title evidence is no longer available.' }
+    ) unless $evidence_row;
+
     my $evidence_json = encode_json( {
         baseline_count => 0 + ( $evidence_row->{baseline_count} || 0 ),
         during_count => 0 + ( $evidence_row->{during_count} || 0 ),
@@ -681,27 +677,55 @@ sub _save_impact_decision {
         evidence_grade => $evidence_row->{evidence_grade},
     } );
 
-    $dbh->do(
-        q{
-            INSERT INTO plugin_ajsn_promo_recommendations
-              (campaign_id,biblionumber,decision_status,recommended_quantity,
-               reviewer_note,evidence_json,decided_by,decided_at)
-            VALUES (?,?,?,?,?,?,?,NOW())
-            ON DUPLICATE KEY UPDATE decision_status=VALUES(decision_status),
-              recommended_quantity=VALUES(recommended_quantity),
-              reviewer_note=VALUES(reviewer_note),
-              evidence_json=VALUES(evidence_json),decided_by=VALUES(decided_by),
-              decided_at=NOW()
-        }, undef, $campaign_id, $biblionumber, $decision, $quantity,
-        $note, $evidence_json, $actor,
-    );
-    $dbh->do(
-        q{INSERT INTO plugin_ajsn_promo_audit
-          (campaign_id,actor_borrowernumber,action_type,entity_type,entity_id,details_json)
-          VALUES (?,?,'impact_decision_recorded','biblio',?,?)},
-        undef, $campaign_id, $actor, $biblionumber,
-        encode_json( { decision => $decision, quantity => 0 + $quantity } ),
-    );
+    my $ok = eval {
+        local $dbh->{RaiseError} = 1;
+        $dbh->begin_work;
+        my $existing = $dbh->selectrow_hashref(
+            q{SELECT recommendation_id,koha_suggestion_id
+                FROM plugin_ajsn_promo_recommendations
+               WHERE campaign_id=? AND biblionumber=?
+               FOR UPDATE},
+            undef, $campaign_id, $biblionumber,
+        );
+        die "__SUBMITTED__\n"
+          if $existing && $existing->{koha_suggestion_id};
+
+        $dbh->do(
+            q{
+                INSERT INTO plugin_ajsn_promo_recommendations
+                  (campaign_id,biblionumber,decision_status,recommended_quantity,
+                   reviewer_note,evidence_json,decided_by,decided_at)
+                VALUES (?,?,?,?,?,?,?,NOW())
+                ON DUPLICATE KEY UPDATE decision_status=VALUES(decision_status),
+                  recommended_quantity=VALUES(recommended_quantity),
+                  reviewer_note=VALUES(reviewer_note),
+                  evidence_json=VALUES(evidence_json),decided_by=VALUES(decided_by),
+                  decided_at=NOW()
+            }, undef, $campaign_id, $biblionumber, $decision, $quantity,
+            $note, $evidence_json, $actor,
+        );
+        $dbh->do(
+            q{INSERT INTO plugin_ajsn_promo_audit
+              (campaign_id,actor_borrowernumber,action_type,entity_type,entity_id,details_json)
+              VALUES (?,?,'impact_decision_recorded','biblio',?,?)},
+            undef, $campaign_id, $actor, $biblionumber,
+            encode_json( { decision => $decision, quantity => 0 + $quantity } ),
+        );
+        $dbh->commit;
+        1;
+    };
+    unless ($ok) {
+        my $error = $@ || 'Unknown decision-save error';
+        eval { $dbh->rollback };
+        return $self->_book_display_impact_screen( {
+            error_message => 'A submitted Koha suggestion cannot be overwritten.'
+        } ) if $error =~ /__SUBMITTED__/;
+        warn "Book Display Impact decision save failed: $error";
+        return $self->_book_display_impact_screen( {
+            error_message => 'The decision could not be saved. No partial change was kept.'
+        } );
+    }
+
     return $self->_book_display_impact_screen( {
         success_message => ucfirst($decision) . ' decision saved with audit history.'
     } );
@@ -728,25 +752,24 @@ sub _submit_impact_suggestion {
     } ) unless $allowed;
 
     my $dbh = C4::Context->dbh;
-    my $row = $dbh->selectrow_hashref(
-        q{SELECT r.*,c.name AS campaign_name,c.branchcode,b.title,b.author
-          FROM plugin_ajsn_promo_recommendations r
-          JOIN plugin_ajsn_promo_campaigns c ON c.campaign_id=r.campaign_id
-          JOIN biblio b ON b.biblionumber=r.biblionumber
-          WHERE r.campaign_id=? AND r.biblionumber=?},
-        undef, $campaign_id, $biblionumber,
-    );
-    return $self->_book_display_impact_screen( {
-        error_message => 'Approve this recommendation before submitting it.'
-    } ) unless $row && $row->{decision_status} eq 'approved';
-    return $self->_book_display_impact_screen( {
-        error_message => 'This recommendation has already been submitted to Koha.'
-    } ) if $row->{koha_suggestion_id};
-
     my $suggestion;
     my $ok = eval {
         local $dbh->{RaiseError} = 1;
         $dbh->begin_work;
+
+        my $row = $dbh->selectrow_hashref(
+            q{SELECT r.*,c.name AS campaign_name,c.branchcode,b.title,b.author
+                FROM plugin_ajsn_promo_recommendations r
+                JOIN plugin_ajsn_promo_campaigns c ON c.campaign_id=r.campaign_id
+                JOIN biblio b ON b.biblionumber=r.biblionumber
+               WHERE r.campaign_id=? AND r.biblionumber=?
+               FOR UPDATE},
+            undef, $campaign_id, $biblionumber,
+        );
+        die "__NOT_APPROVED__\n"
+          unless $row && $row->{decision_status} eq 'approved';
+        die "__ALREADY_SUBMITTED__\n" if $row->{koha_suggestion_id};
+
         $suggestion = Koha::Suggestion->new( {
             suggestedby => $actor, title => $row->{title},
             author => $row->{author}, biblionumber => $biblionumber,
@@ -759,12 +782,17 @@ sub _submit_impact_suggestion {
                 $row->{campaign_name}, $campaign_id, $row->{reviewer_note} || q{}
             ),
         } )->store;
-        $dbh->do(
+
+        my $updated = $dbh->do(
             q{UPDATE plugin_ajsn_promo_recommendations
-              SET decision_status='submitted',koha_suggestion_id=?,submitted_at=NOW()
-              WHERE recommendation_id=?},
+                SET decision_status='submitted',koha_suggestion_id=?,submitted_at=NOW()
+              WHERE recommendation_id=?
+                AND decision_status='approved'
+                AND koha_suggestion_id IS NULL},
             undef, $suggestion->suggestionid, $row->{recommendation_id},
         );
+        die "__SUBMISSION_RACE__\n" unless $updated && $updated == 1;
+
         $dbh->do(
             q{INSERT INTO plugin_ajsn_promo_audit
               (campaign_id,actor_borrowernumber,action_type,entity_type,entity_id,details_json)
@@ -777,8 +805,15 @@ sub _submit_impact_suggestion {
         1;
     };
     unless ($ok) {
+        my $error = $@ || 'Unknown suggestion submission error';
         eval { $dbh->rollback };
-        warn "Book Display Impact suggestion submission failed: $@";
+        return $self->_book_display_impact_screen( {
+            error_message => 'Approve this recommendation before submitting it.'
+        } ) if $error =~ /__NOT_APPROVED__/;
+        return $self->_book_display_impact_screen( {
+            error_message => 'This recommendation has already been submitted to Koha.'
+        } ) if $error =~ /__(?:ALREADY_SUBMITTED|SUBMISSION_RACE)__/;
+        warn "Book Display Impact suggestion submission failed: $error";
         return $self->_book_display_impact_screen( {
             error_message => 'Koha could not create the purchase suggestion. No duplicate submission was recorded.'
         } );
@@ -819,13 +854,20 @@ sub _reports_screen {
             { dbh => $dbh }
           );
         my $ok = eval {
-            $portfolio = $service->portfolio_metrics($campaign_ids);
+            $portfolio = $service->portfolio_metrics(
+                $campaign_ids,
+                { cache_events => 1 }
+            );
             for my $result ( @{ $portfolio->{campaign_results} || [] } ) {
                 _prepare_analytics_for_display($result);
             }
             for my $dimension (qw(campaign_type channel location language_code target_audience)) {
                 $comparisons{$dimension} =
-                  $service->comparison_metrics( $dimension, $campaign_ids );
+                  $service->comparison_metrics(
+                      $dimension,
+                      $campaign_ids,
+                      { cache_events => 1 }
+                  );
             }
             1;
         };
@@ -843,7 +885,8 @@ sub _reports_screen {
       : undef;
     my $template = $self->get_template( { file => 'reports.tt' } );
     $template->param(
-        campaign_count => scalar @{$campaign_ids},
+        campaign_count => $portfolio ? $portfolio->{campaign_count} : 0,
+        campaign_scope_count => scalar @{$campaign_ids},
         portfolio      => $portfolio,
         portfolio_utilization_display => $portfolio_utilization_display,
         type_rows      => $comparisons{campaign_type}
@@ -955,8 +998,8 @@ sub _report_filters {
     my $date_from = _trim( scalar $cgi->param('date_from') );
     my $date_to = _trim( scalar $cgi->param('date_to') );
     $status = q{} unless $status =~ /^(?:draft|active|completed)$/;
-    $date_from = q{} unless $date_from =~ /^\d{4}-\d{2}-\d{2}$/;
-    $date_to = q{} unless $date_to =~ /^\d{4}-\d{2}-\d{2}$/;
+    $date_from = q{} unless _valid_iso_date($date_from);
+    $date_to = q{} unless _valid_iso_date($date_to);
     return {
         campaign_ids => \@campaign_ids,
         campaign_id  => @campaign_ids == 1 ? $campaign_ids[0] : q{},
@@ -970,16 +1013,18 @@ sub _filtered_campaign_ids {
     my ( $campaigns, $filters ) = @_;
     my %selected_campaigns =
       map { 0 + $_ => 1 } @{ $filters->{campaign_ids} || [] };
+    my $today = dt_from_string()->strftime('%F');
 
     return [
         map { 0 + $_->{campaign_id} }
         grep {
+            my $effective_end = _campaign_filter_end_date( $_, $today );
             ( !%selected_campaigns
                 || $selected_campaigns{ 0 + $_->{campaign_id} } )
               && ( !$filters->{status}
                 || ( $_->{status} || q{} ) eq $filters->{status} )
               && ( !$filters->{date_from}
-                || ( $_->{end_date} || $_->{start_date} ) ge $filters->{date_from} )
+                || $effective_end ge $filters->{date_from} )
               && ( !$filters->{date_to}
                 || $_->{start_date} le $filters->{date_to} )
         } @{ $campaigns || [] }
@@ -1015,6 +1060,7 @@ sub _leading_location {
 sub _csv_value {
     my ($value) = @_;
     $value = q{} unless defined $value;
+    $value = q{'} . $value if $value =~ /^\s*[=+\-\@]/;
     $value =~ s/"/""/g;
     return qq{"$value"};
 }
@@ -1455,18 +1501,26 @@ sub _create_promotion {
     push @errors, 'Campaign name must be 255 characters or fewer.'
       if length( $form{name} ) > 255;
     push @errors, 'Start date is required.' unless length $form{start_date};
-    push @errors, 'Start date must use YYYY-MM-DD format.'
-      if length( $form{start_date} ) && $form{start_date} !~ /^\d{4}-\d{2}-\d{2}$/;
-    push @errors, 'End date must use YYYY-MM-DD format.'
-      if length( $form{end_date} ) && $form{end_date} !~ /^\d{4}-\d{2}-\d{2}$/;
+    push @errors, 'Start date must be a valid calendar date in YYYY-MM-DD format.'
+      if length( $form{start_date} ) && !_valid_iso_date( $form{start_date} );
+    push @errors, 'End date must be a valid calendar date in YYYY-MM-DD format.'
+      if length( $form{end_date} ) && !_valid_iso_date( $form{end_date} );
     push @errors, 'End date cannot be before the start date.'
-      if $form{start_date} =~ /^\d{4}-\d{2}-\d{2}$/
-      && $form{end_date} =~ /^\d{4}-\d{2}-\d{2}$/
+      if _valid_iso_date( $form{start_date} )
+      && _valid_iso_date( $form{end_date} )
       && $form{end_date} lt $form{start_date};
     push @errors, 'Target audience must be 255 characters or fewer.'
       if length( $form{target_audience} ) > 255;
     push @errors, 'Language must be 30 characters or fewer.'
       if length( $form{language_code} ) > 30;
+    push @errors, 'Select a configured target audience.'
+      unless _optional_vocab_value_allowed(
+        $dbh, 'audience', $form{target_audience}, undef
+      );
+    push @errors, 'Select a configured language.'
+      unless _optional_vocab_value_allowed(
+        $dbh, 'language', $form{language_code}, undef
+      );
     push @errors, 'Select a valid status.' unless $allowed_statuses{ $form{status} };
 
     my @locations;
@@ -1804,25 +1858,14 @@ sub _edit_promotion_screen {
         $campaign->{target_audience},
     );
 
-    my ( $language_match, $audience_match ) = ( 0, 0 );
-    for my $language ( @{ $languages || [] } ) {
-        $language->{selected} =
-          length( $form->{language_code} || q{} )
-          && ( $form->{language_code} eq $language->{value_code}
-            || $form->{language_code} eq $language->{label} ) ? 1 : 0;
-        $language_match = 1 if $language->{selected};
-    }
-    for my $audience ( @{ $audiences || [] } ) {
-        $audience->{selected} =
-          length( $form->{target_audience} || q{} )
-          && ( $form->{target_audience} eq $audience->{value_code}
-            || $form->{target_audience} eq $audience->{label} ) ? 1 : 0;
-        $audience_match = 1 if $audience->{selected};
-    }
-    my $legacy_language =
-      !$language_match ? ( $form->{language_code} || q{} ) : q{};
-    my $legacy_audience =
-      !$audience_match ? ( $form->{target_audience} || q{} ) : q{};
+    my $legacy_language = _preserve_legacy_vocab_selection(
+        $languages,
+        $form->{language_code},
+    );
+    my $legacy_audience = _preserve_legacy_vocab_selection(
+        $audiences,
+        $form->{target_audience},
+    );
 
     my $locations = $dbh->selectall_arrayref(
         q{
@@ -1917,8 +1960,6 @@ sub _update_promotion {
         barcodes_text    => scalar( $cgi->param('barcodes') // q{} ),
     );
 
-    warn "PE_DEBUG display_location=[" . ($form{display_location} // q{undef}) . "]\n";
-
     my @errors;
     my @warnings;
 
@@ -1943,18 +1984,26 @@ sub _update_promotion {
     push @errors, 'Campaign name must be 255 characters or fewer.'
       if length( $form{name} ) > 255;
     push @errors, 'Start date is required.' unless length $form{start_date};
-    push @errors, 'Start date must use YYYY-MM-DD format.'
-      if length( $form{start_date} ) && $form{start_date} !~ /^\d{4}-\d{2}-\d{2}$/;
-    push @errors, 'End date must use YYYY-MM-DD format.'
-      if length( $form{end_date} ) && $form{end_date} !~ /^\d{4}-\d{2}-\d{2}$/;
+    push @errors, 'Start date must be a valid calendar date in YYYY-MM-DD format.'
+      if length( $form{start_date} ) && !_valid_iso_date( $form{start_date} );
+    push @errors, 'End date must be a valid calendar date in YYYY-MM-DD format.'
+      if length( $form{end_date} ) && !_valid_iso_date( $form{end_date} );
     push @errors, 'End date cannot be before the start date.'
-      if $form{start_date} =~ /^\d{4}-\d{2}-\d{2}$/
-      && $form{end_date} =~ /^\d{4}-\d{2}-\d{2}$/
+      if _valid_iso_date( $form{start_date} )
+      && _valid_iso_date( $form{end_date} )
       && $form{end_date} lt $form{start_date};
     push @errors, 'Target audience must be 255 characters or fewer.'
       if length( $form{target_audience} ) > 255;
     push @errors, 'Language must be 30 characters or fewer.'
       if length( $form{language_code} ) > 30;
+    push @errors, 'Select a configured target audience.'
+      unless _optional_vocab_value_allowed(
+        $dbh, 'audience', $form{target_audience}, $existing->{target_audience}
+      );
+    push @errors, 'Select a configured language.'
+      unless _optional_vocab_value_allowed(
+        $dbh, 'language', $form{language_code}, $existing->{language_code}
+      );
     push @errors, 'Select a valid status.' unless $allowed_statuses{ $form{status} };
 
     my $existing_location_rows = $dbh->selectall_arrayref(
@@ -2635,6 +2684,74 @@ sub _column_exists {
         $column,
     );
     return $count ? 1 : 0;
+}
+
+sub _optional_vocab_value_allowed {
+    my ( $dbh, $dimension, $value, $existing_value ) = @_;
+    $value = _trim($value);
+    return 1 unless length $value;
+
+    return 1
+      if defined $existing_value
+      && length _trim($existing_value)
+      && $value eq _trim($existing_value);
+
+    my ($configured_count) = $dbh->selectrow_array(
+        q{SELECT COUNT(*)
+            FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension=?
+             AND is_active=1
+             AND deleted_at IS NULL},
+        undef, $dimension,
+    );
+    return 1 unless $configured_count;
+
+    my ($match_count) = $dbh->selectrow_array(
+        q{SELECT COUNT(*)
+            FROM plugin_ajsn_promo_vocab_values
+           WHERE dimension=?
+             AND value_code=?
+             AND is_active=1
+             AND deleted_at IS NULL},
+        undef, $dimension, $value,
+    );
+    return $match_count ? 1 : 0;
+}
+
+sub _preserve_legacy_vocab_selection {
+    my ( $rows, $stored_value ) = @_;
+    $stored_value = _trim($stored_value);
+    my $matched = 0;
+    for my $row ( @{ $rows || [] } ) {
+        $row->{selected} =
+          length($stored_value)
+          && $stored_value eq ( $row->{value_code} || q{} ) ? 1 : 0;
+        $matched = 1 if $row->{selected};
+    }
+    return $matched ? q{} : $stored_value;
+}
+
+sub _valid_iso_date {
+    my ($value) = @_;
+    $value = _trim($value);
+    return 0 unless $value =~ /^\d{4}-\d{2}-\d{2}$/;
+    my $dt = eval { dt_from_string( $value, 'iso' ) };
+    return 0 unless $dt;
+    return $dt->strftime('%F') eq $value ? 1 : 0;
+}
+
+sub _campaign_filter_end_date {
+    my ( $campaign, $today ) = @_;
+    my $start = $campaign->{start_date} || q{};
+    my $end = $campaign->{end_date} || q{};
+    my $status = lc( $campaign->{status} || q{} );
+
+    if ( $status eq 'active' ) {
+        return $today if !length $end || $end gt $today;
+        return $end;
+    }
+
+    return length $end ? $end : $start;
 }
 
 sub _trim {

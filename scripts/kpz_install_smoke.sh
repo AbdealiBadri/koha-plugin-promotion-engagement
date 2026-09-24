@@ -6,7 +6,7 @@ user="${KTD_USER:?Set KTD_USER}"
 pass="${KTD_PASS:?Set KTD_PASS}"
 kpz="${KPZ_PATH:?Set KPZ_PATH}"
 container="${KTD_CONTAINER:?Set KTD_CONTAINER}"
-expected_version="${EXPECTED_VERSION:-0.6.0}"
+expected_version="${EXPECTED_VERSION:-0.6.1}"
 filename="$(basename "$kpz")"
 
 work="$(mktemp -d)"
@@ -53,6 +53,19 @@ grep -q "Promotion &amp; Engagement" "$work/plugins.html"
 grep -q "$expected_version" "$work/plugins.html"
 
 docker exec "$container" sudo koha-plack --restart kohadev >/dev/null
+
+ready=0
+for _ in $(seq 1 30); do
+  if curl -fsS -c "$cookie" -b "$cookie" "$base_url/cgi-bin/koha/mainpage.pl" -o "$work/ready.html" >/dev/null 2>&1; then
+    ready=1
+    break
+  fi
+  sleep 1
+done
+if [[ "$ready" != 1 ]]; then
+  printf 'kpz-install-smoke FAIL Koha staff interface did not become ready after Plack restart\n' >&2
+  exit 1
+fi
 
 tables="$(sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name LIKE 'plugin_ajsn_promo_%'")"
 test "$tables" = 7

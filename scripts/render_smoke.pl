@@ -3,31 +3,41 @@ use warnings;
 use CGI;
 use Koha::Plugin::Com::AJSN::PromotionEngagement;
 
-my $plugin = Koha::Plugin::Com::AJSN::PromotionEngagement->new(
-    { enable_plugins => 1 }
-);
-
 my @cases = (
-    [ dashboard => 'action=dashboard', 'Promotion &amp; Engagement', 'Configuration' ],
-    [ promotions => 'action=promotions', 'Promotion portfolio', 'Configuration' ],
-    [ analytics => 'action=analytics&campaign_id=40', 'Promotion analytics', 'Compare all campaigns' ],
-    [ reports => 'action=reports', 'Promotion impact reports', 'All campaigns' ],
-    [ impact => 'action=book_display_impact&campaign_id=40', 'Promoted Resource Impact', 'Promoted-title demand and additional-copy review' ],
-    [ detail => 'action=promotion_detail&campaign_id=40', 'MULTILOC-VISUAL-20260919', 'Edit promotion' ],
+    [ dashboard => 'action=dashboard', 'Promotion &amp; Engagement', 'How to Use', 'Titles Issued / Borrowed' ],
+    [ promotions => 'action=promotions', 'Promotion portfolio', 'How to Use', 'Compare selected campaigns' ],
+    [ analytics => 'action=analytics&campaign_id=40', 'Promotion analytics', 'Chart View', 'Titles with Increased Issues' ],
+    [ reports => 'action=reports', 'Promotion impact reports', 'Chart View', 'Table View' ],
+    [ impact => 'action=book_display_impact&campaign_id=40', 'Promoted Resource Impact', 'Collection-development signals' ],
+    [ detail => 'action=promotion_detail&campaign_id=40', 'MULTILOC-VISUAL-20260919', 'Impact at a glance' ],
     [ edit => 'action=edit_promotion&campaign_id=40', 'Edit promotion', 'Validate and update campaign' ],
     [ new_promotion => 'action=new_promotion', 'New promotion', 'Validate and save campaign' ],
 );
 
-sub render_tool {
-    my ( $query ) = @_;
-    local $plugin->{cgi} = CGI->new($query);
+sub new_plugin {
+    return Koha::Plugin::Com::AJSN::PromotionEngagement->new(
+        { enable_plugins => 1 }
+    );
+}
+
+sub capture_output {
+    my ($code) = @_;
     my $html = q{};
-    open my $capture, '>', \$html or die "capture failed: $!";
-    local *STDOUT = $capture;
-    $plugin->tool;
-    close $capture;
+    {
+        local *STDOUT;
+        open STDOUT, '>', \$html or die "capture failed: $!";
+        $code->();
+    }
     return $html;
 }
+
+sub render_tool {
+    my ($query) = @_;
+    my $plugin = new_plugin();
+    $plugin->{cgi} = CGI->new($query);
+    return capture_output( sub { $plugin->tool } );
+}
+
 for my $case (@cases) {
     my ( $name, $query, @markers ) = @{$case};
     my $html = eval { render_tool($query) };
@@ -42,17 +52,23 @@ for my $case (@cases) {
 }
 
 {
-    local $plugin->{cgi} = CGI->new(q{});
-    my $html = q{};
-    open my $capture, '>', \$html or die "capture failed: $!";
-    local *STDOUT = $capture;
-    $plugin->configure;
-    close $capture;
+    my $plugin = new_plugin();
+    $plugin->{cgi} = CGI->new(q{});
+    my $html = eval { capture_output( sub { $plugin->configure } ) };
+    die "configuration render died: $@" if $@;
     die "configuration returned empty output" unless length $html;
     die "configuration template failure" if $html =~ /Template process failed/i;
-    die "configuration missing heading"
-      unless index( $html, 'Promotion & Engagement configuration' ) >= 0;
+    for my $marker (
+        'Promotion &amp; Engagement configuration',
+        'How to Use',
+        'Campaign types',
+        'Cadence / frequency'
+      )
+    {
+        die "configuration missing marker: $marker"
+          unless index( $html, $marker ) >= 0;
+    }
     print "configuration render PASS\n";
 }
 
-print "render-smoke PASS\n";
+print "render-smoke PASS v0.6.1\n";

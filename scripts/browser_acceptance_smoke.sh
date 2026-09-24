@@ -83,4 +83,4 @@ if [[ -n "${OUTPUT_HTML:-}" ]]; then
   cp "$work_dir/impact.html" "$OUTPUT_HTML"
 fi
 
-printf 'browser-acceptance-smoke PASS v0.6.0 dashboard promotions analytics reports configuration impact detail edit new\n'
+printf 'browser-acceptance-smoke PASS v0.6.1 dashboard promotions analytics reports configuration impact detail edit new\n'

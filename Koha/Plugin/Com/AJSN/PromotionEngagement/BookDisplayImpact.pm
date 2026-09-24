@@ -1,6 +1,7 @@
 package Koha::Plugin::Com::AJSN::PromotionEngagement::BookDisplayImpact;
 
 use Modern::Perl;
+use POSIX qw(ceil);
 use Koha::Plugin::Com::AJSN::PromotionEngagement::Analytics;
 
 our $SPEC_VERSION = '1.0.0';
@@ -167,7 +168,7 @@ sub _classify_row {
     my $copies = $row->{serviceable_copies} || 1;
     $row->{hold_ratio} = 0 + sprintf '%.2f', $row->{active_holds} / $copies;
     my $target = $row->{hold_ratio_target} || 3;
-    my $target_copies = int( ( $row->{active_holds} + $target - 1 ) / $target );
+    my $target_copies = ceil( $row->{active_holds} / $target );
     my $quantity = $target_copies - $row->{serviceable_copies};
     $quantity = 0 if $quantity < 0;
     my $sustained = $followup_complete
